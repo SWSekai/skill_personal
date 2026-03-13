@@ -1,13 +1,13 @@
 ---
 name: modify-log
-description: Create or update a structured modification log documenting code changes with versioned naming
-disable-model-invocation: true
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git diff*), Bash(git log*), Bash(ls *), Bash(date *)
+description: "MANDATORY before every commit: Create or update a structured modification log documenting code changes. Must be invoked before any git commit operation, including Claude Code's own commit planning."
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git diff*), Bash(git log*), Bash(git status*), Bash(ls *), Bash(date *)
 ---
 
 ## Modify Log Protocol
 
 Every significant code change should have a corresponding modify log.
+This skill is **auto-triggered** whenever a commit is about to be made — including Claude Code's self-planned commits, `/commit-push`, or any other commit flow.
 
 ### Step 1: Determine filename
 

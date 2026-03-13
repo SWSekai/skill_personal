@@ -1,6 +1,6 @@
 ---
 name: quality-check
-description: Pre-commit code quality audit — redundancy, impact analysis, architecture conformance, and risk assessment
+description: "Pre-commit code quality audit — redundancy, impact analysis, architecture conformance, and risk assessment. IMPORTANT: After quality check passes, ensure modify-log skill is invoked to create the mandatory modification log before committing."
 allowed-tools: Read, Grep, Glob, Agent
 ---
 
@@ -60,5 +60,9 @@ If the current changes introduce new conventions, patterns, or workflow requirem
 - Ask: "This change introduces a new pattern. Should I update the Skill definitions to reflect it?"
 - Wait for user confirmation before modifying any skill files
 - If confirmed, update the relevant SKILL.md under `.claude/skills/`
+
+### 6. Modify Log Reminder
+
+**CRITICAL**: After quality check passes, the `modify-log` skill **must** be invoked to create the mandatory modification log before any commit proceeds. This applies to ALL commit flows — `/commit-push`, Claude Code self-planned commits, or manual commits.
 
 Arguments: $ARGUMENTS (optional — specific files to check, otherwise checks all staged/changed files)
