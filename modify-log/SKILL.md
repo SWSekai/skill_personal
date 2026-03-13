@@ -11,18 +11,23 @@ This skill is **auto-triggered** whenever a commit is about to be made — inclu
 
 ### Step 1: Determine filename
 
-- Format: `YYYYMMDD_v[VERSION].md`
+- Format: `YYMMDD_TopicDescription.md`（6-digit date + descriptive topic name）
+- Example: `260313_video_h264_reencode.md`
 - Locate the project's log directory (common: `docs/changelog/`, `logs/`, or configurable)
-- Check today's existing logs to determine version number:
-  - If none exist → `v1`
-  - If `v1` exists → `v2`, etc.
+- Check existing logs to avoid duplicates:
+  - Same topic exists today → update that file
+  - Different topic → create a new file with a distinct name
 
 ### Step 2: Gather change info
 
 ```bash
 git diff --stat
 git diff --name-only
-git diff --numstat   # per-file added/removed line counts
+```
+
+For each changed file, count added/removed lines:
+```bash
+git diff --numstat
 ```
 
 ### Step 3: Write the log
@@ -65,6 +70,6 @@ git diff --numstat   # per-file added/removed line counts
 - Include code snippets for non-obvious changes
 - Use tables for before/after comparisons
 - Use ASCII diagrams for data flow or decision logic
-- If the same day already has a log for the same topic, increment the version number
+- If the same day already has a log for the same topic, update that file
 
 Arguments: $ARGUMENTS (topic description — used for filename and content focus)

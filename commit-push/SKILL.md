@@ -35,35 +35,14 @@ Before staging anything, perform:
 
 ### Step 2: Auto-update Modify Log
 
-**Before committing**, create or update the modify log.
+**Before committing**, invoke the `modify-log` skill to create or update the modification log.
 
-- Path: `[PROJECT_LOG_DIR]/YYYYMMDD_v[VERSION].md`
+- Path: `[PROJECT_LOG_DIR]/YYMMDD_TopicDescription.md`（6-digit date + descriptive topic name）
   - Adapt to the project's log directory convention. Common locations: `docs/changelog/`, `logs/`, or project-specific paths.
-- Use today's date. Check existing files for the latest version number of today.
-- If today already has `v1`, use `v2`, etc.
-
-**Required fields:**
-
-```markdown
-# [Title]
-
-## Change Info
-- **Date/Time**: YYYY-MM-DD HH:MM
-- **Version**: vX
-- **Reason**: [Motivation or problem description]
-
-## Change Details
-
-| File | Lines affected | Summary |
-|------|---------------|---------|
-| `path/to/file` | +XX / -YY | Description |
-
-## Impact Scope
-- [List affected modules or features]
-
-## Service Restart Requirements
-- [List services that need restart, if applicable]
-```
+- Check existing files to determine if should update existing or create new:
+  - Same topic exists today → update that file
+  - Different topic → create a new file with a distinct name
+- Follow the `modify-log` skill template for content structure
 
 ---
 
