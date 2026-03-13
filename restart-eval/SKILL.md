@@ -1,7 +1,6 @@
 ---
 name: restart-eval
-description: Evaluate which services or containers need restart or rebuild after code changes
-disable-model-invocation: true
+description: "Evaluate which services or containers need restart or rebuild after code changes. Auto-triggered after commits that modify service code."
 allowed-tools: Bash(git *), Bash(docker *), Read, Glob, Grep
 ---
 
