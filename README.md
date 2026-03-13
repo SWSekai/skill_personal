@@ -10,32 +10,42 @@ A portable set of Claude Code skills that work with **any project**. No project-
 
 ### 規則 1：導入專案時自動建置專案專屬 Skill
 
-當將本倉庫的 Skill 導入新專案時：
+當將本資料夾的 Skill 導入新專案時：
 
 1. 檢查該專案是否已有 `.claude/skills/` 資料夾
 2. 若**無**專案專屬 Skill → 自動複製一份至 `.claude/skills/`，並根據專案特性進行客製化調整（如：修改日誌路徑、服務名稱、commit 慣例、語言偏好）
 3. 若**已有**專案專屬 Skill → 比對通用版與專案版的差異，將通用版的新功能或修正合併至專案版（保留專案特化的設定）
-4. **本倉庫僅作為通用模板持續更新**，不直接作為專案執行用 Skill
+4. **`skill_general` 僅作為通用模板持續更新**，不直接作為專案執行用 Skill
 
 ### 規則 2：專案 Skill 更新回流至通用版
 
 當在專案中對 `.claude/skills/` 進行改進時：
 
 1. 判斷該改進是否為**通用性改進**（適用於所有專案）或**專案特化修正**（僅適用於當前專案）
-2. 若為**通用性改進**（如：新增檢查項目、改善流程邏輯、修正 Skill 缺陷）→ 同步更新回本倉庫對應的 Skill 檔案
+2. 若為**通用性改進**（如：新增檢查項目、改善流程邏輯、修正 Skill 缺陷）→ 同步更新回 `skill_general/` 及遠端倉庫
 3. 若為**專案特化修正**（如：特定路徑、服務名稱、專案慣例）→ **不回流**，僅保留在專案的 `.claude/skills/` 中
 4. 回流更新時，移除所有專案特定的硬編碼，確保通用性
+
+### 規則 3：自動同步至遠端倉庫
+
+- **遠端倉庫地址**：`https://github.com/SWSekai/Skill-personal.git`
+- **本地路徑**：與當前專案同層級的 `../Skill-personal/`（若不存在則自動 clone）
+- **同步時機**：每次 `skill_general/` 有任何更新時，自動執行以下流程：
+  1. 將更新後的檔案複製至本地 `Skill-personal` 倉庫
+  2. 在 `Skill-personal` 倉庫中 commit（訊息與當前專案 commit 對應）
+  3. Push 至遠端 `https://github.com/SWSekai/Skill-personal.git`
+  4. 若 push 失敗，提示使用者手動處理
 
 ---
 
 ## Installation / 安裝
 
 ```bash
-# Copy entire folder into your project's .claude/skills/
-cp -r ./* /path/to/your-project/.claude/skills/
+# Copy entire folder into your project
+cp -r skill_general/* /path/to/your-project/.claude/skills/
 
 # Or copy into personal global skills
-cp -r ./* ~/.claude/skills/
+cp -r skill_general/* ~/.claude/skills/
 ```
 
 ---

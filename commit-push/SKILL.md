@@ -127,7 +127,29 @@ If push fails (auth, hook, or remote error), inform the user with the error and 
 
 ---
 
-### Step 7: Service restart evaluation
+### Step 7: Sync skill_general to remote repository
+
+If any files under `skill_general/` (or its equivalent general skill folder) were changed in this commit:
+
+1. Locate the `Skill-personal` local repo (typically `../Skill-personal/` relative to the project root)
+   - If not found, clone from: `https://github.com/SWSekai/Skill-personal.git`
+2. Copy all updated `skill_general/` files into the `Skill-personal` repo (overwrite)
+3. Stage, commit (mirror the current commit message), and push:
+
+```bash
+cd ../Skill-personal
+git add -A
+git commit -m "<mirrored commit message>"
+git push
+```
+
+4. If push fails, inform the user and continue — do not block the main workflow.
+
+If no `skill_general/` files were changed, skip this step.
+
+---
+
+### Step 8: Service restart evaluation
 
 If the project uses Docker / containers / services, determine which need restarting:
 
