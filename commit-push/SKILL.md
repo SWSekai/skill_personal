@@ -57,18 +57,39 @@ If a key functional directory lacks a README, create one with:
 
 ---
 
-### Step 4: Stage files
+### Step 4: Status overview & staging
+
+**4a. Show full pending status** (give user a clear picture before commit)
 
 ```bash
 git status
 git diff --stat
-git log --oneline -3
+git log --oneline origin/$(git rev-parse --abbrev-ref HEAD)..HEAD   # committed but not pushed
 ```
+
+Present to the user:
+- **Unstaged modified files**: list each file with a one-line change summary
+- **Staged but uncommitted files**: same
+- **Committed but unpushed**: list commit hash + message
+- If nothing pending, inform the user and stop
+
+**4b. Read `.gitignore` for safe staging**
+
+Before staging, read `.gitignore` to verify:
+- Do not stage files matching `.gitignore` patterns (e.g., `.env`, `*.log`, `__pycache__/`, secrets, binaries)
+- If the project has force-add exceptions (e.g., internal doc directories listed in `.gitignore` but required in version control), use `git add -f` only for those
+- If a file about to be staged matches `.gitignore` (and is not an exception), **warn the user and skip it**
+
+**4c. Stage files**
 
 - Use `git add <file>` for specific files
 - Handle `.gitignore` exceptions with `git add -f <file>` when needed
 - **Never** use `git add -A` or `git add .` (risk of including secrets or binaries)
 - Include the updated modify log and any updated READMEs
+
+**4d. Confirm with user before committing**
+
+List all files about to be committed, then ask the user for confirmation before proceeding.
 
 ---
 
