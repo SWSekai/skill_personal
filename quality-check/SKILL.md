@@ -61,6 +61,45 @@ If the current changes introduce new conventions, patterns, or workflow requirem
 - Wait for user confirmation before modifying any skill files
 - If confirmed, update the relevant SKILL.md under `.claude/skills/`
 
+### 5b. Skill Completeness Check (when Skill files are changed)
+
+If any Skill files were modified or created in this changeset, verify:
+
+1. **Each skill folder** has both `SKILL.md` and `README.md`
+2. **Skills README** (`.claude/skills/README.md` or equivalent) includes the new/updated skill in:
+   - Command overview table
+   - Detailed description section
+   - Directory structure tree
+3. **Generic skills directory** (`skill_general/` or equivalent) — evaluate if the change should sync:
+   - Generic improvement (applies to any project) → sync and strip project-specific hardcodes
+   - Project-specific fix → do not sync
+4. **Generic skills README** updated if generic directory was changed
+5. **Project configuration** (e.g., `CLAUDE.md`) skills list includes the skill
+
+Report any missing items to the user before proceeding.
+
+### 5c. Implementation Review (post-implementation flow verification)
+
+After implementation is complete and before commit, perform a full end-to-end flow review on each modified code path:
+
+1. **Re-read the modified code**: Do not rely on memory — read the final version of each file
+2. **Walk through data flow step by step**: From trigger (button / API call) to final output, verify each step's input/output is correct
+3. **Verify cross-layer consistency**:
+   - Field names / types sent by frontend match what backend expects
+   - DB columns queried match actual schema
+   - External service calls (object storage / cache / database) use correct parameters
+4. **Evaluate edge cases one by one**: List possible exception scenarios (null values, missing data, network failures), confirm code handles them or explicitly documents as known limitations
+5. **Output confirmation table**:
+
+| Check Item | Result | Notes |
+|------------|:------:|-------|
+| Data flow integrity | ✓/✗ | |
+| Cross-layer type consistency | ✓/✗ | |
+| Edge case handling | ✓/✗ | |
+| Unmodified logic unaffected | ✓/✗ | |
+
+If any ✗ items exist, **they must be fixed before entering commit flow**.
+
 ### 6. Modify Log Reminder
 
 **CRITICAL**: After quality check passes, the `modify-log` skill **must** be invoked to create the mandatory modification log before any commit proceeds. This applies to ALL commit flows — `/commit-push`, Claude Code self-planned commits, or manual commits.
