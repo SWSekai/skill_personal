@@ -36,6 +36,27 @@ A portable set of Claude Code skills that work with **any project**. No project-
   3. Push 至遠端 `https://github.com/SWSekai/Skill-personal.git`
   4. 若 push 失敗，提示使用者手動處理
 
+### 規則 4：新專案自動初始化
+
+當 Claude 進入一個新專案目錄時：
+
+1. 檢查是否存在 `skill_general/`（專案內）或 `../Skill-personal/`（同層級）
+2. 若存在但專案**沒有** `.claude/skills/` → 自動建立 `.claude/skills/` 並從模板複製
+3. 根據專案特性客製化（路徑、服務名稱、commit 慣例、語言偏好）
+4. 若 `../Skill-personal/` 不存在 → 自動 `git clone https://github.com/SWSekai/Skill-personal.git` 至同層級
+5. 初始化完成後執行 Skill 完整性檢查
+
+### 規則 5：自動偵測遠端差異並同步
+
+每次對話開始時（或操作 `skill_general/` 前）：
+
+1. 進入 `../Skill-personal/` 執行 `git fetch origin`
+2. 比較本地 `HEAD` 與 `origin/main`，若不同步則 `git pull --rebase origin main`
+3. 若有衝突，揉合本地與遠端規則（保留雙方有效內容，移除重複）
+4. 揉合完成後 commit 並 `git push origin main`
+5. 若遠端有 `skill_general/` 缺少的更新，自動合併回專案內的 `skill_general/`
+6. 若 push 失敗，提示使用者手動處理
+
 ---
 
 ## Installation / 安裝
@@ -59,6 +80,8 @@ cp -r skill_general/* ~/.claude/skills/
 | **restart-eval** | `/restart-eval [range]` | Evaluate which Docker services need restart/rebuild after changes |
 | **trace-flow** | `/trace-flow [field]` | Trace a data field end-to-end through the system (UI → API → DB → processing) |
 | **quality-check** | `/quality-check [files]` | Code quality audit: dead code, redundancy, impact, architecture, security |
+| **sys-info** | `/sys-info [question]` | System info query & documentation lifecycle management |
+| **skill-sync** | `/skill-sync` | Auto-init skill environment, sync Skill-personal remote, evaluate rule placement |
 
 ---
 
@@ -108,6 +131,22 @@ cp -r skill_general/* ~/.claude/skills/
 - 安全性掃描（OWASP Top 10）
 - 風險報告（High / Medium / Low）
 - Skill 自我更新建議
+- Skill 完整性檢查（README、skill_general 同步、CLAUDE.md 更新）
+
+### `/sys-info [問題]` — 系統資訊查詢與文件管理
+
+回答系統問題並管理文件生命週期：
+- 搜尋現有文件引導用戶至具體段落
+- 文件不足時自動擴充
+- 無相關文件時新建
+- 自動執行冗餘檢查避免文件重複
+
+### `/skill-sync` — Skill 環境初始化、遠端同步、規則評估
+
+對話開始時自動觸發，確保 Skill 環境就緒：
+- **自動初始化**：偵測缺少 `.claude/skills/` 的專案，從模板建立並生成 CLAUDE.md
+- **遠端同步**：檢查 `../Skill-personal/` 與遠端差異，pull → 揉合 → push
+- **規則評估**：新增至 CLAUDE.md 或 Memory 的規則，評估是否應納入 Skill 或 skill_general
 
 ---
 
@@ -127,8 +166,8 @@ These skills are designed to be project-agnostic. To customize for a specific pr
 ## Directory Structure / 目錄結構
 
 ```
-Skill-personal/
-├── README.md                       ← This file (含同步規則)
+skill_general/
+├── README.md                       ← This file（含同步規則）
 ├── commit-push/
 │   ├── README.md                   ← 提交與推送 — 功能說明
 │   └── SKILL.md                    ← Skill 定義與執行流程
@@ -141,7 +180,13 @@ Skill-personal/
 ├── trace-flow/
 │   ├── README.md                   ← 資料流追蹤 — 功能說明
 │   └── SKILL.md                    ← Skill 定義與追蹤流程
-└── quality-check/
-    ├── README.md                   ← 品質與影響檢查 — 功能說明
-    └── SKILL.md                    ← Skill 定義與檢查項目
+├── quality-check/
+│   ├── README.md                   ← 品質與影響檢查 — 功能說明
+│   └── SKILL.md                    ← Skill 定義與檢查項目
+├── sys-info/
+│   ├── README.md                   ← 系統資訊查詢 — 功能說明
+│   └── SKILL.md                    ← Skill 定義與文件管理流程
+└── skill-sync/
+    ├── README.md                   ← Skill 環境初始化 — 功能說明
+    └── SKILL.md                    ← Skill 定義與同步流程
 ```

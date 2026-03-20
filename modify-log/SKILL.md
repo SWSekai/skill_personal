@@ -38,7 +38,7 @@ git diff --numstat
 ## Change Info
 
 - **Date/Time**: YYYY-MM-DD HH:MM
-- **Version**: vX
+- **Version**: `<git-short-hash>` (fill in after commit, e.g. `9fe154c`)
 - **Reason**: [Motivation / problem description / requirement source]
 
 ## Change Details
