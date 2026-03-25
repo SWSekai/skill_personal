@@ -117,6 +117,7 @@ cp -r skill_personal/* ~/.claude/skills/
 | **commit-push** | `/commit-push` | Full commit flow: quality check → modify log → README update → commit → push → service restart eval |
 | **modify-log** | `/modify-log [topic]` | Create versioned change log (`YYYYMMDD_v1.md`) with structured fields |
 | **restart-eval** | `/restart-eval [range]` | Evaluate which Docker services need restart/rebuild after changes |
+| **restart-volumn** | `/restart-volumn [services]` | Execute container restart/rebuild with health checks & auto-recovery |
 | **trace-flow** | `/trace-flow [field]` | Trace a data field end-to-end through the system (UI → API → DB → processing) |
 | **quality-check** | `/quality-check [files]` | Code quality audit: dead code, redundancy, impact, architecture, security |
 | **report** | `/report [range]` | Generate concise work report from modify logs for 2-3 min presentations |
@@ -154,6 +155,16 @@ cp -r skill_personal/* ~/.claude/skills/
 - 靜態檔案 → 瀏覽器重新整理
 - DB 初始化腳本 → 手動 migration
 - 無容器化專案 → 偵測 PM2 / systemd 等管理工具
+
+### `/restart-volumn [服務名...]` — 容器重啟與自動修復
+
+完整的容器重啟/重建執行流程（與 restart-eval 互補）：
+1. **Pre-flight 檢查**：容器狀態、背景任務、串流服務、掛載 vs 映像判斷
+2. **執行重啟**：volume 掛載用 restart，映像打包用 build + up
+3. **健康檢查**：等待啟動完成，確認 Status
+4. **日誌掃描**：偵測 ImportError / ConnectionRefused 等錯誤
+5. **自動修復**：`--no-cache` 重建、等待依賴、埠號衝突處理
+6. **最終驗證**：API 可達性、Worker 連線確認、輸出報告
 
 ### `/trace-flow [欄位名]` — 資料流追蹤
 
@@ -226,6 +237,9 @@ Skill-personal/
 ├── restart-eval/
 │   ├── README.md                   ← 服務重啟評估 — 功能說明
 │   └── SKILL.md                    ← Skill 定義與評估規則
+├── restart-volumn/
+│   ├── README.md                   ← 容器重啟與自動修復 — 功能說明
+│   └── SKILL.md                    ← Skill 定義與執行修復流程
 ├── trace-flow/
 │   ├── README.md                   ← 資料流追蹤 — 功能說明
 │   └── SKILL.md                    ← Skill 定義與追蹤流程
