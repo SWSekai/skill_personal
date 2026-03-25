@@ -1,6 +1,6 @@
 ---
 name: quality-check
-description: "Pre-commit code quality audit — redundancy, impact analysis, architecture conformance, and risk assessment. IMPORTANT: After quality check passes, ensure modify-log skill is invoked to create the mandatory modification log before committing."
+description: "Pre-commit code quality audit — redundancy, impact analysis, architecture conformance, and risk assessment. IMPORTANT: After quality check passes, ensure modify-log skill is invoked after commit to create the local modification log."
 allowed-tools: Read, Grep, Glob, Agent
 ---
 
@@ -70,11 +70,12 @@ If any Skill files were modified or created in this changeset, verify:
    - Command overview table
    - Detailed description section
    - Directory structure tree
-3. **Generic skills directory** (`skill_general/` or equivalent) — evaluate if the change should sync:
+3. **Generic skills directory** (`skill_personal/` or equivalent) — evaluate if the change should sync:
    - Generic improvement (applies to any project) → sync and strip project-specific hardcodes
    - Project-specific fix → do not sync
 4. **Generic skills README** updated if generic directory was changed
 5. **Project configuration** (e.g., `CLAUDE.md`) skills list includes the skill
+6. **Skill changes do NOT go into project git** — they are managed via `skill_personal/` → `../Skill-personal/` remote repo only
 
 Report any missing items to the user before proceeding.
 
@@ -102,6 +103,6 @@ If any ✗ items exist, **they must be fixed before entering commit flow**.
 
 ### 6. Modify Log Reminder
 
-**CRITICAL**: After quality check passes, the `modify-log` skill **must** be invoked to create the mandatory modification log before any commit proceeds. This applies to ALL commit flows — `/commit-push`, Claude Code self-planned commits, or manual commits.
+**CRITICAL**: After quality check passes and commit is made, the `modify-log` skill **must** be invoked to create the modification log. **Logs are stored locally only — they are NOT added to git version control.**
 
 Arguments: $ARGUMENTS (optional — specific files to check, otherwise checks all staged/changed files)

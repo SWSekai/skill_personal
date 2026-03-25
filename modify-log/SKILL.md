@@ -1,13 +1,15 @@
 ---
 name: modify-log
-description: "MANDATORY before every commit: Create or update a structured modification log documenting code changes. Must be invoked before any git commit operation, including Claude Code's own commit planning."
+description: "Create or update a structured local modification log documenting code changes. Invoked after commit — logs are LOCAL ONLY, never committed to project git."
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git diff*), Bash(git log*), Bash(git status*), Bash(ls *), Bash(date *)
 ---
 
 ## Modify Log Protocol
 
 Every significant code change should have a corresponding modify log.
-This skill is **auto-triggered** whenever a commit is about to be made — including Claude Code's self-planned commits, `/commit-push`, or any other commit flow.
+This skill is **auto-triggered** after a commit is made. Logs are created **after commit** so the commit hash is directly available.
+
+**Important: Modify logs are stored locally only — they are NOT added to any git version control.**
 
 ### Step 1: Determine filename
 
@@ -20,14 +22,13 @@ This skill is **auto-triggered** whenever a commit is about to be made — inclu
 
 ### Step 2: Gather change info
 
-```bash
-git diff --stat
-git diff --name-only
-```
+From the completed commit:
 
-For each changed file, count added/removed lines:
 ```bash
-git diff --numstat
+git log --oneline -1                    # get commit hash
+git diff --stat HEAD~1                  # change statistics
+git diff --name-only HEAD~1             # changed files
+git diff --numstat HEAD~1               # per-file added/removed lines
 ```
 
 ### Step 3: Write the log
@@ -38,7 +39,7 @@ git diff --numstat
 ## Change Info
 
 - **Date/Time**: YYYY-MM-DD HH:MM
-- **Version**: `<git-short-hash>` (fill in after commit, e.g. `9fe154c`)
+- **Version**: `<git-short-hash>` (e.g. `9fe154c`)
 - **Reason**: [Motivation / problem description / requirement source]
 
 ## Change Details
@@ -71,5 +72,6 @@ git diff --numstat
 - Use tables for before/after comparisons
 - Use ASCII diagrams for data flow or decision logic
 - If the same day already has a log for the same topic, update that file
+- **Logs are local only — never add them to git version control**
 
 Arguments: $ARGUMENTS (topic description — used for filename and content focus)

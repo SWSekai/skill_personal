@@ -1,6 +1,6 @@
 ---
 name: commit-push
-description: Commit and push changes — auto-generate modify logs, update READMEs, evaluate service restarts, and run quality checks before committing
+description: Commit and push changes — auto-generate local modify logs, update READMEs, evaluate service restarts, and run quality checks. No .gitignore files are ever force-added.
 disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(docker *)
 ---
@@ -33,20 +33,7 @@ Before staging anything, perform:
 
 ---
 
-### Step 2: Auto-update Modify Log
-
-**Before committing**, invoke the `modify-log` skill to create or update the modification log.
-
-- Path: `[PROJECT_LOG_DIR]/YYMMDD_TopicDescription.md`（6-digit date + descriptive topic name）
-  - Adapt to the project's log directory convention. Common locations: `docs/changelog/`, `logs/`, or project-specific paths.
-- Check existing files to determine if should update existing or create new:
-  - Same topic exists today → update that file
-  - Different topic → create a new file with a distinct name
-- Follow the `modify-log` skill template for content structure
-
----
-
-### Step 3: Auto-update README.md files
+### Step 2: Auto-update README.md files
 
 Check if any changed files belong to directories that have `README.md`. If the changes affect the directory's structure or functionality, update the README accordingly.
 
@@ -57,9 +44,9 @@ If a key functional directory lacks a README, create one with:
 
 ---
 
-### Step 4: Status overview & staging
+### Step 3: Status overview & staging
 
-**4a. Show full pending status** (give user a clear picture before commit)
+**3a. Show full pending status** (give user a clear picture before commit)
 
 ```bash
 git status
@@ -73,27 +60,28 @@ Present to the user:
 - **Committed but unpushed**: list commit hash + message
 - If nothing pending, inform the user and stop
 
-**4b. Read `.gitignore` for safe staging**
+**3b. Read `.gitignore` for safe staging**
 
 Before staging, read `.gitignore` to verify:
-- Do not stage files matching `.gitignore` patterns (e.g., `.env`, `*.log`, `__pycache__/`, secrets, binaries)
-- If the project has force-add exceptions (e.g., internal doc directories listed in `.gitignore` but required in version control), use `git add -f` only for those
-- If a file about to be staged matches `.gitignore` (and is not an exception), **warn the user and skip it**
+- **All files matching `.gitignore` patterns must NOT be staged — no exceptions**
+- This includes: `.env`, `*.log`, `__pycache__/`, secrets, binaries, `CLAUDE.md`, `.claude/skills/`, `.hanschen/`, `.skill_personal/`, or any project-specific ignored paths
+- **Never use `git add -f`** — files in `.gitignore` are excluded from project version control by design
+- If a file about to be staged matches `.gitignore`, **warn the user and skip it**
 
-**4c. Stage files**
+**3c. Stage files**
 
-- Use `git add <file>` for specific files
-- Handle `.gitignore` exceptions with `git add -f <file>` when needed
+- Use `git add <file>` for specific files only
+- **Never** use `git add -f`（no force-adding of any file）
 - **Never** use `git add -A` or `git add .` (risk of including secrets or binaries)
-- Include the updated modify log and any updated READMEs
+- Include any updated READMEs
 
-**4d. Confirm with user before committing**
+**3d. Confirm with user before committing**
 
 List all files about to be committed, then ask the user for confirmation before proceeding.
 
 ---
 
-### Step 5: Commit
+### Step 4: Commit
 
 - Follow the project's commit message conventions (detect from `git log`)
 - If no convention is established, use Conventional Commits:
@@ -117,6 +105,20 @@ EOF
 
 ---
 
+### Step 5: Auto-create Modify Log (local only, not committed)
+
+After commit, create the modification log:
+
+1. Get the commit hash:
+   ```bash
+   git log --oneline -1
+   ```
+2. Invoke the `modify-log` skill with the commit hash
+3. Path: `[PROJECT_LOG_DIR]/YYMMDD_TopicDescription.md`
+4. **The log is stored locally only — it is NOT added to git version control**
+
+---
+
 ### Step 6: Push
 
 ```bash
@@ -127,13 +129,13 @@ If push fails (auth, hook, or remote error), inform the user with the error and 
 
 ---
 
-### Step 7: Sync skill_general to remote repository
+### Step 7: Sync skill_personal to remote repository
 
-If any files under `skill_general/` (or its equivalent general skill folder) were changed in this commit:
+If any files under `skill_personal/` (or its equivalent general skill folder) were changed in this session:
 
 1. Locate the `Skill-personal` local repo (typically `../Skill-personal/` relative to the project root)
    - If not found, clone from: `https://github.com/SWSekai/Skill-personal.git`
-2. Copy all updated `skill_general/` files into the `Skill-personal` repo (overwrite)
+2. Copy all updated `skill_personal/` files into the `Skill-personal` repo (overwrite)
 3. Stage, commit (mirror the current commit message), and push:
 
 ```bash
@@ -145,7 +147,7 @@ git push
 
 4. If push fails, inform the user and continue — do not block the main workflow.
 
-If no `skill_general/` files were changed, skip this step.
+If no `skill_personal/` files were changed, skip this step.
 
 ---
 

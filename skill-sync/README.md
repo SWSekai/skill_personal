@@ -6,7 +6,7 @@
 
 1. **新專案自動初始化** — 偵測缺少 `.claude/skills/` 的專案，自動從模板建立並生成 CLAUDE.md
 2. **Skill-personal 遠端同步** — 每次對話開始時檢查本地與遠端差異，自動 pull → 揉合 → push
-3. **規則評估與歸類** — 新增至 CLAUDE.md 或 Memory 的規則，自動評估是否應納入 Skill 或 skill_general
+3. **規則評估與歸類** — 新增至 CLAUDE.md 或 Memory 的規則，自動評估是否應納入 Skill 或 skill_personal
 
 ## 觸發方式
 
@@ -14,7 +14,7 @@
 |---|---|
 | 對話開始 | 自動觸發（檢查環境 + 遠端同步） |
 | 新增規則至 CLAUDE.md / Memory | 自動觸發（規則評估） |
-| 修改 skill_general/ | 自動觸發（同步至 Skill-personal） |
+| 修改 skill_personal/ | 自動觸發（同步至 Skill-personal） |
 | 使用者呼叫 `/skill-sync` | 手動觸發（完整流程） |
 
 ## 執行流程
@@ -36,7 +36,7 @@
   │
   └─ 流程三：規則評估
       ├─ 僅限本專案 → CLAUDE.md / Memory
-      └─ 通用規則 → 更新 Skill → 回流 skill_general/ → 同步 Skill-personal
+      └─ 通用規則 → 更新 Skill → 回流 skill_personal/ → 同步 Skill-personal
 ```
 
 ## 目錄結構
