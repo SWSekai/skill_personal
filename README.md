@@ -123,6 +123,7 @@ cp -r skill_personal/* ~/.claude/skills/
 | **report** | `/report [range]` | Generate concise work report from modify logs for 2-3 min presentations |
 | **sys-info** | `/sys-info [question]` | System info query & documentation lifecycle management |
 | **skill-sync** | `/skill-sync` | Auto-init skill environment, sync Skill-personal remote, evaluate rule placement |
+| **md-collab** | `/md-collab [topic]` | Generate structured Markdown with checkboxes/tables for interactive decision-making |
 | **context-guard** | `/context-guard` | Monitor context window usage, auto-summarize & suggest /clear when exceeding 40% |
 
 ---
@@ -200,6 +201,15 @@ cp -r skill_personal/* ~/.claude/skills/
 - 無相關文件時新建
 - 自動執行冗餘檢查避免文件重複
 
+### `/md-collab [主題]` — Markdown 互動式協作
+
+透過結構化 Markdown 檔案進行互動式決策協作：
+1. **分析主題**：掃描相關程式碼，識別決策項目，記錄現狀
+2. **生成決策表**：核取方塊 / 填寫欄位，預填建議值
+3. **引導編輯**：告知檔案位置與規則，使用者修改後回覆
+4. **讀取與實作**：差異比對 → 變更摘要 → 確認後逐項實作
+- 支援四種模式：單選矩陣、多選清單、自由填寫、混合模式
+
 ### `/skill-sync` — Skill 環境初始化、遠端同步、規則評估
 
 對話開始時自動觸發，確保 Skill 環境就緒：
@@ -252,6 +262,12 @@ Skill-personal/
 ├── sys-info/
 │   ├── README.md                   ← 系統資訊查詢 — 功能說明
 │   └── SKILL.md                    ← Skill 定義與文件管理流程
+├── md-collab/
+│   ├── README.md                   ← Markdown 互動式協作 — 功能說明
+│   └── SKILL.md                    ← Skill 定義與協作流程
+├── context-guard/
+│   ├── README.md                   ← Context Window 管理 — 功能說明
+│   └── SKILL.md                    ← Skill 定義與管理流程
 └── skill-sync/
     ├── README.md                   ← Skill 環境初始化 — 功能說明
     └── SKILL.md                    ← Skill 定義與同步流程
