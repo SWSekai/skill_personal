@@ -15,7 +15,7 @@ This skill is **auto-triggered** after a commit is made. Logs are created **afte
 
 - Format: `YYMMDD_TopicDescription.md`（6-digit date + descriptive topic name）
 - Example: `260313_video_h264_reencode.md`
-- Locate the project's log directory (common: `docs/changelog/`, `logs/`, or configurable)
+- Log directory: `.local/logs/` (created by `setup.bat`)
 - Check existing logs to avoid duplicates:
   - Same topic exists today → update that file
   - Different topic → create a new file with a distinct name

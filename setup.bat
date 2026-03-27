@@ -3,13 +3,13 @@ chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
 
 REM ============================================================
-REM  Skill-personal 一鍵建置腳本
+REM  skill_personal 一鍵建置腳本
 REM  用法：在目標專案資料夾中執行此腳本
 REM    setup.bat [專案路徑]
 REM    若不帶參數，則以當前目錄為目標專案
 REM ============================================================
 
-REM 取得腳本所在目錄（Skill-personal 倉庫根目錄）
+REM 取得腳本所在目錄（skill_personal 倉庫根目錄）
 set "SCRIPT_DIR=%~dp0"
 set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
 
@@ -22,7 +22,7 @@ if "%~1"=="" (
 
 echo.
 echo ====================================================
-echo   Skill-personal 專案建置工具
+echo   skill_personal 專案建置工具
 echo ====================================================
 echo.
 echo   Skill 來源：%SCRIPT_DIR%
@@ -41,9 +41,9 @@ if not exist "%PROJECT_DIR%\.git" (
     echo.
 )
 
-REM 防止在 Skill-personal 倉庫本身執行
+REM 防止在 skill_personal 倉庫本身執行
 if "%PROJECT_DIR%"=="%SCRIPT_DIR%" (
-    echo [ERROR] 不可在 Skill-personal 倉庫本身執行此腳本
+    echo [ERROR] 不可在 skill_personal 倉庫本身執行此腳本
     echo         請在目標專案資料夾中執行，或傳入專案路徑作為參數
     exit /b 1
 )
@@ -111,15 +111,18 @@ if exist "%PROJECT_DIR%\skill_personal" (
     echo       skill_personal/ 已存在，跳過
 ) else (
     xcopy "%SCRIPT_DIR%" "%PROJECT_DIR%\skill_personal\" /E /I /Y /Q >nul 2>&1
-    REM 移除 .git 資料夾（不需要在專案內保留 Skill-personal 的 git 歷史）
+    REM 重新初始化 git 並連結遠端倉庫（skill_personal 需要獨立推送）
     if exist "%PROJECT_DIR%\skill_personal\.git" (
         rmdir /S /Q "%PROJECT_DIR%\skill_personal\.git" 2>nul
     )
-    REM 移除 setup.bat 本身（不需要在專案的 skill_personal 中）
-    if exist "%PROJECT_DIR%\skill_personal\setup.bat" (
-        del /Q "%PROJECT_DIR%\skill_personal\setup.bat" 2>nul
-    )
-    echo       已建立 skill_personal/
+    pushd "%PROJECT_DIR%\skill_personal"
+    git init >nul 2>&1
+    git remote add origin https://github.com/SWSekai/skill_personal.git >nul 2>&1
+    git fetch origin >nul 2>&1
+    git branch -M main >nul 2>&1
+    git reset --mixed origin/main >nul 2>&1
+    popd
+    echo       已建立 skill_personal/（含獨立 git，remote: skill_personal）
 )
 
 REM ============================
@@ -159,8 +162,8 @@ if exist "%PROJECT_DIR%\CLAUDE.md" (
         echo.
         echo ### 4. skill_personal/ 禁止加入專案版控，變更須推送至獨立倉庫
         echo - `skill_personal/` 已加入 `.gitignore`，**絕對不可**使用 `git add -f` 或任何方式加入專案版控
-        echo - `skill_personal/` 屬於 `Skill-personal` 遠端倉庫（`https://github.com/SWSekai/Skill-personal.git`），僅透過該倉庫管理
-        echo - **每次修改 `skill_personal/` 內容後，必須同步推送至 Skill-personal 倉庫**
+        echo - `skill_personal/` 屬於 `skill_personal` 遠端倉庫（`https://github.com/SWSekai/skill_personal.git`），僅透過該倉庫管理
+        echo - **每次修改 `skill_personal/` 內容後，必須同步推送至 skill_personal 倉庫**
         echo.
         echo ### 5. 每次 Commit 前 — .gitignore 安全檢查與狀態總覽
         echo - 讀取 `.gitignore`，確認即將 stage 的檔案不在忽略清單中
@@ -182,7 +185,7 @@ if exist "%PROJECT_DIR%\CLAUDE.md" (
         echo ### 9. Memory、Skill、skill_personal 三向連動
         echo - 寫入 Memory 時，評估是否應同步加入 Skill
         echo - 更新 `.claude/skills/` 或 Memory 時，評估是否應回流至 `skill_personal/`
-        echo - `skill_personal/` 更新後，自動同步至 `../Skill-personal/`
+        echo - `skill_personal/` 更新後，自動同步至 `../skill_personal/`
         echo.
         echo ### 10. 新增 Skill 後 — 完整性檢查
         echo - Skill 資料夾包含 `SKILL.md` 和 `README.md`
@@ -194,7 +197,7 @@ if exist "%PROJECT_DIR%\CLAUDE.md" (
         echo - 進入新專案時，自動偵測並初始化 Skill 環境
         echo - 觸發 `/skill-sync` 執行完整初始化流程
         echo.
-        echo ### 12. Skill-personal 遠端同步與衝突處理
+        echo ### 12. skill_personal 遠端同步與衝突處理
         echo - 每次對話開始時自動同步
         echo - 觸發 `/skill-sync` 執行遠端同步流程
         echo.

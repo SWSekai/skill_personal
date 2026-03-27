@@ -1,7 +1,6 @@
 ---
 name: commit-push
 description: Commit and push changes — auto-generate local modify logs, update READMEs, evaluate service restarts, and run quality checks. No .gitignore files are ever force-added.
-disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(docker *)
 ---
 
@@ -64,9 +63,13 @@ Present to the user:
 
 Before staging, read `.gitignore` to verify:
 - **All files matching `.gitignore` patterns must NOT be staged — no exceptions**
-- This includes: `.env`, `*.log`, `__pycache__/`, secrets, binaries, `CLAUDE.md`, `.claude/skills/`, `.hanschen/`, `.skill_personal/`, or any project-specific ignored paths
+- This includes: `.env`, `*.log`, `__pycache__/`, secrets, binaries, `CLAUDE.md`, `.claude/skills/`, `.local/`, `.skill_personal/`, or any project-specific ignored paths
 - **Never use `git add -f`** — files in `.gitignore` are excluded from project version control by design
 - If a file about to be staged matches `.gitignore`, **warn the user and skip it**
+
+> **Note**: A pre-commit hook (installed by `setup.bat`) provides a hard block as the last line of defense.
+> Even if `git add -f` is used, the commit will be rejected if `.claude/`, `skill_personal/`, or `CLAUDE.md` are staged.
+> Run `skill_personal/verify.bat` to confirm the hook is active.
 
 **3c. Stage files**
 
@@ -114,7 +117,7 @@ After commit, create the modification log:
    git log --oneline -1
    ```
 2. Invoke the `modify-log` skill with the commit hash
-3. Path: `[PROJECT_LOG_DIR]/YYMMDD_TopicDescription.md`
+3. Path: `.local/logs/YYMMDD_TopicDescription.md`
 4. **The log is stored locally only — it is NOT added to git version control**
 
 ---
@@ -133,19 +136,17 @@ If push fails (auth, hook, or remote error), inform the user with the error and 
 
 If any files under `skill_personal/` (or its equivalent general skill folder) were changed in this session:
 
-1. Locate the `Skill-personal` local repo (typically `../Skill-personal/` relative to the project root)
-   - If not found, clone from: `https://github.com/SWSekai/Skill-personal.git`
-2. Copy all updated `skill_personal/` files into the `Skill-personal` repo (overwrite)
-3. Stage, commit (mirror the current commit message), and push:
+1. Enter the `skill_personal/` directory (it is itself a git repo with remote `https://github.com/SWSekai/skill_personal.git`)
+2. Stage all updated files, commit (mirror the current commit message), and push:
 
 ```bash
-cd ../Skill-personal
+cd skill_personal
 git add -A
 git commit -m "<mirrored commit message>"
 git push
 ```
 
-4. If push fails, inform the user and continue — do not block the main workflow.
+3. If push fails, inform the user and continue — do not block the main workflow.
 
 If no `skill_personal/` files were changed, skip this step.
 
