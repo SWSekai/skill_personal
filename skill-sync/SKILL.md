@@ -155,6 +155,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(cp *
 
 ## 核心行為規則
 [由 setup.bat 生成的 CLAUDE.md 定義，此處不重複]
+- 功能需求規劃先行：收到功能訴求時，必須先設計完整方案與步驟，呈獻使用者確認後才開始實作；如有多種做法，列出替代方案與優缺點供選擇
 
 ## 可用 Skills
 - `/commit-push` — 提交推送（含品質檢查、日誌、README 更新、容器評估）
