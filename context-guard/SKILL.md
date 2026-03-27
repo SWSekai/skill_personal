@@ -35,7 +35,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(wc *), Bash(git s
 
 ### Step 2: 記錄當前工作狀態
 
-在 `[PROJECT_SUMMARY_DIR]/` 建立摘要（目錄由專案自訂，如 `.hanschen/context_summary/`）：
+在 `.local/summary/` 建立摘要（由 `setup.bat` 自動建立）：
 
 **檔名格式**：`YYMMDD_HHMM_TopicDescription.md`
 
@@ -68,7 +68,7 @@ YYYY-MM-DD HH:MM
 
 ### Step 3: Update Topic State File
 
-Write or update `[PROJECT_SUMMARY_DIR]/current_topic.md`:
+Write or update `.local/summary/current_topic.md`:
 
 ```markdown
 # Current Work Topic
@@ -104,7 +104,7 @@ This file is used for task switch detection (Step 4).
 ### Step 5: Summary Recovery & Lifecycle
 
 **At conversation start** (chained by skill-sync):
-1. Check `[PROJECT_SUMMARY_DIR]/` for `.md` summary files (excluding `current_topic.md`)
+1. Check `.local/summary/` for `.md` summary files (excluding `current_topic.md`)
 2. Found → read latest summary, present to user and ask whether to continue
 3. Not found → start normally
 

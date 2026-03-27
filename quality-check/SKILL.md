@@ -75,7 +75,7 @@ If any Skill files were modified or created in this changeset, verify:
    - Project-specific fix → do not sync
 4. **Generic skills README** updated if generic directory was changed
 5. **Project configuration** (e.g., `CLAUDE.md`) skills list includes the skill
-6. **Skill changes do NOT go into project git** — they are managed via `skill_personal/` → `../Skill-personal/` remote repo only
+6. **Skill changes do NOT go into project git** — they are managed via `skill_personal/` (its own git repo) → `https://github.com/SWSekai/skill_personal.git` remote only
 
 Report any missing items to the user before proceeding.
 

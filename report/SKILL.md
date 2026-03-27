@@ -28,7 +28,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git log*), Bash(git diff*), B
 - `weekly` → 讀取近 7 天（依檔名日期前綴篩選）
 - `YYMMDD YYMMDD` → 讀取指定區間
 
-自動偵測專案的修改紀錄存放路徑（常見位置：`docs/changelog/`、`modify_log/`、或專案慣用路徑）。
+修改紀錄存放於 `.local/logs/`（由 `setup.bat` 建立）。
 
 ### Step 2: 讀取並分析所有紀錄
 
@@ -90,7 +90,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git log*), Bash(git diff*), B
 
 ### Step 4: 輸出報告
 
-將報告寫入專案的報告目錄。
+將報告寫入 `.local/reports/`。
 
 ---
 

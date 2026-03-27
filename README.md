@@ -48,22 +48,22 @@ A portable set of Claude Code skills that work with **any project**. No project-
 
 ### 規則 3：自動同步至遠端倉庫
 
-- **遠端倉庫地址**：`https://github.com/SWSekai/Skill-personal.git`
-- **本地路徑**：與當前專案同層級的 `../Skill-personal/`（若不存在則自動 clone）
+- **遠端倉庫地址**：`https://github.com/SWSekai/skill_personal.git`
+- **本地路徑**：專案內的 `skill_personal/`（自身即為 git repo）
 - **同步時機**：每次 `skill_personal/` 有任何更新時，自動執行以下流程：
-  1. 將更新後的檔案複製至本地 `Skill-personal` 倉庫
-  2. 在 `Skill-personal` 倉庫中 commit（訊息與當前專案 commit 對應）
-  3. Push 至遠端 `https://github.com/SWSekai/Skill-personal.git`
+  1. 進入 `skill_personal/` 目錄
+  2. 在 `skill_personal/` 中 stage、commit（訊息與當前專案 commit 對應）
+  3. Push 至遠端 `https://github.com/SWSekai/skill_personal.git`
   4. 若 push 失敗，提示使用者手動處理
 
 ### 規則 4：新專案自動初始化
 
 當 Claude 進入一個新專案目錄時：
 
-1. 檢查是否存在 `skill_personal/`（專案內）或 `../Skill-personal/`（同層級）
+1. 檢查是否存在 `skill_personal/`（專案內，自身為 git repo）
 2. 若存在但專案**沒有** `.claude/skills/` → 自動建立 `.claude/skills/` 並從模板複製
 3. 根據專案特性客製化（路徑、服務名稱、commit 慣例、語言偏好）
-4. 若 `../Skill-personal/` 不存在 → 自動 `git clone https://github.com/SWSekai/Skill-personal.git` 至同層級
+4. 若 `skill_personal/` 尚未初始化為 git repo → 執行 `git init` 並 `git remote add origin https://github.com/SWSekai/skill_personal.git`
 5. **確保 `.gitignore` 排除所有 Claude Code 相關檔案**
 6. 初始化完成後執行 Skill 完整性檢查
 
@@ -71,7 +71,7 @@ A portable set of Claude Code skills that work with **any project**. No project-
 
 每次對話開始時（或操作 `skill_personal/` 前）：
 
-1. 進入 `../Skill-personal/` 執行 `git fetch origin`
+1. 進入 `skill_personal/` 執行 `git fetch origin`
 2. 比較本地 `HEAD` 與 `origin/main`，若不同步則 `git pull --rebase origin main`
 3. 若有衝突，揉合本地與遠端規則（保留雙方有效內容，移除重複）
 4. 揉合完成後 commit 並 `git push origin main`
@@ -87,10 +87,10 @@ A portable set of Claude Code skills that work with **any project**. No project-
 ```bash
 # 在目標專案資料夾中執行 setup.bat
 cd /path/to/your-project
-D:\git\Skill-personal\setup.bat
+D:\git\skill_personal\setup.bat
 
 # 或傳入專案路徑作為參數
-D:\git\Skill-personal\setup.bat D:\git\your-project
+D:\git\skill_personal\setup.bat D:\git\your-project
 ```
 
 setup.bat 會自動完成以下步驟：
@@ -122,7 +122,7 @@ cp -r skill_personal/* ~/.claude/skills/
 | **quality-check** | `/quality-check [files]` | Code quality audit: dead code, redundancy, impact, architecture, security |
 | **report** | `/report [range]` | Generate concise work report from modify logs for 2-3 min presentations |
 | **sys-info** | `/sys-info [question]` | System info query & documentation lifecycle management |
-| **skill-sync** | `/skill-sync` | Auto-init skill environment, sync Skill-personal remote, evaluate rule placement |
+| **skill-sync** | `/skill-sync` | Auto-init skill environment, sync skill_personal remote, evaluate rule placement |
 | **md-collab** | `/md-collab [topic]` | Generate structured Markdown with checkboxes/tables for interactive decision-making |
 | **context-guard** | `/context-guard` | Monitor context window usage, auto-summarize & suggest /clear when exceeding 40% |
 
@@ -214,7 +214,7 @@ cp -r skill_personal/* ~/.claude/skills/
 
 對話開始時自動觸發，確保 Skill 環境就緒：
 - **自動初始化**：偵測缺少 `.claude/skills/` 的專案，從模板建立並生成 CLAUDE.md
-- **遠端同步**：檢查 `../Skill-personal/` 與遠端差異，pull → 揉合 → push
+- **遠端同步**：檢查 `skill_personal/` 與遠端差異，pull → 揉合 → push
 - **規則評估**：新增至 CLAUDE.md 或 Memory 的規則，評估是否應納入 Skill 或 skill_personal
 
 ---
@@ -235,7 +235,7 @@ These skills are designed to be project-agnostic. To customize for a specific pr
 ## Directory Structure / 目錄結構
 
 ```
-Skill-personal/
+skill_personal/
 ├── README.md                       ← This file（含同步規則）
 ├── setup.bat                       ← 一鍵建置腳本
 ├── commit-push/

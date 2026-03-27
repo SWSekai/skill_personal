@@ -13,12 +13,12 @@ When the user asks a question about how the system works, this skill manages the
 Scan all documentation sources for relevant content:
 
 ```
-[PROJECT_DOCS_DIR]/      ← Primary knowledge base (managed by this skill)
+.local/docs/      ← Primary knowledge base (managed by this skill)
 docs/                    ← Official project docs
 **/README.md             ← Directory-level READMEs
 ```
 
-Adapt `[PROJECT_DOCS_DIR]` to the project's convention (e.g., `docs/internal/`, `notes/`, or similar).
+Created automatically by `setup.bat`. All local documentation goes here.
 
 ### Step 2: Evaluate & respond
 
@@ -46,7 +46,7 @@ Based on search results, follow **one** of three paths:
 #### Path C — No relevant documentation
 
 1. Answer the user's question
-2. Organize the answer into a structured document, save to `[PROJECT_DOCS_DIR]/[topic_description].md`
+2. Organize the answer into a structured document, save to `.local/docs/[topic_description].md`
 3. Inform the user of the new file location
 
 ### Step 3: Redundancy check
