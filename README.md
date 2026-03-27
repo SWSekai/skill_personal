@@ -219,6 +219,56 @@ cp -r skill_personal/* ~/.claude/skills/
 
 ---
 
+## 文件存放位置總覽
+
+所有 Skill 產生的本地工作文件皆存放於 `.local/` 下，由 `.gitignore` 排除，不入專案版控。
+
+### 本地工作文件（不入版控）
+
+```
+.local/
+├── logs/          ← modify-log、restart-eval、restart-volumn
+├── docs/          ← sys-info、trace-flow、md-collab
+├── summary/       ← context-guard
+└── reports/       ← report
+```
+
+| Skill | 檔案說明 | 存放位置 |
+|-------|----------|----------|
+| modify-log | 變更紀錄 `YYMMDD_TopicDescription.md` | `.local/logs/` |
+| restart-eval | 服務重啟評估（可選存檔） | `.local/logs/` |
+| restart-volumn | 重啟執行報告（可選存檔） | `.local/logs/` |
+| sys-info | 系統文件 `[topic_description].md` | `.local/docs/` |
+| trace-flow | 資料流追蹤（可選存檔） | `.local/docs/` |
+| md-collab | 互動式決策表 | `.local/docs/`（預設） |
+| context-guard | 上下文摘要 `YYMMDD_HHMM_Topic.md` + `current_topic.md` | `.local/summary/` |
+| report | 工作報告 `YYMMDD_[type]_report.md` | `.local/reports/` |
+
+### 入版控文件
+
+| Skill | 檔案說明 | 存放位置 |
+|-------|----------|----------|
+| commit-push | 目錄 `README.md` 自動更新 | 變更目錄下的 `README.md` |
+
+### Skill / 設定檔（由 skill-sync 管理）
+
+| Skill | 檔案說明 | 存放位置 | 備註 |
+|-------|----------|----------|------|
+| skill-sync | `.claude/skills/` 各 `SKILL.md` | `.claude/skills/[name]/SKILL.md` | 同步至 `skill_personal` remote |
+| skill-sync | `CLAUDE.md` 規則更新 | 專案根目錄 `CLAUDE.md` | 僅在規則評估需要時更新 |
+| quality-check | Skill 定義更新（條件觸發） | `.claude/skills/` | 僅在修改 Skill 定義時觸發 |
+
+### 僅控制台輸出（不存檔）
+
+| Skill | 輸出內容 |
+|-------|----------|
+| quality-check | Risk Report 表格（Severity/File/Mitigation） |
+| trace-flow | 端到端資料流表格（Layer/File:Line/Variable/Type/Risk） |
+| restart-eval | 服務重啟分類 + 執行指令清單 |
+| restart-volumn | 重啟報告（Service/Action/Status/Duration） |
+
+---
+
 ## Customization / 客製化
 
 These skills are designed to be project-agnostic. To customize for a specific project:
