@@ -133,7 +133,7 @@ echo.
 
 if !FAIL! GTR 0 (
     echo   Run sp-init.bat to fix issues:
-    echo     Skill-personal\sp-init.bat "%PROJECT_DIR%"
+    echo     Skill-personal\setup\sp-init.bat "%PROJECT_DIR%"
     echo.
     exit /b 1
 )

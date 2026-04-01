@@ -21,7 +21,7 @@ git clone https://github.com/SWSekai/Skill-personal.git
 
 # 2. 進入你的專案目錄，執行一鍵建置
 cd /path/to/your-project
-/path/to/Skill-personal/sp-init.bat
+/path/to/Skill-personal/setup/sp-init.bat
 ```
 
 完成後你的專案會多出：
@@ -138,7 +138,7 @@ Skill-personal (遠端倉庫)     ← 通用模板，跨專案共享
 
 ```bash
 # 檢查所有保護層是否就位
-/path/to/Skill-personal/sp-verify.bat /path/to/your-project
+/path/to/Skill-personal/setup/sp-verify.bat /path/to/your-project
 ```
 
 驗證項目：`.gitignore` 規則、hook 安裝、目錄結構、遠端連線。

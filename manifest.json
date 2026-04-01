@@ -103,23 +103,28 @@
   "resources": [
     {
       "name": "hooks",
-      "path": "hooks/pre-commit",
+      "path": "setup/hooks/pre-commit",
       "description": "Git pre-commit hook，防止 Skill 檔案誤入專案版控"
     },
     {
       "name": "templates",
-      "path": "templates/CLAUDE.md.template",
+      "path": "setup/templates/CLAUDE.md.template",
       "description": "CLAUDE.md 通用模板，sp-init.bat 建置時使用"
     },
     {
       "name": "sp-init.bat",
-      "path": "sp-init.bat",
+      "path": "setup/sp-init.bat",
       "description": "一鍵建置腳本：建立 .claude/skills/ + .skill_personal/ + CLAUDE.md + hook"
     },
     {
       "name": "sp-verify.bat",
-      "path": "sp-verify.bat",
+      "path": "setup/sp-verify.bat",
       "description": "環境驗證腳本：檢查所有保護層是否就位"
+    },
+    {
+      "name": "QUICKSTART",
+      "path": "docs/QUICKSTART.md",
+      "description": "面向協作使用者的快速上手指南"
     }
   ]
 }

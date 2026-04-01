@@ -3,13 +3,14 @@ setlocal enabledelayedexpansion
 
 REM ============================================================
 REM  Skill-personal project init script
-REM  Usage: sp-init.bat [project-path]
+REM  Usage: setup\sp-init.bat [project-path]
 REM  If no argument given, uses current directory as target
 REM ============================================================
 
-REM Get script directory (Skill-personal repo root)
+REM Get script directory (setup/) and repo root (parent)
 set "SCRIPT_DIR=%~dp0"
 set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
+for %%I in ("%SCRIPT_DIR%\..") do set "REPO_ROOT=%%~fI"
 
 REM Get target project path
 if "%~1"=="" (
@@ -23,7 +24,7 @@ echo ====================================================
 echo   Skill-personal Project Init
 echo ====================================================
 echo.
-echo   Source:  %SCRIPT_DIR%
+echo   Repo:    %REPO_ROOT%
 echo   Target:  %PROJECT_DIR%
 echo.
 
@@ -40,7 +41,7 @@ if not exist "%PROJECT_DIR%\.git" (
 )
 
 REM Prevent running in Skill-personal repo itself
-if "%PROJECT_DIR%"=="%SCRIPT_DIR%" (
+if "%PROJECT_DIR%"=="%REPO_ROOT%" (
     echo [ERROR] Cannot run this script inside the Skill-personal repo itself.
     echo         Run from the target project directory, or pass the project path as argument.
     exit /b 1
@@ -66,14 +67,14 @@ REM ============================
 echo [2/5] Copying skill files...
 
 set "SKILL_COUNT=0"
-for /d %%D in ("%SCRIPT_DIR%\*") do (
+for /d %%D in ("%REPO_ROOT%\*") do (
     call :CopySkill "%%D" "%%~nxD"
 )
 
 REM Copy root README.md to .claude/skills/ (init mode only)
 if "!MODE!"=="init" (
-    if exist "%SCRIPT_DIR%\README.md" (
-        copy /Y "%SCRIPT_DIR%\README.md" "%PROJECT_DIR%\.claude\skills\README.md" >nul 2>&1
+    if exist "%REPO_ROOT%\README.md" (
+        copy /Y "%REPO_ROOT%\README.md" "%PROJECT_DIR%\.claude\skills\README.md" >nul 2>&1
         echo       + README.md
     )
 )
@@ -88,7 +89,7 @@ echo [3/5] Setting up .skill_personal/ ...
 if exist "%PROJECT_DIR%\.skill_personal" (
     echo       .skill_personal/ already exists - skipped
 ) else (
-    xcopy "%SCRIPT_DIR%" "%PROJECT_DIR%\.skill_personal\" /E /I /Y /Q >nul 2>&1
+    xcopy "%REPO_ROOT%" "%PROJECT_DIR%\.skill_personal\" /E /I /Y /Q >nul 2>&1
     REM Re-init git and link to remote repo
     if exist "%PROJECT_DIR%\.skill_personal\.git" (
         rmdir /S /Q "%PROJECT_DIR%\.skill_personal\.git" 2>nul
@@ -142,7 +143,7 @@ set "HOOK_SRC=%SCRIPT_DIR%\hooks\pre-commit"
 set "HOOK_DST=%PROJECT_DIR%\.git\hooks\pre-commit"
 
 if not exist "!HOOK_SRC!" (
-    echo       WARN: hooks/pre-commit source not found - skipped
+    echo       WARN: setup/hooks/pre-commit source not found - skipped
     goto :DoneHook
 )
 
@@ -196,10 +197,10 @@ REM ============================
 set "SKILL_PATH=%~1"
 set "DIRNAME=%~2"
 
-REM Skip .git, hidden folders, hooks, templates
+REM Skip non-skill directories
 if "%DIRNAME%"==".git" exit /b 0
-if "%DIRNAME%"=="hooks" exit /b 0
-if "%DIRNAME%"=="templates" exit /b 0
+if "%DIRNAME%"=="setup" exit /b 0
+if "%DIRNAME%"=="docs" exit /b 0
 if "%DIRNAME:~0,1%"=="." exit /b 0
 
 if "!MODE!"=="init" (

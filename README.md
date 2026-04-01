@@ -87,10 +87,10 @@ A portable set of Claude Code skills that work with **any project**. No project-
 ```bash
 # 在目標專案資料夾中執行 sp-init.bat
 cd /path/to/your-project
-D:\git\Skill-personal\sp-init.bat
+D:\git\Skill-personal\setup\sp-init.bat
 
 # 或傳入專案路徑作為參數
-D:\git\Skill-personal\sp-init.bat D:\git\your-project
+D:\git\Skill-personal\setup\sp-init.bat D:\git\your-project
 ```
 
 sp-init.bat 會自動完成以下步驟：
@@ -288,43 +288,53 @@ These skills are designed to be project-agnostic. To customize for a specific pr
 ```
 Skill-personal/
 ├── README.md                       ← This file（含同步規則）
-├── sp-init.bat                     ← 一鍵建置腳本
-├── sp-verify.bat                   ← 環境驗證腳本
-├── templates/
-│   └── CLAUDE.md.template          ← CLAUDE.md 通用模板（sp-init.bat 使用）
-├── hooks/
-│   └── pre-commit                  ← Git pre-commit hook（防止 Skill 檔案誤入版控）
-├── commit-push/
-│   ├── README.md                   ← 提交與推送 — 功能說明
-│   └── SKILL.md                    ← Skill 定義與執行流程
-├── modify-log/
-│   ├── README.md                   ← 修改日誌 — 功能說明
-│   └── SKILL.md                    ← Skill 定義與日誌格式規範
-├── restart-eval/
-│   ├── README.md                   ← 服務重啟評估 — 功能說明
-│   └── SKILL.md                    ← Skill 定義與評估規則
-├── restart-volumn/
-│   ├── README.md                   ← 容器重啟與自動修復 — 功能說明
-│   └── SKILL.md                    ← Skill 定義與執行修復流程
-├── trace-flow/
-│   ├── README.md                   ← 資料流追蹤 — 功能說明
-│   └── SKILL.md                    ← Skill 定義與追蹤流程
-├── quality-check/
-│   ├── README.md                   ← 品質與影響檢查 — 功能說明
-│   └── SKILL.md                    ← Skill 定義與檢查項目
-├── report/
-│   ├── README.md                   ← 工作報告生成 — 功能說明
-│   └── SKILL.md                    ← Skill 定義與報告格式規範
-├── sys-info/
-│   ├── README.md                   ← 系統資訊查詢 — 功能說明
-│   └── SKILL.md                    ← Skill 定義與文件管理流程
-├── md-collab/
-│   ├── README.md                   ← Markdown 互動式協作 — 功能說明
-│   └── SKILL.md                    ← Skill 定義與協作流程
-├── context-guard/
-│   ├── README.md                   ← Context Window 管理 — 功能說明
-│   └── SKILL.md                    ← Skill 定義與管理流程
-└── skill-sync/
-    ├── README.md                   ← Skill 環境初始化 — 功能說明
-    └── SKILL.md                    ← Skill 定義與同步流程
+├── manifest.json                   ← Skill 結構索引（機器可讀）
+│
+├── setup/                          ← 建置與基礎設施
+│   ├── sp-init.bat                 ← 一鍵建置腳本
+│   ├── sp-verify.bat               ← 環境驗證腳本
+│   ├── hooks/
+│   │   └── pre-commit              ← Git pre-commit hook（防止 Skill 檔案誤入版控）
+│   └── templates/
+│       └── CLAUDE.md.template      ← CLAUDE.md 通用模板（sp-init.bat 使用）
+│
+├── docs/                           ← 使用者文件
+│   └── QUICKSTART.md               ← 快速上手指南
+│
+├── commit-push/                    ← 提交與推送
+│   ├── README.md
+│   └── SKILL.md
+├── context-guard/                  ← Context Window 管理
+│   ├── README.md
+│   └── SKILL.md
+├── md-collab/                      ← Markdown 互動式協作
+│   ├── README.md
+│   └── SKILL.md
+├── modify-log/                     ← 修改日誌
+│   ├── README.md
+│   └── SKILL.md
+├── quality-check/                  ← 品質與影響檢查
+│   ├── README.md
+│   └── SKILL.md
+├── report/                         ← 工作報告生成
+│   ├── README.md
+│   └── SKILL.md
+├── restart-eval/                   ← 服務重啟評估
+│   ├── README.md
+│   └── SKILL.md
+├── restart-volumn/                 ← 容器重啟與自動修復
+│   ├── README.md
+│   └── SKILL.md
+├── skill-sync/                     ← Skill 環境同步
+│   ├── README.md
+│   └── SKILL.md
+├── sys-info/                       ← 系統資訊查詢
+│   ├── README.md
+│   └── SKILL.md
+├── todo/                           ← AI 待辦事項處理
+│   ├── README.md
+│   └── SKILL.md
+└── trace-flow/                     ← 資料流追蹤
+    ├── README.md
+    └── SKILL.md
 ```
