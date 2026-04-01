@@ -192,9 +192,9 @@ Create or **overwrite** a README.md in the context summary directory, containing
 - Topic and date for each summary
 - Usage instructions (how to recover context, how to clean stale summaries)
 
-**9c. Execute /clear**
+**9c. Prompt user to execute /clear** ✗ Cannot be automated
 
-After summary is saved, execute `/clear` to free the context window.
-- No user confirmation needed (this is an automatic cleanup step of the commit-push workflow)
+`/clear` is a built-in CLI command that cannot be triggered programmatically by Claude.
+After summary is saved, prompt the user: "Summary saved. Recommend running `/clear` to free the context window."
 
 Arguments: $ARGUMENTS (optional commit message override)
