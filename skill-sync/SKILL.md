@@ -1,7 +1,7 @@
 ---
 name: skill-sync
 description: "Remote sync and rule evaluation only. Initial setup is handled by setup.bat, NOT this skill. (1) Sync skill_personal/ with remote (fetch → pull → merge → push). (2) Evaluate whether new CLAUDE.md/Memory rules should be added to skills or skill_personal/. Triggered when rules change or user calls /skill-sync."
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(cp *), Bash(mkdir *), Bash(date *)
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(cp *), Bash(mkdir *), Bash(date *), Bash(bash *)
 ---
 
 # Skill Sync — 遠端同步、規則評估
@@ -48,39 +48,26 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(cp *
 
 **觸發條件**：每次對話開始時、操作 `skill_personal/` 前
 
-### 步驟
+### 執行方式
 
-1. **Fetch 遠端**
-   ```bash
-   cd skill_personal && git fetch origin
-   ```
+**直接執行自動化腳本：**
+```bash
+bash skill_personal/setup/sp-sync.sh
+```
 
-2. **比較本地與遠端**
-   ```bash
-   git log HEAD..origin/main --oneline
-   git log origin/main..HEAD --oneline
-   ```
+腳本會自動完成以下所有步驟：
+1. `git fetch origin` — 取得遠端更新
+2. 比較本地與遠端 commit 差異
+3. 若有更新 → `git pull --rebase origin main`
+4. 逐一比對 `skill_personal/` 與 `.claude/skills/` 下每個 skill 的 SKILL.md / README.md
+5. 自動複製新增或有差異的 skill 到 `.claude/skills/`
+6. 輸出同步摘要（Added / Updated / No change）
 
-3. **若不同步 — Pull 並揉合**
-   ```bash
-   git pull --rebase origin main
-   ```
-   - 若有衝突：分析雙方內容，保留兩方有效規則，移除重複
-   - 揉合原則：
-     - 新增的規則 → 保留
-     - 修改的規則 → 取較新或較完整的版本
-     - 刪除的規則 → 確認是否為有意移除
-   - 揉合完成後 commit
+### 腳本無法處理的情況（需手動介入）
 
-4. **Push 至遠端**
-   ```bash
-   git push origin main
-   ```
-   - 若 push 失敗 → 提示使用者手動處理
-
-5. **反向同步至 skill_personal/**
-   - 若遠端有 `skill_personal/` 缺少的更新（來自其他專案的回流）
-   - 將差異合併回當前專案的 `skill_personal/`
+- **Pull 衝突**：腳本會中止並提示，需手動 resolve 後重新執行
+- **新增 skill**：腳本會複製檔案，但需手動更新 CLAUDE.md「Available Skills」清單
+- **Push 本地變更**：腳本不會自動 push，需確認後手動執行 `cd skill_personal && git push origin main`
 
 ---
 
