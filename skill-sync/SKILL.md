@@ -88,6 +88,19 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(cp *
 
 **觸發條件**：新增規則至 CLAUDE.md 或 Memory 時
 
+### 強制執行約束
+
+> **寫入 Memory 時，必須在同一回覆中完成三向連動評估與執行。**
+> 不可僅寫入 Memory 就結束，不可拆成多步，不可等使用者提醒。
+>
+> Memory 記錄的多數為使用者開發習慣與行為偏好，這些偏好具備跨專案通用性。
+> 僅存在 Memory 中的規則只對當前專案有效，無法隨 skill_personal 帶到新專案。
+>
+> **每次寫入 Memory 後立即判斷：**
+> 1. 是否為可重複套用的行為約束或流程規則？ → 同步更新 CLAUDE.md
+> 2. 是否具備跨專案通用性？ → 回流至 `skill_personal/` 模板並推送遠端
+> 3. 是否僅適用當前專案？ → 僅 Memory，不回流
+
 ### 評估決策樹
 
 ```
