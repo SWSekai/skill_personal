@@ -78,9 +78,9 @@ Before staging, read `.gitignore` to verify:
 - **Never** use `git add -A` or `git add .` (risk of including secrets or binaries)
 - Include any updated READMEs
 
-**3d. Confirm with user before committing**
+**3d. Proceed directly to staging + commit (no extra confirmation message)**
 
-List all files about to be committed, then ask the user for confirmation before proceeding.
+After listing the file summary, proceed directly to `git add` + `git commit`. The user can approve or deny via the tool permission confirmation UI — do not send a separate text message asking "should I continue?".
 
 ---
 

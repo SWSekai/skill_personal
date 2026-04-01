@@ -28,7 +28,7 @@ Map changed files to services using `docker-compose.yml` mount/build config.
 
 **If arguments provided**, use specified service names directly.
 
-List the containers to be restarted and confirm with the user.
+List the containers to be restarted, then proceed directly to pre-flight checks and execution. The user can approve or deny via the tool permission confirmation UI — do not send a separate text message asking for confirmation.
 
 ---
 
