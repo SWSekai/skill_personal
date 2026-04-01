@@ -1,0 +1,232 @@
+#!/bin/bash
+# ============================================================
+# sp-pack.sh — 專案打包：收集 AI 上下文 → 清除 skill 環境
+# 用法：bash skill_personal/setup/sp-pack.sh
+#
+# 流程：
+#   1. 收集 AI 上下文到 .local/ai-context/
+#   2. 比對找出專案專屬 skill，保存到 project-skills/
+#   3. 刪除 .claude/skills/、skill_personal/、CLAUDE.md
+#   4. 產生 manifest.txt
+# ============================================================
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_DIR="$(cd "$SP_DIR/.." && pwd)"
+SKILLS_DIR="$PROJECT_DIR/.claude/skills"
+AI_CONTEXT="$PROJECT_DIR/.local/ai-context"
+TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+GIT_HASH=$(cd "$PROJECT_DIR" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+
+# Memory 路徑（Windows Claude Code 預設位置）
+# 嘗試多種可能的路徑格式
+MEMORY_DIR=""
+for candidate in \
+    "$HOME/.claude/projects/D--cm-wip_setup/memory" \
+    "$HOME/.claude/projects/D--cm_wip_setup/memory" \
+    "$HOME/.claude/projects/D--cm-wip-setup/memory" \
+    "$USERPROFILE/.claude/projects/D--cm-wip_setup/memory" \
+    "$USERPROFILE/.claude/projects/D--cm_wip_setup/memory" \
+    "$USERPROFILE/.claude/projects/D--cm-wip-setup/memory"; do
+    if [ -d "$candidate" ] 2>/dev/null; then
+        MEMORY_DIR="$candidate"
+        break
+    fi
+done
+
+echo ""
+echo "========================================"
+echo " sp-pack — 專案打包工具"
+echo "========================================"
+echo ""
+echo "[INFO] 專案目錄  : $PROJECT_DIR"
+echo "[INFO] 打包目標  : $AI_CONTEXT"
+echo "[INFO] Git hash  : $GIT_HASH"
+echo "[INFO] 時間      : $TIMESTAMP"
+echo ""
+
+# --- 安全確認 ---
+echo "[WARN] 此操作將："
+echo "       1. 收集 AI 上下文到 .local/ai-context/"
+echo "       2. 刪除 .claude/skills/ 目錄"
+echo "       3. 刪除 skill_personal/ 目錄"
+echo "       4. 刪除 CLAUDE.md"
+echo ""
+read -p "確認執行？(y/N) " confirm
+if [[ ! "$confirm" =~ ^[yY]$ ]]; then
+    echo "[ABORT] 使用者取消"
+    exit 0
+fi
+
+echo ""
+
+# --- Step 1: 清理舊的打包 ---
+if [ -d "$AI_CONTEXT" ]; then
+    echo "[Step 0] 清理舊的 ai-context/..."
+    rm -rf "$AI_CONTEXT"
+fi
+
+mkdir -p "$AI_CONTEXT"
+
+# --- Step 2: 收集 CLAUDE.md ---
+echo "[Step 1] 收集 CLAUDE.md..."
+if [ -f "$PROJECT_DIR/CLAUDE.md" ]; then
+    cp "$PROJECT_DIR/CLAUDE.md" "$AI_CONTEXT/CLAUDE.md"
+    echo "  [OK] CLAUDE.md"
+else
+    echo "  [SKIP] CLAUDE.md 不存在"
+fi
+
+# --- Step 3: 收集 .local/ 子目錄 ---
+echo "[Step 2] 收集 .local/ 工作紀錄..."
+for subdir in docs logs summary reports; do
+    src="$PROJECT_DIR/.local/$subdir"
+    if [ -d "$src" ] && [ "$(ls -A "$src" 2>/dev/null)" ]; then
+        cp -r "$src" "$AI_CONTEXT/$subdir"
+        count=$(find "$AI_CONTEXT/$subdir" -type f | wc -l)
+        echo "  [OK] $subdir/ ($count 檔案)"
+    else
+        echo "  [SKIP] $subdir/ (空或不存在)"
+    fi
+done
+
+# --- Step 4: 收集 Memory ---
+echo "[Step 3] 收集 Memory..."
+if [ -n "$MEMORY_DIR" ] && [ -d "$MEMORY_DIR" ]; then
+    mkdir -p "$AI_CONTEXT/memory"
+    cp "$MEMORY_DIR"/*.md "$AI_CONTEXT/memory/" 2>/dev/null || true
+    count=$(find "$AI_CONTEXT/memory" -type f | wc -l)
+    echo "  [OK] memory/ ($count 檔案) ← $MEMORY_DIR"
+else
+    echo "  [SKIP] Memory 目錄未找到"
+fi
+
+# --- Step 5: 收集全部 skills 快照 ---
+echo "[Step 4] 收集 skills 快照..."
+if [ -d "$SKILLS_DIR" ]; then
+    mkdir -p "$AI_CONTEXT/skills"
+    for skill_dir in "$SKILLS_DIR"/*/; do
+        [ ! -d "$skill_dir" ] && continue
+        skill_name=$(basename "$skill_dir")
+        mkdir -p "$AI_CONTEXT/skills/$skill_name"
+        cp "$skill_dir"/*.md "$AI_CONTEXT/skills/$skill_name/" 2>/dev/null || true
+    done
+    skill_count=$(find "$AI_CONTEXT/skills" -mindepth 1 -maxdepth 1 -type d | wc -l)
+    echo "  [OK] skills/ ($skill_count 個 skill)"
+fi
+
+# --- Step 6: 比對找出專案專屬 skill ---
+echo "[Step 5] 偵測專案專屬 skill..."
+PROJECT_SKILL_COUNT=0
+
+if [ -d "$SKILLS_DIR" ] && [ -d "$SP_DIR" ]; then
+    mkdir -p "$AI_CONTEXT/project-skills"
+    for skill_dir in "$SKILLS_DIR"/*/; do
+        [ ! -d "$skill_dir" ] && continue
+        skill_name=$(basename "$skill_dir")
+
+        # 如果 skill_personal/ 沒有同名目錄 → 專案專屬
+        if [ ! -d "$SP_DIR/$skill_name" ]; then
+            cp -r "$skill_dir" "$AI_CONTEXT/project-skills/$skill_name"
+            echo "  [SAVE] $skill_name (專案專屬)"
+            PROJECT_SKILL_COUNT=$((PROJECT_SKILL_COUNT + 1))
+        fi
+    done
+
+    if [ "$PROJECT_SKILL_COUNT" -eq 0 ]; then
+        rmdir "$AI_CONTEXT/project-skills" 2>/dev/null || true
+        echo "  [INFO] 無專案專屬 skill"
+    fi
+else
+    echo "  [SKIP] 無法比對（目錄不存在）"
+fi
+
+# --- Step 7: 收集 .claude/settings.local.json ---
+echo "[Step 6] 收集 Claude 設定..."
+if [ -f "$PROJECT_DIR/.claude/settings.local.json" ]; then
+    cp "$PROJECT_DIR/.claude/settings.local.json" "$AI_CONTEXT/settings.local.json"
+    echo "  [OK] settings.local.json"
+else
+    echo "  [SKIP] settings.local.json 不存在"
+fi
+
+# --- Step 8: 產生 manifest.txt ---
+echo "[Step 7] 產生 manifest.txt..."
+cat > "$AI_CONTEXT/manifest.txt" << MANIFEST
+================================================================
+ AI Context Pack — 打包資訊
+================================================================
+
+打包時間    : $TIMESTAMP
+Git commit  : $GIT_HASH
+專案目錄    : $PROJECT_DIR
+打包工具    : sp-pack.sh
+
+----------------------------------------------------------------
+ 收集內容
+----------------------------------------------------------------
+$(find "$AI_CONTEXT" -type f | sort | sed "s|$AI_CONTEXT/||")
+
+----------------------------------------------------------------
+ 專案專屬 Skill（已保存至 project-skills/）
+----------------------------------------------------------------
+$(if [ -d "$AI_CONTEXT/project-skills" ]; then
+    ls "$AI_CONTEXT/project-skills" 2>/dev/null || echo "(無)"
+else
+    echo "(無)"
+fi)
+
+----------------------------------------------------------------
+ 還原指引
+----------------------------------------------------------------
+1. 執行 skill_personal/setup/sp-init.bat 重建 skill 環境
+2. 執行 bash skill_personal/setup/sp-sync.sh 同步最新 skill
+3. 將 project-skills/ 內容複製回 .claude/skills/
+4. 將 CLAUDE.md 複製回專案根目錄
+5. Memory 檔案複製回 ~/.claude/projects/.../memory/
+================================================================
+MANIFEST
+echo "  [OK] manifest.txt"
+
+# --- Step 9: 刪除 skill 環境 ---
+echo ""
+echo "[Step 8] 清除 skill 環境..."
+
+# 刪除 .claude/skills/
+if [ -d "$SKILLS_DIR" ]; then
+    rm -rf "$SKILLS_DIR"
+    echo "  [DEL] .claude/skills/"
+fi
+
+# 刪除 skill_personal/（先確認不在其中工作）
+cd "$PROJECT_DIR"
+if [ -d "$SP_DIR" ]; then
+    rm -rf "$SP_DIR"
+    echo "  [DEL] skill_personal/"
+fi
+
+# 刪除 CLAUDE.md
+if [ -f "$PROJECT_DIR/CLAUDE.md" ]; then
+    rm "$PROJECT_DIR/CLAUDE.md"
+    echo "  [DEL] CLAUDE.md"
+fi
+
+# --- Summary ---
+echo ""
+echo "========================================"
+echo " 打包完成"
+echo "========================================"
+echo ""
+echo "  AI 上下文已保存至: .local/ai-context/"
+echo "  專案專屬 skill   : $PROJECT_SKILL_COUNT 個"
+echo ""
+echo "  已清除："
+echo "    - .claude/skills/"
+echo "    - skill_personal/"
+echo "    - CLAUDE.md"
+echo ""
+echo "  還原方式請參閱: .local/ai-context/manifest.txt"
+echo ""
+echo "[DONE]"
