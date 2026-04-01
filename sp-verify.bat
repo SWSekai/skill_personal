@@ -1,10 +1,9 @@
 @echo off
-chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
 
 REM ============================================================
-REM  skill_personal environment verification
-REM  Usage: verify.bat [project-path]
+REM  Skill-personal environment verification
+REM  Usage: sp-verify.bat [project-path]
 REM  Checks that all protection layers are in place
 REM ============================================================
 
@@ -33,7 +32,7 @@ if not exist "!GI!" (
     set /a FAIL+=1
 ) else (
     set "GI_OK=1"
-    for %%E in (".claude/" "skill_personal/" ".local/") do (
+    for %%E in (".claude/" ".skill_personal/" ".hanschen/") do (
         findstr /B /C:%%E "!GI!" >nul 2>&1
         if errorlevel 1 (
             echo       FAIL: %%~E not in .gitignore
@@ -42,7 +41,7 @@ if not exist "!GI!" (
         )
     )
     if "!GI_OK!"=="1" (
-        echo       PASS: .claude/ skill_personal/ .local/ all present
+        echo       PASS: .claude/ .skill_personal/ .hanschen/ all present
         set /a PASS+=1
     )
 )
@@ -73,13 +72,13 @@ if not exist "%PROJECT_DIR%\.claude\skills" (
     set /a PASS+=1
 )
 
-REM --- Check 4: skill_personal/ exists ---
-echo [Check 4] skill_personal/ directory...
-if not exist "%PROJECT_DIR%\skill_personal" (
-    echo       FAIL: skill_personal/ not found
+REM --- Check 4: .skill_personal/ exists ---
+echo [Check 4] .skill_personal/ directory...
+if not exist "%PROJECT_DIR%\.skill_personal" (
+    echo       FAIL: .skill_personal/ not found
     set /a FAIL+=1
 ) else (
-    echo       PASS: skill_personal/ exists
+    echo       PASS: .skill_personal/ exists
     set /a PASS+=1
 )
 
@@ -97,7 +96,6 @@ REM --- Check 6: git staging test ---
 echo [Check 6] Git staging protection test...
 if exist "%PROJECT_DIR%\.git" (
     pushd "%PROJECT_DIR%"
-    REM Try to add a test file under .claude/ and verify git ignores it
     mkdir ".claude\__verify_test__" 2>nul
     echo test > ".claude\__verify_test__\test.txt"
     git add ".claude/__verify_test__/test.txt" >nul 2>&1
@@ -116,18 +114,13 @@ if exist "%PROJECT_DIR%\.git" (
     echo       SKIP: not a git repository
 )
 
-REM --- Check 7: .local/ working directories ---
-echo [Check 7] .local/ working directories...
-set "LOCAL_OK=1"
-for %%D in (logs docs summary reports) do (
-    if not exist "%PROJECT_DIR%\.local\%%D" (
-        echo       WARN: .local/%%D/ not found
-        set "LOCAL_OK=0"
-        set /a WARN+=1
-    )
-)
-if "!LOCAL_OK!"=="1" (
-    echo       PASS: .local/ directories exist
+REM --- Check 7: .hanschen/ working directory ---
+echo [Check 7] .hanschen/ working directory...
+if not exist "%PROJECT_DIR%\.hanschen" (
+    echo       WARN: .hanschen/ not found
+    set /a WARN+=1
+) else (
+    echo       PASS: .hanschen/ exists
     set /a PASS+=1
 )
 
@@ -139,8 +132,8 @@ echo ====================================================
 echo.
 
 if !FAIL! GTR 0 (
-    echo   Run setup.bat to fix issues:
-    echo     skill_personal\setup.bat "%PROJECT_DIR%"
+    echo   Run sp-init.bat to fix issues:
+    echo     Skill-personal\sp-init.bat "%PROJECT_DIR%"
     echo.
     exit /b 1
 )

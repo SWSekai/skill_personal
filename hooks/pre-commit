@@ -1,10 +1,10 @@
 #!/bin/sh
 # =============================================================
 #  Pre-commit hook: block skill/config files from project commits
-#  Installed by Skill-personal/setup.bat
+#  Installed by Skill-personal/sp-init.bat
 # =============================================================
 
-BLOCKED_PATTERNS=".claude/ skill_personal/ Skill-personal/ CLAUDE.md"
+BLOCKED_PATTERNS=".claude/ .skill_personal/ Skill-personal/ CLAUDE.md .hanschen/"
 
 # Get list of staged files
 STAGED=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null)

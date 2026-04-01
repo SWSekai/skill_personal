@@ -1,0 +1,79 @@
+# {{PROJECT_NAME}} — Claude Code 專案規範
+
+## 語言與格式
+- Commit 訊息、修改日誌、README：**繁體中文**
+- Commit prefix：`feat:`, `fix:`, `ui:`, `docs:`, `refactor:`
+- 所有 commit 附加：`Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
+
+## 核心行為規則
+
+### 1. 每次修改前 — 影響評估
+- 主動檢查改動對現有功能、架構的影響或衝突
+- 主動提出潛在風險（向下相容、競態條件、資料遺失）
+- 若無風險，明確說明「無潛在風險」
+
+### 2. 每次修改後 — 品質檢查
+- 掃描冗餘程式碼、死碼、未使用的 import
+- 驗證是否符合專案現有設計模式
+- 檢查 JSON 序列化風險
+
+### 3. 每次 Commit 前 — 自動化日誌
+- **必須**建立修改紀錄
+- 必備欄位：日期時間、版本號、更動原因、檔案影響行數、影響範圍、容器重啟需求
+
+### 4. .skill_personal/ 禁止加入專案版控，變更須推送至獨立倉庫
+- `.skill_personal/` 已加入 `.gitignore`，**絕對不可**使用 `git add -f` 或任何方式加入專案版控
+- `.skill_personal/` 屬於 `Skill-personal` 遠端倉庫，僅透過該倉庫管理
+- **每次修改 `.skill_personal/` 內容後，必須同步推送至 Skill-personal 倉庫**
+
+### 5. 每次 Commit 前 — .gitignore 安全檢查與狀態總覽
+- 讀取 `.gitignore`，確認即將 stage 的檔案不在忽略清單中
+- 列出所有待處理狀態：未暫存修改、已暫存未 commit、已 commit 未 push
+- 向使用者確認後才執行 commit
+
+### 6. 每次 Commit 後 — 容器重啟評估
+- 根據改動檔案列出需重啟的容器及指令
+
+### 7. README 維護
+- 具備功能的資料夾下必須有 `README.md`
+- 新增任何資料夾時，必須同步建立 `README.md`
+- Commit 時若改動影響目錄結構或功能，主動更新對應 README
+
+### 8. Skill 動態更新
+- 當對話中出現新規則或偏好時，主動詢問是否更新至 Skill 規範
+- 獲得確認後修改 `.claude/skills/` 對應文件
+
+### 9. Memory、Skill、.skill_personal 三向連動
+- 寫入 Memory 時，評估是否應同步加入 Skill
+- 更新 `.claude/skills/` 或 Memory 時，評估是否應回流至 `.skill_personal/`
+- `.skill_personal/` 更新後，自動同步至 `../Skill-personal/`
+
+### 10. 新增 Skill 後 — 完整性檢查
+- Skill 資料夾包含 `SKILL.md` 和 `README.md`
+- `.claude/skills/README.md` 已更新
+- `.skill_personal/` 對應資料夾已同步
+- CLAUDE.md 可用 Skills 列表已更新
+
+### 11. 新專案自動初始化 Skill
+- 進入新專案時，自動偵測並初始化 Skill 環境
+- 觸發 `/skill-sync` 執行完整初始化流程
+
+### 12. .skill_personal 遠端同步與衝突處理
+- 每次對話開始時自動同步
+- 觸發 `/skill-sync` 執行遠端同步流程
+
+### 13. 資訊查詢時主動建立文件
+- 被詢問系統架構、功能、資料流等問題時，自動觸發 `/sys-info`
+
+### 14. 對話中主動記錄關鍵資訊
+- 對話過程中若經評估含有功能相關的關鍵資訊，主動寫入記錄檔
+- 關鍵資訊範例：資料庫名稱、collection/table 名稱、待開發功能、API 端點、環境變數、業務規則、第三方服務等
+
+## 可用 Skills
+- `/commit-push` — 提交推送（含品質檢查、日誌、README 更新、容器評估）
+- `/modify-log` — 建立修改日誌（commit 前自動觸發）
+- `/restart-eval` — 容器重啟評估（commit 後自動觸發）
+- `/trace-flow` — 資料流端到端追蹤
+- `/quality-check` — 程式碼品質與影響檢查（commit 前自動觸發）
+- `/sys-info` — 系統資訊查詢與文件管理
+- `/skill-sync` — Skill 環境初始化、遠端同步、規則評估（對話開始時自動觸發）

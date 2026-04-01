@@ -13,7 +13,7 @@ A portable set of Claude Code skills that work with **any project**. No project-
 | 路徑 | 版控歸屬 | 說明 |
 |------|---------|------|
 | `.claude/skills/` | 不入版控 | 專案專屬 Skill，僅本地使用 |
-| `skill_personal/` / `.skill_personal/` | **本倉庫** | 通用 Skill 模板，透過本遠端倉庫管理 |
+| `.skill_personal/` | **本倉庫** | 通用 Skill 模板，透過本遠端倉庫管理 |
 | `CLAUDE.md` | 不入版控 | Claude Code 專案規範，僅本地使用 |
 | 修改日誌目錄 | 不入版控 | 本地工作紀錄 |
 
@@ -33,49 +33,49 @@ A portable set of Claude Code skills that work with **any project**. No project-
 1. 檢查該專案是否已有 `.claude/skills/` 資料夾
 2. 若**無**專案專屬 Skill → 自動複製一份至 `.claude/skills/`，並根據專案特性進行客製化調整（如：修改日誌路徑、服務名稱、commit 慣例、語言偏好）
 3. 若**已有**專案專屬 Skill → 比對通用版與專案版的差異，將通用版的新功能或修正合併至專案版（保留專案特化的設定）
-4. **`skill_personal` 僅作為通用模板持續更新**，不直接作為專案執行用 Skill
-5. **確保 `.gitignore` 排除 `CLAUDE.md`、`.claude/skills/`、`skill_personal/`、修改日誌目錄**
+4. **`.skill_personal` 僅作為通用模板持續更新**，不直接作為專案執行用 Skill
+5. **確保 `.gitignore` 排除 `CLAUDE.md`、`.claude/skills/`、`.skill_personal/`、修改日誌目錄**
 
 ### 規則 2：專案 Skill 更新回流至通用版
 
 當在專案中對 `.claude/skills/` 進行改進時：
 
 1. 判斷該改進是否為**通用性改進**（適用於所有專案）或**專案特化修正**（僅適用於當前專案）
-2. 若為**通用性改進**（如：新增檢查項目、改善流程邏輯、修正 Skill 缺陷）→ 同步更新回 `skill_personal/` 及遠端倉庫
+2. 若為**通用性改進**（如：新增檢查項目、改善流程邏輯、修正 Skill 缺陷）→ 同步更新回 `.skill_personal/` 及遠端倉庫
 3. 若為**專案特化修正**（如：特定路徑、服務名稱、專案慣例）→ **不回流**，僅保留在專案的 `.claude/skills/` 中
 4. 回流更新時，移除所有專案特定的硬編碼，確保通用性
 5. **Skill 變更不進入專案版控**，僅透過本遠端倉庫管理
 
 ### 規則 3：自動同步至遠端倉庫
 
-- **遠端倉庫地址**：`https://github.com/SWSekai/skill_personal.git`
-- **本地路徑**：專案內的 `skill_personal/`（自身即為 git repo）
-- **同步時機**：每次 `skill_personal/` 有任何更新時，自動執行以下流程：
-  1. 進入 `skill_personal/` 目錄
-  2. 在 `skill_personal/` 中 stage、commit（訊息與當前專案 commit 對應）
-  3. Push 至遠端 `https://github.com/SWSekai/skill_personal.git`
+- **遠端倉庫地址**：`https://github.com/SWSekai/Skill-personal.git`
+- **本地路徑**：專案內的 `.skill_personal/`（自身即為 git repo）
+- **同步時機**：每次 `.skill_personal/` 有任何更新時，自動執行以下流程：
+  1. 進入 `.skill_personal/` 目錄
+  2. 在 `.skill_personal/` 中 stage、commit（訊息與當前專案 commit 對應）
+  3. Push 至遠端 `https://github.com/SWSekai/Skill-personal.git`
   4. 若 push 失敗，提示使用者手動處理
 
 ### 規則 4：新專案自動初始化
 
 當 Claude 進入一個新專案目錄時：
 
-1. 檢查是否存在 `skill_personal/`（專案內，自身為 git repo）
+1. 檢查是否存在 `.skill_personal/`（專案內，自身為 git repo）
 2. 若存在但專案**沒有** `.claude/skills/` → 自動建立 `.claude/skills/` 並從模板複製
 3. 根據專案特性客製化（路徑、服務名稱、commit 慣例、語言偏好）
-4. 若 `skill_personal/` 尚未初始化為 git repo → 執行 `git init` 並 `git remote add origin https://github.com/SWSekai/skill_personal.git`
+4. 若 `.skill_personal/` 尚未初始化為 git repo → 執行 `git init` 並 `git remote add origin https://github.com/SWSekai/Skill-personal.git`
 5. **確保 `.gitignore` 排除所有 Claude Code 相關檔案**
 6. 初始化完成後執行 Skill 完整性檢查
 
 ### 規則 5：自動偵測遠端差異並同步
 
-每次對話開始時（或操作 `skill_personal/` 前）：
+每次對話開始時（或操作 `.skill_personal/` 前）：
 
-1. 進入 `skill_personal/` 執行 `git fetch origin`
+1. 進入 `.skill_personal/` 執行 `git fetch origin`
 2. 比較本地 `HEAD` 與 `origin/main`，若不同步則 `git pull --rebase origin main`
 3. 若有衝突，揉合本地與遠端規則（保留雙方有效內容，移除重複）
 4. 揉合完成後 commit 並 `git push origin main`
-5. 若遠端有 `skill_personal/` 缺少的更新，自動合併回專案內的 `skill_personal/`
+5. 若遠端有 `.skill_personal/` 缺少的更新，自動合併回專案內的 `.skill_personal/`
 6. 若 push 失敗，提示使用者手動處理
 
 ---
@@ -85,18 +85,19 @@ A portable set of Claude Code skills that work with **any project**. No project-
 ### 方法 1：一鍵建置（推薦）
 
 ```bash
-# 在目標專案資料夾中執行 setup.bat
+# 在目標專案資料夾中執行 sp-init.bat
 cd /path/to/your-project
-D:\git\skill_personal\setup.bat
+D:\git\Skill-personal\sp-init.bat
 
 # 或傳入專案路徑作為參數
-D:\git\skill_personal\setup.bat D:\git\your-project
+D:\git\Skill-personal\sp-init.bat D:\git\your-project
 ```
 
-setup.bat 會自動完成以下步驟：
+sp-init.bat 會自動完成以下步驟：
 1. 建立 `.claude/skills/` 並複製所有 Skill
-2. 建立 `skill_personal/` 作為通用模板同步用
+2. 建立 `.skill_personal/` 作為通用模板同步用
 3. 生成 `CLAUDE.md` 專案規範（含所有核心行為規則）
+4. 安裝 pre-commit hook（防止 Skill 檔案誤入專案版控）
 
 ### 方法 2：手動複製
 
@@ -122,7 +123,7 @@ cp -r skill_personal/* ~/.claude/skills/
 | **quality-check** | `/quality-check [files]` | Code quality audit: dead code, redundancy, impact, architecture, security |
 | **report** | `/report [range]` | Generate concise work report from modify logs for 2-3 min presentations |
 | **sys-info** | `/sys-info [question]` | System info query & documentation lifecycle management |
-| **skill-sync** | `/skill-sync` | Auto-init skill environment, sync skill_personal remote, evaluate rule placement |
+| **skill-sync** | `/skill-sync` | Auto-init skill environment, sync .skill_personal remote, evaluate rule placement |
 | **md-collab** | `/md-collab [topic]` | Generate structured Markdown with checkboxes/tables for interactive decision-making |
 | **context-guard** | `/context-guard` | Monitor context window usage, auto-summarize & suggest /clear when exceeding 40% |
 
@@ -184,7 +185,7 @@ cp -r skill_personal/* ~/.claude/skills/
 - 安全性掃描（OWASP Top 10）
 - 風險報告（High / Medium / Low）
 - Skill 自我更新建議
-- Skill 完整性檢查（README、skill_personal 同步、CLAUDE.md 更新）
+- Skill 完整性檢查（README、.skill_personal 同步、CLAUDE.md 更新）
 
 ### `/report [範圍]` — 工作報告生成
 
@@ -213,9 +214,9 @@ cp -r skill_personal/* ~/.claude/skills/
 ### `/skill-sync` — Skill 環境初始化、遠端同步、規則評估
 
 對話開始時自動觸發，確保 Skill 環境就緒：
-- **自動初始化**：偵測缺少 `.claude/skills/` 的專案，從模板建立並生成 CLAUDE.md
-- **遠端同步**：檢查 `skill_personal/` 與遠端差異，pull → 揉合 → push
-- **規則評估**：新增至 CLAUDE.md 或 Memory 的規則，評估是否應納入 Skill 或 skill_personal
+- **自動初始化**：偵測缺少 `.claude/skills/` 的專案，從 .skill_personal 模板建立並生成 CLAUDE.md
+- **遠端同步**：檢查 `.skill_personal/` 與遠端差異，pull → 揉合 → push
+- **規則評估**：新增至 CLAUDE.md 或 Memory 的規則，評估是否應納入 Skill 或 .skill_personal
 
 ---
 
@@ -254,7 +255,7 @@ cp -r skill_personal/* ~/.claude/skills/
 
 | Skill | 檔案說明 | 存放位置 | 備註 |
 |-------|----------|----------|------|
-| skill-sync | `.claude/skills/` 各 `SKILL.md` | `.claude/skills/[name]/SKILL.md` | 同步至 `skill_personal` remote |
+| skill-sync | `.claude/skills/` 各 `SKILL.md` | `.claude/skills/[name]/SKILL.md` | 同步至 `.skill_personal` remote |
 | skill-sync | `CLAUDE.md` 規則更新 | 專案根目錄 `CLAUDE.md` | 僅在規則評估需要時更新 |
 | quality-check | Skill 定義更新（條件觸發） | `.claude/skills/` | 僅在修改 Skill 定義時觸發 |
 
@@ -285,9 +286,14 @@ These skills are designed to be project-agnostic. To customize for a specific pr
 ## Directory Structure / 目錄結構
 
 ```
-skill_personal/
+Skill-personal/
 ├── README.md                       ← This file（含同步規則）
-├── setup.bat                       ← 一鍵建置腳本
+├── sp-init.bat                     ← 一鍵建置腳本
+├── sp-verify.bat                   ← 環境驗證腳本
+├── templates/
+│   └── CLAUDE.md.template          ← CLAUDE.md 通用模板（sp-init.bat 使用）
+├── hooks/
+│   └── pre-commit                  ← Git pre-commit hook（防止 Skill 檔案誤入版控）
 ├── commit-push/
 │   ├── README.md                   ← 提交與推送 — 功能說明
 │   └── SKILL.md                    ← Skill 定義與執行流程
