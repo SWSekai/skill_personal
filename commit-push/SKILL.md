@@ -148,6 +148,12 @@ git push
 
 3. If push fails, inform the user and continue — do not block the main workflow.
 
+4. **If any SKILL.md or README.md was added/modified**, auto-update `manifest.json` and `QUICKSTART.md`:
+   - Read `manifest.json`, update the changed skill's entry (or add new entry)
+   - Update the skill count comment and date in `QUICKSTART.md`
+   - If a new skill was added, add its row to the command table in `QUICKSTART.md`
+   - Include these updates in the same commit
+
 If no `skill_personal/` files were changed, skip this step.
 
 ---
