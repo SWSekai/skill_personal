@@ -168,4 +168,33 @@ If the project uses Docker / containers / services, determine which need restart
 
 If the project has no containerization, skip this step.
 
+---
+
+### Step 9: Context cleanup & summary (auto-execute)
+
+After the commit-push workflow completes (including modify log creation), proactively manage context:
+
+**9a. Execute context-guard summary**
+
+Follow context-guard Skill Step 2~3 logic to create or merge a summary:
+
+1. Check if `.local/context_summary/` (or equivalent) already has a **same-day same-topic** summary:
+   - Yes → merge (append new commit info to existing summary)
+   - No → create new summary `YYMMDD_HHMM_TopicDescription.md`
+2. Update `current_topic.md` with the current work topic
+3. Summary content follows context-guard format: in-progress work, completed work, uncommitted changes, pending items, key decisions, container restart needs
+
+**9b. Create README.md (for user reference)**
+
+Create or **overwrite** a README.md in the context summary directory, containing:
+- Purpose of the directory
+- List of existing summary files (scan the directory)
+- Topic and date for each summary
+- Usage instructions (how to recover context, how to clean stale summaries)
+
+**9c. Execute /clear**
+
+After summary is saved, execute `/clear` to free the context window.
+- No user confirmation needed (this is an automatic cleanup step of the commit-push workflow)
+
 Arguments: $ARGUMENTS (optional commit message override)

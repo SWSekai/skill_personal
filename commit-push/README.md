@@ -2,7 +2,7 @@
 
 ## 功能概述
 
-完整的 Git 提交流程自動化，依序執行品質檢查、修改日誌、README 更新、暫存、提交、推送、服務重啟評估共七個步驟。
+完整的 Git 提交流程自動化，依序執行品質檢查、修改日誌、README 更新、暫存、提交、推送、服務重啟評估、Context 清理共九個步驟。
 
 ## 目錄結構
 
@@ -29,6 +29,8 @@ commit-push/
 | 5. 提交 | 自動偵測專案 commit 訊息慣例，使用 HEREDOC 格式撰寫多行訊息 |
 | 6. 推送 | 執行 `git push`，失敗時提示使用者手動處理 |
 | 7. 重啟評估 | 讀取 `docker-compose.yml` 分析掛載方式，列出需重啟的服務與指令 |
+| 8. skill_personal 同步 | 若有 skill_personal 異動，同步至遠端倉庫 |
+| 9. Context 清理 | 自動執行 context-guard 摘要、建立 README、執行 /clear |
 
 ## 特性
 
@@ -41,6 +43,6 @@ commit-push/
 
 ## Overview (English)
 
-Automated Git commit workflow executing 7 sequential steps: quality check → modify log → README update → stage → commit → push → service restart evaluation.
+Automated Git commit workflow executing 9 sequential steps: quality check → modify log → README update → stage → commit → push → service restart evaluation → skill_personal sync → context cleanup.
 
 Automatically detects commit message conventions, handles `.gitignore` exceptions, and evaluates container restart requirements. Works with both containerized and non-containerized projects.
