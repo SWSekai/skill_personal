@@ -60,10 +60,19 @@
 - 當對話中出現新規則或偏好時，主動詢問是否更新至 Skill 規範
 - 獲得確認後修改 `.claude/skills/` 對應文件
 
-### 9. Memory、Skill、.skill_personal 三向連動
-- 寫入 Memory 時，評估是否應同步加入 Skill
-- 更新 `.claude/skills/` 或 Memory 時，評估是否應回流至 `.skill_personal/`
-- `.skill_personal/` 更新後，自動同步至 `../Skill-personal/`
+### 9. Memory、Skill、skill_personal 三向連動（強制）
+> **此規則為強制執行，不依賴 Skill 載入。每次寫入 Memory 時必須在同一回覆中完成以下所有步驟。**
+
+- **步驟 1：寫入 Memory**
+- **步驟 2：立即判斷歸類**（不可拆成下一回覆）
+  1. 是否為可重複套用的行為約束或流程規則？ → **同步更新 CLAUDE.md**
+  2. 是否具備跨專案通用性？ → **回流至 `skill_personal/` 模板並推送遠端**
+  3. 是否僅適用當前專案？ → 僅 Memory，不回流
+- **步驟 3：若有對應 Skill**，同步更新 `.claude/skills/` 對應的 SKILL.md
+- **步驟 4：若更新了 `skill_personal/`**，複製至 `../Skill-personal/` 並 commit & push
+
+**禁止**：僅寫入 Memory 就結束回覆、將同步留給下一回覆、等使用者提醒才補做。
+**原因**：Memory 綁定專案路徑，僅存 Memory 的規則無法隨 skill_personal 帶到新專案。
 
 ### 10. 新增 Skill 後 — 完整性檢查
 - Skill 資料夾包含 `SKILL.md` 和 `README.md`
