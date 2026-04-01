@@ -98,6 +98,14 @@
       "trigger": "手動呼叫",
       "allowed_tools": ["Read", "Grep", "Glob", "Agent"],
       "files": ["trace-flow/SKILL.md", "trace-flow/README.md"]
+    },
+    {
+      "name": "pack",
+      "command": "/pack",
+      "description": "專案打包：收集 AI 上下文、保存專案專屬 skill、清除 skill 環境",
+      "trigger": "手動呼叫",
+      "allowed_tools": ["Bash(bash *)", "Bash(ls *)", "Bash(cat *)", "Read"],
+      "files": ["pack/SKILL.md", "pack/README.md"]
     }
   ],
   "resources": [
@@ -125,6 +133,16 @@
       "name": "QUICKSTART",
       "path": "docs/QUICKSTART.md",
       "description": "面向協作使用者的快速上手指南"
+    },
+    {
+      "name": "sp-sync",
+      "path": "setup/sp-sync.sh",
+      "description": "一鍵同步腳本：pull 遠端 → 比對差異 → 更新 .claude/skills/"
+    },
+    {
+      "name": "sp-pack",
+      "path": "setup/sp-pack.sh",
+      "description": "專案打包腳本：收集 AI 上下文 → 保存專屬 skill → 清除 skill 環境"
     }
   ]
 }
