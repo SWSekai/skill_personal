@@ -20,21 +20,28 @@ AI_CONTEXT="$PROJECT_DIR/.local/ai-context"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 GIT_HASH=$(cd "$PROJECT_DIR" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
-# Memory 路徑（Windows Claude Code 預設位置）
-# 嘗試多種可能的路徑格式
+# Memory 路徑（動態推導，適用於任何專案位置）
+# Claude Code 將專案路徑編碼為：drive letter + -- + path with - replacing separators
+# 例如 D:\cm_wip_setup → D--cm_wip_setup
 MEMORY_DIR=""
-for candidate in \
-    "$HOME/.claude/projects/D--cm-wip_setup/memory" \
-    "$HOME/.claude/projects/D--cm_wip_setup/memory" \
-    "$HOME/.claude/projects/D--cm-wip-setup/memory" \
-    "$USERPROFILE/.claude/projects/D--cm-wip_setup/memory" \
-    "$USERPROFILE/.claude/projects/D--cm_wip_setup/memory" \
-    "$USERPROFILE/.claude/projects/D--cm-wip-setup/memory"; do
-    if [ -d "$candidate" ] 2>/dev/null; then
-        MEMORY_DIR="$candidate"
-        break
-    fi
-done
+CLAUDE_HOME="${HOME:-$USERPROFILE}/.claude/projects"
+
+if [ -d "$CLAUDE_HOME" ]; then
+    # 取得專案絕對路徑，轉換為 Claude Code 的編碼格式
+    ABS_PROJECT=$(cd "$PROJECT_DIR" && pwd -W 2>/dev/null || pwd)
+    # 嘗試在 projects/ 下尋找匹配的 memory 目錄
+    # Claude Code 的路徑編碼會因 OS 而異，直接搜尋最可靠
+    PROJECT_BASENAME=$(basename "$PROJECT_DIR")
+    for candidate_dir in "$CLAUDE_HOME"/*/memory; do
+        [ ! -d "$candidate_dir" ] && continue
+        parent_name=$(basename "$(dirname "$candidate_dir")")
+        # 匹配：編碼路徑名稱包含專案資料夾名稱
+        if echo "$parent_name" | grep -qi "$PROJECT_BASENAME"; then
+            MEMORY_DIR="$candidate_dir"
+            break
+        fi
+    done
+fi
 
 echo ""
 echo "========================================"

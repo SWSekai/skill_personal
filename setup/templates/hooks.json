@@ -1,0 +1,38 @@
+{
+  "_comment": "Claude Code Hooks 模板 — 由 sp-init.bat 安裝到 .claude/settings.local.json",
+  "_design": "放 settings.local.json 不影響共用帳號；隨 skill_personal 可移植到任何專案",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "if": "Write(*memory*)",
+            "prompt": "[Hook: Rule 9 三方同步] 你剛寫入了 Memory 檔案。評估：1) 此內容是否也應寫入 .claude/skills/ 的 Skill 規格？2) 是否需要同步到 skill_personal/？如需更新，立即執行並推送 skill_personal remote。"
+          },
+          {
+            "type": "prompt",
+            "if": "Write(*skills*SKILL.md)",
+            "prompt": "[Hook: Rule 9+10 Skill 同步與完整性] 你剛寫入了 Skill 檔案。檢查：1) skill_personal/ 對應資料夾是否需同步？2) 該 Skill 有 SKILL.md + README.md？3) .claude/skills/README.md 已更新？4) CLAUDE.md Available Skills 已更新？如需修正立即執行，skill_personal 變更後推送 remote。"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "if": "Edit(*memory*)",
+            "prompt": "[Hook: Rule 9 三方同步] 你剛編輯了 Memory 檔案。評估：1) 此變更是否也應反映到 .claude/skills/？2) 是否需要同步到 skill_personal/？如需更新，立即執行並推送 skill_personal remote。"
+          },
+          {
+            "type": "prompt",
+            "if": "Edit(*skills*SKILL.md)",
+            "prompt": "[Hook: Rule 9 Skill 同步] 你剛編輯了 Skill 檔案。檢查 skill_personal/ 對應資料夾是否需同步？如需更新，立即執行並推送 skill_personal remote。"
+          }
+        ]
+      }
+    ]
+  }
+}
