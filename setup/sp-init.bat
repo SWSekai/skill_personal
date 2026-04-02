@@ -50,7 +50,7 @@ if "%PROJECT_DIR%"=="%REPO_ROOT%" (
 REM ============================
 REM  Step 1: Create .claude/skills/
 REM ============================
-echo [1/7] Setting up .claude/skills/ ...
+echo [1/9] Setting up .claude/skills/ ...
 
 if exist "%PROJECT_DIR%\.claude\skills" (
     echo       Already exists - merge mode, will not overwrite existing skills
@@ -64,7 +64,7 @@ if exist "%PROJECT_DIR%\.claude\skills" (
 REM ============================
 REM  Step 2: Copy skill folders
 REM ============================
-echo [2/7] Copying skill files...
+echo [2/9] Copying skill files...
 
 set "SKILL_COUNT=0"
 for /d %%D in ("%REPO_ROOT%\*") do (
@@ -84,7 +84,7 @@ echo       Processed !SKILL_COUNT! skills
 REM ============================
 REM  Step 3: Create .skill_personal/
 REM ============================
-echo [3/7] Setting up .skill_personal/ ...
+echo [3/9] Setting up .skill_personal/ ...
 
 if exist "%PROJECT_DIR%\.skill_personal" (
     echo       .skill_personal/ already exists - skipped
@@ -107,7 +107,7 @@ if exist "%PROJECT_DIR%\.skill_personal" (
 REM ============================
 REM  Step 4: Create CLAUDE.md
 REM ============================
-echo [4/7] Setting up CLAUDE.md...
+echo [4/9] Setting up CLAUDE.md...
 
 if exist "%PROJECT_DIR%\CLAUDE.md" (
     echo       CLAUDE.md already exists - skipped, check manually if update needed
@@ -126,9 +126,39 @@ if exist "%PROJECT_DIR%\CLAUDE.md" (
 :DoneClaude
 
 REM ============================
-REM  Step 5: Install pre-commit hook
+REM  Step 5: Update .gitignore
 REM ============================
-echo [5/7] Installing pre-commit hook...
+echo [5/9] Updating .gitignore...
+
+set "GITIGNORE=%PROJECT_DIR%\.gitignore"
+
+REM Create .gitignore if not exists
+if not exist "!GITIGNORE!" (
+    type nul > "!GITIGNORE!"
+    echo       Created new .gitignore
+)
+
+REM Define required entries
+set "GI_ENTRIES=CLAUDE.md .claude/ skill_personal/ .skill_personal/ .local/"
+
+for %%E in (%GI_ENTRIES%) do (
+    findstr /X /C:"%%E" "!GITIGNORE!" >nul 2>&1
+    if errorlevel 1 (
+        echo.>>"!GITIGNORE!"
+        echo %%E>>"!GITIGNORE!"
+        echo       + %%E
+    ) else (
+        echo       ~ %%E [already present]
+    )
+)
+
+REM Clean up: remove consecutive blank lines (PowerShell one-liner)
+powershell -NoProfile -Command "$c = Get-Content '!GITIGNORE!' -Raw; $c = $c -replace '(\r?\n){3,}', \"`n`n\"; $c = $c.Trim(); Set-Content '!GITIGNORE!' $c -Encoding UTF8 -NoNewline"
+
+REM ============================
+REM  Step 6: Install pre-commit hook
+REM ============================
+echo [6/9] Installing pre-commit hook...
 
 if not exist "%PROJECT_DIR%\.git" (
     echo       WARN: Not a git repository - hook install skipped
@@ -165,10 +195,10 @@ if exist "!HOOK_DST!" (
 :DoneHook
 
 REM ============================
-REM  Step 6: Claude Code environment
+REM  Step 7: Claude Code environment
 REM  (statusline + hooks)
 REM ============================
-echo [6/7] Setting up Claude Code environment...
+echo [7/9] Setting up Claude Code environment...
 
 set "CLAUDE_HOME=%USERPROFILE%\.claude"
 set "SL_SRC=%SCRIPT_DIR%\templates\statusline.sh"
@@ -179,8 +209,8 @@ set "LOCAL_SETTINGS=%PROJECT_DIR%\.claude\settings.local.json"
 
 if not exist "%CLAUDE_HOME%" mkdir "%CLAUDE_HOME%" 2>nul
 
-REM --- 6a: Statusline ---
-echo       [6a] Statusline...
+REM --- 7a: Statusline ---
+echo       [7a] Statusline...
 if not exist "!SL_SRC!" (
     echo            WARN: templates/statusline.sh not found - skipped
 ) else if exist "!SL_DST!" (
@@ -208,8 +238,8 @@ if exist "!USER_SETTINGS!" (
     echo            Created settings.json with statusLine
 )
 
-REM --- 6b: Hooks (into project .claude/settings.local.json) ---
-echo       [6b] Hooks...
+REM --- 7b: Hooks (into project .claude/settings.local.json) ---
+echo       [7b] Hooks...
 if not exist "!HOOKS_SRC!" (
     echo            WARN: templates/hooks.json not found - skipped
     goto :DoneEnv
@@ -235,9 +265,9 @@ if exist "!LOCAL_SETTINGS!" (
 :DoneEnv
 
 REM ============================
-REM  Step 7: Restore portable memory
+REM  Step 8: Restore portable memory
 REM ============================
-echo [7/7] Restoring portable memory...
+echo [8/9] Restoring portable memory...
 
 set "MEM_PORTABLE=%REPO_ROOT%\memory-portable"
 
@@ -312,6 +342,22 @@ if !MEM_RESTORED! GTR 0 (
 :DoneMemory
 
 REM ============================
+REM  Step 9: Run skill-sync
+REM ============================
+echo [9/9] Running skill-sync...
+
+set "SYNC_BAT=%SCRIPT_DIR%\sp-sync.bat"
+set "SYNC_SH=%SCRIPT_DIR%\sp-sync.sh"
+
+if exist "!SYNC_BAT!" (
+    call "!SYNC_BAT!"
+) else if exist "!SYNC_SH!" (
+    bash "!SYNC_SH!"
+) else (
+    echo       WARN: sp-sync script not found - skipped
+)
+
+REM ============================
 REM  Done
 REM ============================
 echo.
@@ -322,17 +368,17 @@ echo.
 echo   Created:
 echo     - .claude/skills/     - Claude Code skill definitions
 echo     - .skill_personal/    - Skill template for sync
+echo     - .gitignore          - auto-added exclusion entries
 echo     - pre-commit hook     - blocks skill files from project git
 echo     - CLAUDE.md           - project rules, customize as needed
 echo     - statusline.sh       - Claude Code status bar script
 echo     - hooks               - auto-trigger for skill/memory sync (local only)
 echo     - portable memory     - restored user preferences and habits
+echo     - skill-sync          - synced with remote
 echo.
 echo   Next steps:
-echo     1. Add .skill_personal/ to .gitignore
-echo     2. Customize CLAUDE.md for your project
-echo     3. Customize .claude/skills/ SKILL.md files
-echo     4. Run /skill-sync in Claude Code to verify
+echo     1. Customize CLAUDE.md for your project
+echo     2. Customize .claude/skills/ SKILL.md files
 echo.
 
 endlocal
