@@ -116,6 +116,7 @@ cp -r skill_personal/* ~/.claude/skills/
 | Skill | Command | Description |
 |---|---|---|
 | **commit-push** | `/commit-push` | Full commit flow: quality check → modify log → README update → commit → push → service restart eval |
+| **create-skill** | `/create-skill [name]` | 建立新 Skill：互動式定義 → 生成 SKILL.md + README.md → 註冊索引 → 同步 skill_personal |
 | **modify-log** | `/modify-log [topic]` | Create versioned change log (`YYYYMMDD_v1.md`) with structured fields |
 | **restart-eval** | `/restart-eval [range]` | Evaluate which Docker services need restart/rebuild after changes |
 | **restart-volumn** | `/restart-volumn [services]` | Execute container restart/rebuild with health checks & auto-recovery |
@@ -140,6 +141,16 @@ cp -r skill_personal/* ~/.claude/skills/
 4. **暫存與提交**：偵測專案的 commit 訊息慣例並遵循
 5. **推送**：推送至遠端，失敗時提示手動處理
 6. **服務重啟評估**：自動讀取 `docker-compose.yml` 分析掛載方式，列出重啟指令
+
+### `/create-skill [名稱]` — 建立新 Skill
+
+互動式建立全新 Claude Code Skill：
+1. **收集定義**：名稱、指令、描述、觸發方式、工具清單、執行步驟
+2. **衝突檢查**：確認無同名 Skill 存在
+3. **生成檔案**：建立 `SKILL.md` + `README.md`，遵循 frontmatter + 步驟格式
+4. **更新索引**：`.claude/skills/README.md`、`CLAUDE.md`、`manifest.json`
+5. **同步 skill_personal**：通用 Skill 自動複製並推送至遠端
+6. **完整性驗證**：逐項確認所有檔案與索引一致
 
 ### `/modify-log [主題]` — 修改日誌
 
@@ -302,6 +313,9 @@ Skill-personal/
 │   └── QUICKSTART.md               ← 快速上手指南
 │
 ├── commit-push/                    ← 提交與推送
+│   ├── README.md
+│   └── SKILL.md
+├── create-skill/                   ← 建立新 Skill
 │   ├── README.md
 │   └── SKILL.md
 ├── context-guard/                  ← Context Window 管理
