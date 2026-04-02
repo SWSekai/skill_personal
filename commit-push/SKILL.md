@@ -203,4 +203,25 @@ Create or **overwrite** a README.md in the context summary directory, containing
 `/clear` is a built-in CLI command that cannot be triggered programmatically by Claude.
 After summary is saved, prompt the user: "Summary saved. Recommend running `/clear` to free the context window."
 
+---
+
+### Step 10: Lessons learned — document to guides
+
+After completing the commit, evaluate whether this change contains **troubleshooting experience, gotchas, or non-obvious fixes** worth documenting:
+
+1. **Criteria for documenting**: Does this fix or change involve:
+   - A problem that took significant time to diagnose?
+   - A non-obvious root cause (e.g., auth hanging, environment differences)?
+   - Configuration that differs from documentation or defaults?
+   - Workarounds for tool/platform limitations?
+
+2. **If yes**, update the relevant guide in `.local/docs/`:
+   - Add to the appropriate troubleshooting/FAQ section
+   - Format: **症狀** → **原因** → **解決方式** → **注意事項**
+   - If no relevant guide exists, create one
+
+3. **Inform the user**: "已將此經驗寫入 `.local/docs/<guide>.md`，/pack 時會一併帶走。"
+
+This ensures operational knowledge is captured in portable documentation, not lost in conversation history.
+
 Arguments: $ARGUMENTS (optional commit message override)
