@@ -50,7 +50,7 @@ if "%PROJECT_DIR%"=="%REPO_ROOT%" (
 REM ============================
 REM  Step 1: Create .claude/skills/
 REM ============================
-echo [1/5] Setting up .claude/skills/ ...
+echo [1/6] Setting up .claude/skills/ ...
 
 if exist "%PROJECT_DIR%\.claude\skills" (
     echo       Already exists - merge mode, will not overwrite existing skills
@@ -64,7 +64,7 @@ if exist "%PROJECT_DIR%\.claude\skills" (
 REM ============================
 REM  Step 2: Copy skill folders
 REM ============================
-echo [2/5] Copying skill files...
+echo [2/6] Copying skill files...
 
 set "SKILL_COUNT=0"
 for /d %%D in ("%REPO_ROOT%\*") do (
@@ -84,7 +84,7 @@ echo       Processed !SKILL_COUNT! skills
 REM ============================
 REM  Step 3: Create .skill_personal/
 REM ============================
-echo [3/5] Setting up .skill_personal/ ...
+echo [3/6] Setting up .skill_personal/ ...
 
 if exist "%PROJECT_DIR%\.skill_personal" (
     echo       .skill_personal/ already exists - skipped
@@ -107,7 +107,7 @@ if exist "%PROJECT_DIR%\.skill_personal" (
 REM ============================
 REM  Step 4: Create CLAUDE.md
 REM ============================
-echo [4/5] Setting up CLAUDE.md...
+echo [4/6] Setting up CLAUDE.md...
 
 if exist "%PROJECT_DIR%\CLAUDE.md" (
     echo       CLAUDE.md already exists - skipped, check manually if update needed
@@ -128,7 +128,7 @@ if exist "%PROJECT_DIR%\CLAUDE.md" (
 REM ============================
 REM  Step 5: Install pre-commit hook
 REM ============================
-echo [5/5] Installing pre-commit hook...
+echo [5/6] Installing pre-commit hook...
 
 if not exist "%PROJECT_DIR%\.git" (
     echo       WARN: Not a git repository - hook install skipped
@@ -165,6 +165,76 @@ if exist "!HOOK_DST!" (
 :DoneHook
 
 REM ============================
+REM  Step 6: Claude Code environment
+REM  (statusline + hooks)
+REM ============================
+echo [6/6] Setting up Claude Code environment...
+
+set "CLAUDE_HOME=%USERPROFILE%\.claude"
+set "SL_SRC=%SCRIPT_DIR%\templates\statusline.sh"
+set "SL_DST=%CLAUDE_HOME%\statusline.sh"
+set "USER_SETTINGS=%CLAUDE_HOME%\settings.json"
+set "HOOKS_SRC=%SCRIPT_DIR%\templates\hooks.json"
+set "LOCAL_SETTINGS=%PROJECT_DIR%\.claude\settings.local.json"
+
+if not exist "%CLAUDE_HOME%" mkdir "%CLAUDE_HOME%" 2>nul
+
+REM --- 6a: Statusline ---
+echo       [6a] Statusline...
+if not exist "!SL_SRC!" (
+    echo            WARN: templates/statusline.sh not found - skipped
+) else if exist "!SL_DST!" (
+    fc /B "!SL_SRC!" "!SL_DST!" >nul 2>&1
+    if errorlevel 1 (
+        copy /Y "!SL_SRC!" "!SL_DST!" >nul 2>&1
+        echo            Updated statusline.sh
+    ) else (
+        echo            Already up-to-date
+    )
+) else (
+    copy /Y "!SL_SRC!" "!SL_DST!" >nul 2>&1
+    echo            Installed statusline.sh
+)
+
+REM Ensure statusLine in user settings.json
+if exist "!USER_SETTINGS!" (
+    findstr /C:"statusLine" "!USER_SETTINGS!" >nul 2>&1
+    if errorlevel 1 (
+        powershell -NoProfile -Command "$j = Get-Content '!USER_SETTINGS!' -Raw | ConvertFrom-Json; $j | Add-Member -NotePropertyName 'statusLine' -NotePropertyValue ([PSCustomObject]@{type='command';command='bash ~/.claude/statusline.sh'}) -Force; $j | ConvertTo-Json -Depth 10 | Set-Content '!USER_SETTINGS!' -Encoding UTF8"
+        echo            Added statusLine to settings.json
+    )
+) else (
+    powershell -NoProfile -Command "@{statusLine=@{type='command';command='bash ~/.claude/statusline.sh'}} | ConvertTo-Json -Depth 10 | Set-Content '!USER_SETTINGS!' -Encoding UTF8"
+    echo            Created settings.json with statusLine
+)
+
+REM --- 6b: Hooks (into project .claude/settings.local.json) ---
+echo       [6b] Hooks...
+if not exist "!HOOKS_SRC!" (
+    echo            WARN: templates/hooks.json not found - skipped
+    goto :DoneEnv
+)
+
+if not exist "%PROJECT_DIR%\.claude" mkdir "%PROJECT_DIR%\.claude" 2>nul
+
+if exist "!LOCAL_SETTINGS!" (
+    findstr /C:"hooks" "!LOCAL_SETTINGS!" >nul 2>&1
+    if errorlevel 1 (
+        REM settings.local.json exists but no hooks - merge hooks from template
+        powershell -NoProfile -Command "$local = Get-Content '!LOCAL_SETTINGS!' -Raw | ConvertFrom-Json; $tmpl = Get-Content '!HOOKS_SRC!' -Raw | ConvertFrom-Json; $local | Add-Member -NotePropertyName 'hooks' -NotePropertyValue $tmpl.hooks -Force; $local | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
+        echo            Merged hooks into settings.local.json
+    ) else (
+        echo            Hooks already configured
+    )
+) else (
+    REM Create settings.local.json from hooks template (without _comment/_design)
+    powershell -NoProfile -Command "$tmpl = Get-Content '!HOOKS_SRC!' -Raw | ConvertFrom-Json; $out = @{hooks=$tmpl.hooks}; $out | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
+    echo            Created settings.local.json with hooks
+)
+
+:DoneEnv
+
+REM ============================
 REM  Done
 REM ============================
 echo.
@@ -177,6 +247,8 @@ echo     - .claude/skills/     - Claude Code skill definitions
 echo     - .skill_personal/    - Skill template for sync
 echo     - pre-commit hook     - blocks skill files from project git
 echo     - CLAUDE.md           - project rules, customize as needed
+echo     - statusline.sh       - Claude Code status bar script
+echo     - hooks               - auto-trigger for skill/memory sync (local only)
 echo.
 echo   Next steps:
 echo     1. Add .skill_personal/ to .gitignore
