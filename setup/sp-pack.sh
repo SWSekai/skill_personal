@@ -110,6 +110,43 @@ else
     echo "  [SKIP] Memory 目錄未找到"
 fi
 
+# --- Step 4b: 回寫 portable memory 到 skill_personal ---
+echo "[Step 3b] 回寫 portable memory..."
+MEM_PORTABLE="$SP_DIR/memory-portable"
+if [ -n "$MEMORY_DIR" ] && [ -d "$MEMORY_DIR" ] && [ -d "$MEM_PORTABLE" ]; then
+    WRITEBACK_COUNT=0
+    for mem_file in "$MEMORY_DIR"/feedback_*.md "$MEMORY_DIR"/user_*.md; do
+        [ ! -f "$mem_file" ] && continue
+        fname=$(basename "$mem_file")
+        if [ -f "$MEM_PORTABLE/$fname" ]; then
+            # Update only if content differs
+            if ! diff -q "$mem_file" "$MEM_PORTABLE/$fname" >/dev/null 2>&1; then
+                cp "$mem_file" "$MEM_PORTABLE/$fname"
+                echo "  [UPDATE] $fname"
+                WRITEBACK_COUNT=$((WRITEBACK_COUNT + 1))
+            fi
+        else
+            cp "$mem_file" "$MEM_PORTABLE/$fname"
+            echo "  [ADD] $fname"
+            WRITEBACK_COUNT=$((WRITEBACK_COUNT + 1))
+        fi
+    done
+    if [ "$WRITEBACK_COUNT" -eq 0 ]; then
+        echo "  [INFO] portable memory 已是最新"
+    else
+        echo "  [OK] 回寫 $WRITEBACK_COUNT 個 memory 到 skill_personal/memory-portable/"
+        # Auto commit within skill_personal
+        cd "$SP_DIR"
+        git add memory-portable/ 2>/dev/null
+        git commit -m "sync: 回寫 portable memory from $(basename "$PROJECT_DIR")
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>" 2>/dev/null || true
+        echo "  [INFO] 已 commit 到 skill_personal (記得 push)"
+    fi
+else
+    echo "  [SKIP] Memory 或 memory-portable/ 不存在"
+fi
+
 # --- Step 5: 收集全部 skills 快照 ---
 echo "[Step 4] 收集 skills 快照..."
 if [ -d "$SKILLS_DIR" ]; then
