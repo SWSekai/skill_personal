@@ -12,6 +12,14 @@
       "files": ["commit-push/SKILL.md", "commit-push/README.md"]
     },
     {
+      "name": "create-skill",
+      "command": "/create-skill",
+      "description": "建立新 Skill：互動式定義 → 生成 SKILL.md + README.md → 註冊索引 → 同步 skill_personal",
+      "trigger": "手動呼叫",
+      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(mkdir *)", "Bash(date *)", "Bash(git *)", "Bash(cp *)"],
+      "files": ["create-skill/SKILL.md", "create-skill/README.md"]
+    },
+    {
       "name": "context-guard",
       "command": "/context-guard",
       "description": "Context window 管理：壓縮通知時自動摘要，手動呼叫整理，對話開始恢復",
