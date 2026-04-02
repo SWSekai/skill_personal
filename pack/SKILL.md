@@ -26,8 +26,24 @@ bash skill_personal/setup/sp-pack.sh
 1. **收集** — CLAUDE.md、.local/ 工作紀錄、Memory、skills 快照
 2. **偵測專案專屬 skill** — 比對 `.claude/skills/` vs `skill_personal/`，不在 skill_personal 的就是專案專屬
 3. **保存專案專屬 skill** → `.local/ai-context/project-skills/`
-4. **產生 manifest.txt** — 打包時間、檔案清單、還原指引
-5. **清除** — 刪除 `.claude/skills/`、`skill_personal/`、`CLAUDE.md`
+4. **收集通用指南** — 掃描 `.local/docs/`、`docs/`、專案根目錄，收集含 `guide` 或 `指南` 的文件至 `guides/`
+5. **產生 manifest.txt** — 打包時間、檔案清單、還原指引
+6. **清除** — 刪除 `.claude/skills/`、`skill_personal/`、`CLAUDE.md`
+
+## 腳本執行後 — AI 合併指南（必須執行）
+
+腳本完成後，Claude **必須** 對 `.local/ai-context/guides/` 進行智慧合併：
+
+1. **讀取所有收集到的指南文件**
+2. **識別重複/重疊主題** — 例如多份 K8s 部署指南、多份 CI/CD 指南
+3. **合併同主題文件** — 規則：
+   - 盡力保留所有資訊，不丟棄任何實務細節
+   - 合併後的文件以主題命名（如 `guide-k8s-deployment.md`、`guide-cicd-pipeline.md`）
+   - 保留每份來源文件的出處（在合併文件頂部註明原始路徑）
+   - 衝突資訊並列保留，標註差異
+   - 目標：產出可作為日後閱讀的「實務精華」
+4. **刪除已合併的原始檔案**，只保留合併後的版本
+5. **無重疊的獨立指南** 保持原樣，僅重新命名為乾淨的主題名稱
 
 ## 執行後注意
 

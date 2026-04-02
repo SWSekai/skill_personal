@@ -143,8 +143,47 @@ else
     echo "  [SKIP] 無法比對（目錄不存在）"
 fi
 
-# --- Step 7: 收集 .claude/settings.local.json ---
-echo "[Step 6] 收集 Claude 設定..."
+# --- Step 7: 收集通用指南文件 ---
+echo "[Step 6] 收集通用指南文件..."
+mkdir -p "$AI_CONTEXT/guides"
+GUIDE_COUNT=0
+
+# 掃描已知位置的指南文件
+GUIDE_SEARCH_DIRS=(
+    "$PROJECT_DIR/.local/docs"
+    "$PROJECT_DIR/docs"
+    "$PROJECT_DIR"
+)
+GUIDE_PATTERNS=("*guide*" "*指南*")
+
+for search_dir in "${GUIDE_SEARCH_DIRS[@]}"; do
+    [ ! -d "$search_dir" ] && continue
+    for pattern in "${GUIDE_PATTERNS[@]}"; do
+        while IFS= read -r -d '' guide_file; do
+            # 跳過 node_modules, dist, .local/ai-context 自身
+            case "$guide_file" in
+                */node_modules/*|*/dist/*|*/.local/ai-context/*) continue ;;
+            esac
+            # 計算相對路徑作為子目錄保留來源資訊
+            rel_path="${guide_file#$PROJECT_DIR/}"
+            # 用 --- 取代路徑分隔符作為檔名前綴，避免衝突
+            flat_name=$(echo "$rel_path" | sed 's|/|---|g')
+            cp "$guide_file" "$AI_CONTEXT/guides/$flat_name"
+            echo "  [OK] $rel_path"
+            GUIDE_COUNT=$((GUIDE_COUNT + 1))
+        done < <(find "$search_dir" -maxdepth 3 -type f -iname "$pattern" -print0 2>/dev/null)
+    done
+done
+
+if [ "$GUIDE_COUNT" -eq 0 ]; then
+    rmdir "$AI_CONTEXT/guides" 2>/dev/null || true
+    echo "  [INFO] 未找到指南文件"
+else
+    echo "  [OK] 共收集 $GUIDE_COUNT 份指南"
+fi
+
+# --- Step 8: 收集 .claude/settings.local.json ---
+echo "[Step 7] 收集 Claude 設定..."
 if [ -f "$PROJECT_DIR/.claude/settings.local.json" ]; then
     cp "$PROJECT_DIR/.claude/settings.local.json" "$AI_CONTEXT/settings.local.json"
     echo "  [OK] settings.local.json"
@@ -152,8 +191,8 @@ else
     echo "  [SKIP] settings.local.json 不存在"
 fi
 
-# --- Step 8: 產生 manifest.txt ---
-echo "[Step 7] 產生 manifest.txt..."
+# --- Step 9: 產生 manifest.txt ---
+echo "[Step 8] 產生 manifest.txt..."
 cat > "$AI_CONTEXT/manifest.txt" << MANIFEST
 ================================================================
  AI Context Pack — 打包資訊
@@ -190,9 +229,9 @@ fi)
 MANIFEST
 echo "  [OK] manifest.txt"
 
-# --- Step 9: 刪除 skill 環境 ---
+# --- Step 10: 刪除 skill 環境 ---
 echo ""
-echo "[Step 8] 清除 skill 環境..."
+echo "[Step 9] 清除 skill 環境..."
 
 # 刪除 .claude/skills/
 if [ -d "$SKILLS_DIR" ]; then
