@@ -50,7 +50,7 @@ if "%PROJECT_DIR%"=="%REPO_ROOT%" (
 REM ============================
 REM  Step 1: Create .claude/skills/
 REM ============================
-echo [1/6] Setting up .claude/skills/ ...
+echo [1/7] Setting up .claude/skills/ ...
 
 if exist "%PROJECT_DIR%\.claude\skills" (
     echo       Already exists - merge mode, will not overwrite existing skills
@@ -64,7 +64,7 @@ if exist "%PROJECT_DIR%\.claude\skills" (
 REM ============================
 REM  Step 2: Copy skill folders
 REM ============================
-echo [2/6] Copying skill files...
+echo [2/7] Copying skill files...
 
 set "SKILL_COUNT=0"
 for /d %%D in ("%REPO_ROOT%\*") do (
@@ -84,7 +84,7 @@ echo       Processed !SKILL_COUNT! skills
 REM ============================
 REM  Step 3: Create .skill_personal/
 REM ============================
-echo [3/6] Setting up .skill_personal/ ...
+echo [3/7] Setting up .skill_personal/ ...
 
 if exist "%PROJECT_DIR%\.skill_personal" (
     echo       .skill_personal/ already exists - skipped
@@ -107,7 +107,7 @@ if exist "%PROJECT_DIR%\.skill_personal" (
 REM ============================
 REM  Step 4: Create CLAUDE.md
 REM ============================
-echo [4/6] Setting up CLAUDE.md...
+echo [4/7] Setting up CLAUDE.md...
 
 if exist "%PROJECT_DIR%\CLAUDE.md" (
     echo       CLAUDE.md already exists - skipped, check manually if update needed
@@ -128,7 +128,7 @@ if exist "%PROJECT_DIR%\CLAUDE.md" (
 REM ============================
 REM  Step 5: Install pre-commit hook
 REM ============================
-echo [5/6] Installing pre-commit hook...
+echo [5/7] Installing pre-commit hook...
 
 if not exist "%PROJECT_DIR%\.git" (
     echo       WARN: Not a git repository - hook install skipped
@@ -168,7 +168,7 @@ REM ============================
 REM  Step 6: Claude Code environment
 REM  (statusline + hooks)
 REM ============================
-echo [6/6] Setting up Claude Code environment...
+echo [6/7] Setting up Claude Code environment...
 
 set "CLAUDE_HOME=%USERPROFILE%\.claude"
 set "SL_SRC=%SCRIPT_DIR%\templates\statusline.sh"
@@ -235,6 +235,83 @@ if exist "!LOCAL_SETTINGS!" (
 :DoneEnv
 
 REM ============================
+REM  Step 7: Restore portable memory
+REM ============================
+echo [7/7] Restoring portable memory...
+
+set "MEM_PORTABLE=%REPO_ROOT%\memory-portable"
+
+if not exist "!MEM_PORTABLE!" (
+    echo       WARN: memory-portable/ not found in skill_personal - skipped
+    goto :DoneMemory
+)
+
+REM Detect Claude Code memory path for this project
+REM Claude Code encodes project path as: D--project_name (drive + path with separators replaced)
+for %%F in ("%PROJECT_DIR%") do set "PROJ_DRIVE=%%~dF"
+set "PROJ_DRIVE_LETTER=%PROJ_DRIVE:~0,1%"
+for %%F in ("%PROJECT_DIR%") do set "PROJ_PATH_RAW=%%~pnxF"
+REM Remove leading backslash, replace \ with -
+set "PROJ_PATH_CLEAN=%PROJ_PATH_RAW:~1%"
+set "PROJ_PATH_CLEAN=%PROJ_PATH_CLEAN:\=-%"
+
+REM Search for matching memory directory under ~/.claude/projects/
+set "CLAUDE_PROJECTS=%USERPROFILE%\.claude\projects"
+set "MEMORY_TARGET="
+
+if not exist "%CLAUDE_PROJECTS%" mkdir "%CLAUDE_PROJECTS%" 2>nul
+
+REM Try exact encoded path first
+set "EXACT_PATH=%CLAUDE_PROJECTS%\%PROJ_DRIVE_LETTER%--%PROJ_PATH_CLEAN%\memory"
+if exist "%EXACT_PATH%" (
+    set "MEMORY_TARGET=!EXACT_PATH!"
+) else (
+    REM Fallback: search for directory containing project folder name
+    for %%F in ("%PROJECT_DIR%") do set "PROJ_BASENAME=%%~nxF"
+    for /d %%D in ("%CLAUDE_PROJECTS%\*") do (
+        echo %%~nxD | findstr /I "!PROJ_BASENAME!" >nul 2>&1
+        if not errorlevel 1 (
+            if exist "%%D\memory" (
+                set "MEMORY_TARGET=%%D\memory"
+            )
+        )
+    )
+)
+
+REM If still not found, create the directory using exact encoded path
+if "!MEMORY_TARGET!"=="" (
+    set "MEMORY_TARGET=!EXACT_PATH!"
+    mkdir "!MEMORY_TARGET!" 2>nul
+    echo       Created memory directory: !MEMORY_TARGET!
+)
+
+REM Copy portable memories (skip existing to preserve local modifications)
+set "MEM_RESTORED=0"
+set "MEM_SKIPPED=0"
+for %%F in ("!MEM_PORTABLE!\*.md") do (
+    if "%%~nxF"=="README.md" goto :SkipMem
+    if exist "!MEMORY_TARGET!\%%~nxF" (
+        set /a MEM_SKIPPED+=1
+    ) else (
+        copy /Y "%%F" "!MEMORY_TARGET!\%%~nxF" >nul 2>&1
+        set /a MEM_RESTORED+=1
+    )
+    :SkipMem
+)
+
+REM Generate/update MEMORY.md index
+if !MEM_RESTORED! GTR 0 (
+    REM Rebuild MEMORY.md from all .md files in memory dir
+    powershell -NoProfile -Command "$dir='!MEMORY_TARGET!'; $entries=@(); Get-ChildItem $dir -Filter '*.md' | Where-Object { $_.Name -ne 'MEMORY.md' -and $_.Name -ne 'README.md' } | ForEach-Object { $content=Get-Content $_.FullName -Raw -Encoding UTF8; if($content -match 'name:\s*(.+)') { $name=$Matches[1].Trim() } else { $name=$_.BaseName }; if($content -match 'description:\s*(.+)') { $desc=$Matches[1].Trim() } else { $desc='' }; $entries += \"- [$name]($($_.Name)) — $desc\" }; $entries -join \"`n\" | Set-Content (Join-Path $dir 'MEMORY.md') -Encoding UTF8"
+    echo       Restored !MEM_RESTORED! memories, skipped !MEM_SKIPPED! (already exist)
+    echo       Rebuilt MEMORY.md index
+) else (
+    echo       All portable memories already present (!MEM_SKIPPED! skipped)
+)
+
+:DoneMemory
+
+REM ============================
 REM  Done
 REM ============================
 echo.
@@ -249,6 +326,7 @@ echo     - pre-commit hook     - blocks skill files from project git
 echo     - CLAUDE.md           - project rules, customize as needed
 echo     - statusline.sh       - Claude Code status bar script
 echo     - hooks               - auto-trigger for skill/memory sync (local only)
+echo     - portable memory     - restored user preferences and habits
 echo.
 echo   Next steps:
 echo     1. Add .skill_personal/ to .gitignore
