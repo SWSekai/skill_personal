@@ -1,11 +1,8 @@
 // PostToolUse hook: 寫入 memory 時建立 pending flag，寫入 skills 時清除 flag
-// 輸入: stdin JSON with tool_name, tool_input
+// 輸入: stdin JSON with tool_name, tool_input, cwd
 
 const fs = require('fs');
 const path = require('path');
-
-const FLAG_DIR = 'D:/<PROJECT_NAME>/.local';
-const FLAG_FILE = path.join(FLAG_DIR, '.pending_skill_sync');
 
 let input = '';
 process.stdin.setEncoding('utf8');
@@ -13,6 +10,10 @@ process.stdin.on('data', chunk => { input += chunk; });
 process.stdin.on('end', () => {
   try {
     const data = JSON.parse(input);
+    const cwd = data.cwd || process.cwd();
+    const FLAG_DIR = path.join(cwd, '.local');
+    const FLAG_FILE = path.join(FLAG_DIR, '.pending_skill_sync');
+
     const filePath = (data.tool_input && (data.tool_input.file_path || data.tool_input.path)) || '';
     const lowerPath = filePath.toLowerCase();
 

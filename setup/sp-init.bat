@@ -238,8 +238,25 @@ if exist "!USER_SETTINGS!" (
     echo            Created settings.json with statusLine
 )
 
-REM --- 7b: Hooks (into project .claude/settings.local.json) ---
-echo       [7b] Hooks...
+REM --- 7b: Hook scripts (copy .cjs files to .claude/hooks/) ---
+echo       [7b] Hook scripts...
+set "HOOK_SCRIPTS_SRC=%REPO_ROOT%\hooks"
+set "HOOK_SCRIPTS_DST=%PROJECT_DIR%\.claude\hooks"
+
+if not exist "!HOOK_SCRIPTS_SRC!" (
+    echo            WARN: hooks/ directory not found in skill_personal - skipped
+) else (
+    if not exist "!HOOK_SCRIPTS_DST!" mkdir "!HOOK_SCRIPTS_DST!" 2>nul
+    set "HOOK_COPIED=0"
+    for %%F in ("!HOOK_SCRIPTS_SRC!\*.cjs") do (
+        copy /Y "%%F" "!HOOK_SCRIPTS_DST!\%%~nxF" >nul 2>&1
+        set /a HOOK_COPIED+=1
+    )
+    echo            Copied !HOOK_COPIED! hook scripts
+)
+
+REM --- 7c: Hooks config (into project .claude/settings.local.json) ---
+echo       [7c] Hooks config...
 if not exist "!HOOKS_SRC!" (
     echo            WARN: templates/hooks.json not found - skipped
     goto :DoneEnv
@@ -247,18 +264,23 @@ if not exist "!HOOKS_SRC!" (
 
 if not exist "%PROJECT_DIR%\.claude" mkdir "%PROJECT_DIR%\.claude" 2>nul
 
+REM Convert PROJECT_DIR to forward-slash path for hooks.json
+set "PROJECT_DIR_FWD=%PROJECT_DIR:\=/%"
+
 if exist "!LOCAL_SETTINGS!" (
     findstr /C:"hooks" "!LOCAL_SETTINGS!" >nul 2>&1
     if errorlevel 1 (
         REM settings.local.json exists but no hooks - merge hooks from template
-        powershell -NoProfile -Command "$local = Get-Content '!LOCAL_SETTINGS!' -Raw | ConvertFrom-Json; $tmpl = Get-Content '!HOOKS_SRC!' -Raw | ConvertFrom-Json; $local | Add-Member -NotePropertyName 'hooks' -NotePropertyValue $tmpl.hooks -Force; $local | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
+        powershell -NoProfile -Command "$local = Get-Content '!LOCAL_SETTINGS!' -Raw | ConvertFrom-Json; $tmpl = (Get-Content '!HOOKS_SRC!' -Raw) -replace '\{\{PROJECT_DIR\}\}', '!PROJECT_DIR_FWD!' | ConvertFrom-Json; $local | Add-Member -NotePropertyName 'hooks' -NotePropertyValue $tmpl.hooks -Force; $local | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
         echo            Merged hooks into settings.local.json
     ) else (
-        echo            Hooks already configured
+        echo            Hooks already configured - updating hook paths
+        REM Update existing hooks with current project path
+        powershell -NoProfile -Command "$content = Get-Content '!LOCAL_SETTINGS!' -Raw; $tmpl = (Get-Content '!HOOKS_SRC!' -Raw) -replace '\{\{PROJECT_DIR\}\}', '!PROJECT_DIR_FWD!' | ConvertFrom-Json; $local = $content | ConvertFrom-Json; $local.hooks = $tmpl.hooks; $local | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
     )
 ) else (
-    REM Create settings.local.json from hooks template (without _comment/_design)
-    powershell -NoProfile -Command "$tmpl = Get-Content '!HOOKS_SRC!' -Raw | ConvertFrom-Json; $out = @{hooks=$tmpl.hooks}; $out | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
+    REM Create settings.local.json from hooks template
+    powershell -NoProfile -Command "$tmpl = (Get-Content '!HOOKS_SRC!' -Raw) -replace '\{\{PROJECT_DIR\}\}', '!PROJECT_DIR_FWD!' | ConvertFrom-Json; $out = @{hooks=$tmpl.hooks}; $out | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
     echo            Created settings.local.json with hooks
 )
 
@@ -397,6 +419,7 @@ REM Skip non-skill directories
 if "%DIRNAME%"==".git" exit /b 0
 if "%DIRNAME%"=="setup" exit /b 0
 if "%DIRNAME%"=="docs" exit /b 0
+if "%DIRNAME%"=="hooks" exit /b 0
 if "%DIRNAME:~0,1%"=="." exit /b 0
 
 if "!MODE!"=="init" (

@@ -1,16 +1,19 @@
 // Stop hook: 檢查是否有未完成的 Memory→Skill 同步
-// 輸入: stdin JSON with assistant_message, stop_reason
+// 輸入: stdin JSON with assistant_message, stop_reason, cwd
 // 輸出: JSON with decision: "block" if pending sync exists
 
 const fs = require('fs');
-
-const FLAG_FILE = 'D:/<PROJECT_NAME>/.local/.pending_skill_sync';
+const path = require('path');
 
 let input = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', chunk => { input += chunk; });
 process.stdin.on('end', () => {
   try {
+    const data = JSON.parse(input);
+    const cwd = data.cwd || process.cwd();
+    const FLAG_FILE = path.join(cwd, '.local', '.pending_skill_sync');
+
     if (fs.existsSync(FLAG_FILE)) {
       const pendingFile = fs.readFileSync(FLAG_FILE, 'utf8').trim();
       const result = {
