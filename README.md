@@ -239,7 +239,7 @@ cp -r skill_personal/* ~/.claude/skills/
 
 ```
 .local/
-├── logs/          ← modify-log、restart-eval、restart-volumn
+├── modify_logs/   ← modify-log、restart-eval、restart-volumn
 ├── docs/          ← sys-info、trace-flow、md-collab
 ├── summary/       ← context-guard
 └── reports/       ← report
@@ -247,9 +247,9 @@ cp -r skill_personal/* ~/.claude/skills/
 
 | Skill | 檔案說明 | 存放位置 |
 |-------|----------|----------|
-| modify-log | 變更紀錄 `YYMMDD_TopicDescription.md` | `.local/logs/` |
-| restart-eval | 服務重啟評估（可選存檔） | `.local/logs/` |
-| restart-volumn | 重啟執行報告（可選存檔） | `.local/logs/` |
+| modify-log | 變更紀錄 `YYMMDD_TopicDescription.md` | `.local/modify_logs/` |
+| restart-eval | 服務重啟評估（可選存檔） | `.local/modify_logs/` |
+| restart-volumn | 重啟執行報告（可選存檔） | `.local/modify_logs/` |
 | sys-info | 系統文件 `[topic_description].md` | `.local/docs/` |
 | trace-flow | 資料流追蹤（可選存檔） | `.local/docs/` |
 | md-collab | 互動式決策表 | `.local/docs/`（預設） |

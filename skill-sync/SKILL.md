@@ -148,7 +148,7 @@ bash skill_personal/setup/sp-sync.sh
 |------|------|---------|---------|
 | `CLAUDE.md` | Claude Code 專案規範 | 本地設定 | .gitignore + hook |
 | `.claude/skills/` | 專案專屬 Skill 定義 | 本地設定 | .gitignore + hook |
-| `.local/` | logs/ docs/ summary/ reports/ | 本地工作紀錄 | .gitignore + setup.bat |
+| `.local/` | modify_logs/ docs/ summary/ reports/ | 本地工作紀錄 | .gitignore + setup.bat |
 | `skill_personal/` | 通用 Skill 模板 | skill_personal 遠端倉庫 | .gitignore + hook |
 
 **原則：專案 git 僅追蹤專案程式碼。版控保護由腳本自動安裝，不依賴規則約束。**

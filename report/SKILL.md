@@ -28,7 +28,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git log*), Bash(git diff*), B
 - `weekly` → 讀取近 7 天（依檔名日期前綴篩選）
 - `YYMMDD YYMMDD` → 讀取指定區間
 
-修改紀錄存放於 `.local/logs/`（由 `setup.bat` 建立）。
+修改紀錄存放於 `.local/modify_logs/`（由 `setup.bat` 建立）。
 
 ### Step 2: 讀取並分析所有紀錄
 

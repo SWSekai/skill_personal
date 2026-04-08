@@ -117,7 +117,7 @@ After commit, create the modification log:
    git log --oneline -1
    ```
 2. Invoke the `modify-log` skill with the commit hash
-3. Path: `.local/logs/YYMMDD_TopicDescription.md`
+3. Path: `.local/modify_logs/YYMMDD_TopicDescription.md`
 4. **The log is stored locally only — it is NOT added to git version control**
 
 ---
