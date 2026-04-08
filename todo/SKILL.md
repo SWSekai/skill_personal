@@ -1,6 +1,8 @@
 ---
 name: todo
 description: "Read and process AI TODO list from the collaboration directory. Picks items by priority, asks follow-up questions, executes tasks, and updates the TODO file with results."
+model: sonnet
+effort: medium
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(docker *), Bash(mkdir *)
 ---
 

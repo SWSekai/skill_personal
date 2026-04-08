@@ -1,6 +1,9 @@
 ---
 name: restart-eval
 description: "Evaluate which services or containers need restart or rebuild after code changes. Auto-triggered after commits that modify service code."
+model: haiku
+effort: low
+argument-hint: "[service...]"
 allowed-tools: Bash(git *), Bash(docker *), Read, Glob, Grep
 ---
 

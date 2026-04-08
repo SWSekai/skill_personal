@@ -1,6 +1,9 @@
 ---
 name: modify-log
 description: "Create or update a structured local modification log documenting code changes. Invoked after commit — logs are LOCAL ONLY, never committed to project git."
+model: haiku
+effort: low
+argument-hint: "[commit-hash]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git diff*), Bash(git log*), Bash(git status*), Bash(ls *), Bash(date *)
 ---
 

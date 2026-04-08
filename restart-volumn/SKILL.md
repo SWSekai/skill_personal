@@ -1,6 +1,9 @@
 ---
 name: restart-volumn
 description: "Execute container restart/rebuild with pre-flight checks, health verification, and automatic error recovery. Handles the full lifecycle: check active tasks → restart/rebuild → verify health → check logs for errors → auto-recover if possible."
+model: haiku
+effort: low
+argument-hint: "[service...] or \"all\""
 allowed-tools: Bash(docker *), Bash(sleep *), Read, Grep
 ---
 

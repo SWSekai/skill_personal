@@ -1,6 +1,9 @@
 ---
 name: quality-check
 description: "Pre-commit code quality audit — redundancy, impact analysis, architecture conformance, and risk assessment. IMPORTANT: After quality check passes, ensure modify-log skill is invoked after commit to create the local modification log."
+model: opus
+effort: high
+argument-hint: "[files...]"
 allowed-tools: Read, Grep, Glob, Agent
 ---
 

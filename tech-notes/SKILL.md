@@ -1,6 +1,9 @@
 ---
 name: tech-notes
 description: 將對話中的技術問答整理成結構化技術筆記，存放於 .local/docs/tech-notes/
+model: sonnet
+effort: medium
+argument-hint: "[topic]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(mkdir *)
 ---
 

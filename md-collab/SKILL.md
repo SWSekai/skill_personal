@@ -1,6 +1,9 @@
 ---
 name: md-collab
 description: "Generate a structured Markdown file with checkboxes/tables for interactive decision-making. User edits the file to make selections, Claude reads it back and implements the decisions."
+model: sonnet
+effort: medium
+argument-hint: "[topic] [mode]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(mkdir *)
 ---
 
@@ -33,25 +36,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(mkdir *)
 
 #### 2-1. 檔案結構
 
-```markdown
-# {主題名稱}
-
-{使用說明：告知使用者如何填寫，勾選規則}
-
----
-
-## 一、{分類名稱}
-
-| # | 項目 | 現狀 | [ ] 選項A | [ ] 選項B | [ ] 選項C |
-|---|------|:----:|:---------:|:---------:|:---------:|
-| 1 | 項目名稱 | 目前值 | [x] | [ ] | [ ] |
-| 2 | 項目名稱 | 目前值 | [ ] | [x] | [ ] |
-
----
-
-## 二、{分類名稱}
-...
-```
+使用 `${CLAUDE_SKILL_DIR}/assets/collab-template.md` 作為檔案模板
 
 #### 2-2. 格式規範
 
@@ -64,28 +49,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(mkdir *)
 
 #### 2-3. 支援的互動模式
 
-根據主題性質選擇最適合的模式：
+支援單選矩陣、多選清單、自由填寫、混合模式四種。
 
-**模式 A — 單選矩陣**（如權限等級配置）
-```markdown
-| # | 項目 | [ ] 低 | [ ] 中 | [ ] 高 |
-```
-每列僅勾選一個選項，表示選定的等級/類別。
-
-**模式 B — 多選清單**（如功能開關、遷移項目）
-```markdown
-| # | 項目 | 說明 | [ ] 啟用 |
-```
-可勾選多個項目，表示啟用/選取。
-
-**模式 C — 自由填寫**（如參數配置、名稱對照）
-```markdown
-| # | 項目 | 現狀 | 新值（請填寫） |
-```
-使用者直接在表格中填入文字值。
-
-**模式 D — 混合模式**
-上述模式可混合使用，不同區塊採用不同模式。
+詳見 `${CLAUDE_SKILL_DIR}/references/interaction-modes.md`
 
 ---
 
