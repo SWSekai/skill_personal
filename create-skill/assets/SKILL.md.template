@@ -1,0 +1,24 @@
+---
+name: {{name}}
+description: "{{description}}"
+model: {{model}}
+effort: {{effort}}
+argument-hint: "{{argument_hint}}"
+allowed-tools: {{allowed_tools}}
+---
+
+## {{title}}
+
+{{overview}}
+
+---
+
+### Step 1: {{step_1_title}}
+
+{{step_1_content}}
+
+---
+
+{{additional_steps}}
+
+Arguments: $ARGUMENTS {{argument_description}}

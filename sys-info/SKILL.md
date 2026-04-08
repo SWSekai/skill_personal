@@ -1,6 +1,9 @@
 ---
 name: sys-info
 description: "Auto-triggered when user asks about system architecture, features, data flow, configuration, deployment, or how things work. Guides user to existing docs or creates/expands documentation."
+model: opus
+effort: medium
+argument-hint: "[topic]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(find *), Agent
 ---
 

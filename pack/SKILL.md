@@ -1,6 +1,8 @@
 ---
 name: pack
 description: "專案打包：收集 AI 上下文到 .local/ai-context/，保存專案專屬 skill，然後清除 skill 環境（.claude/skills/、skill_personal/、CLAUDE.md）。還給專案乾淨的版控環境。"
+model: sonnet
+effort: low
 allowed-tools: Bash(bash *), Bash(ls *), Bash(cat *), Read
 ---
 

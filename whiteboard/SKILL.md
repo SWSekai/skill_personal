@@ -1,6 +1,9 @@
 ---
 name: whiteboard
 description: "諮詢討論時建立即時白板文件，follow up 動態更新。像開會寫白板，所有資訊集中一份 markdown。"
+model: sonnet
+effort: medium
+argument-hint: "[topic]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(date *)
 ---
 
@@ -26,59 +29,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(date *)
 - **檔名規則**: 日期 + 簡短主題，中英皆可
 - **同主題同日**: 更新既有文件，不另開新檔
 
-初始結構：
-
-```markdown
-# [主題標題] 白板
-
-> 最後更新：YYYY-MM-DD
-> 狀態：**進行中** | **已完成** | **暫停**
-
----
-
-## 摘要
-
-（表格：核心資訊一目瞭然，如新舊值對照、影響範圍）
-
----
-
-## 已完成
-
-- [x] 項目一 — 一行結果摘要
-- [x] 項目二 — 一行結果摘要
-
----
-
-## 待辦
-
-- [ ] **項目名** — 簡述目標（見操作步驟 §1）
-- [ ] **項目名** — 簡述目標（見操作步驟 §2）
-
----
-
-## 操作步驟
-
-### §1 項目名
-
-（具體操作路徑、指令、預期結果）
-
-### §2 項目名
-
-（具體操作路徑、指令、預期結果）
-
----
-
-## 決策紀錄
-
-| 日期 | 決策 | 原因 |
-|------|------|------|
-
----
-
-## 備註
-
-（補充資訊、注意事項、相關文件連結）
-```
+使用 `${CLAUDE_SKILL_DIR}/assets/whiteboard-template.md` 作為初始模板
 
 **結構設計原則**：
 - **待辦**：純 checkbox 清單，一眼掃完剩什麼要做

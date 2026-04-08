@@ -1,6 +1,9 @@
 ---
 name: trace-flow
 description: Trace a data field or feature's complete flow through the system — from UI to storage to processing — identifying data loss risks
+model: opus
+effort: high
+argument-hint: "[entry-point]"
 disable-model-invocation: true
 allowed-tools: Read, Grep, Glob, Agent
 ---

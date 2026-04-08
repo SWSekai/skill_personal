@@ -1,6 +1,9 @@
 ---
 name: commit-push
 description: Commit and push changes — auto-generate local modify logs, update READMEs, evaluate service restarts, and run quality checks. No .gitignore files are ever force-added.
+model: sonnet
+effort: medium
+argument-hint: "[commit message]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(docker *)
 ---
 
@@ -61,22 +64,14 @@ Present to the user:
 
 **3b. Read `.gitignore` for safe staging**
 
-Before staging, read `.gitignore` to verify:
-- **All files matching `.gitignore` patterns must NOT be staged — no exceptions**
-- This includes: `.env`, `*.log`, `__pycache__/`, secrets, binaries, `CLAUDE.md`, `.claude/skills/`, `.local/`, `.skill_personal/`, or any project-specific ignored paths
-- **Never use `git add -f`** — files in `.gitignore` are excluded from project version control by design
-- If a file about to be staged matches `.gitignore`, **warn the user and skip it**
-
-> **Note**: A pre-commit hook (installed by `setup.bat`) provides a hard block as the last line of defense.
-> Even if `git add -f` is used, the commit will be rejected if `.claude/`, `skill_personal/`, or `CLAUDE.md` are staged.
-> Run `skill_personal/verify.bat` to confirm the hook is active.
+Read `.gitignore` before staging. Never force-add ignored files. See full rules:
+→ `${CLAUDE_SKILL_DIR}/references/gitignore-safety.md`
 
 **3c. Stage files**
 
 - Use `git add <file>` for specific files only
-- **Never** use `git add -f`（no force-adding of any file）
-- **Never** use `git add -A` or `git add .` (risk of including secrets or binaries)
 - Include any updated READMEs
+- See `${CLAUDE_SKILL_DIR}/references/gitignore-safety.md` for prohibited commands
 
 **3d. Proceed directly to staging + commit (no extra confirmation message)**
 
@@ -86,25 +81,9 @@ After listing the file summary, proceed directly to `git add` + `git commit`. Th
 
 ### Step 4: Commit
 
-- Follow the project's commit message conventions (detect from `git log`)
-- If no convention is established, use Conventional Commits:
-  - `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
-- First line: short summary (under 72 chars)
-- Body: bullet points of key changes
-- End with: `Co-Authored-By: Claude <noreply@anthropic.com>`
-- Use HEREDOC format for multi-line messages:
-
-```bash
-git commit -m "$(cat <<'EOF'
-type: short summary
-
-- change 1
-- change 2
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
-```
+- Follow Conventional Commits format with HEREDOC template
+- See full conventions and template:
+  → `${CLAUDE_SKILL_DIR}/references/commit-conventions.md`
 
 ---
 

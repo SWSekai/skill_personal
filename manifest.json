@@ -1,28 +1,32 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "description": "Skill-personal 結構索引 — Claude 讀取此檔即可掌握全貌，無需逐一掃描目錄",
-  "updated": "2026-04-01",
+  "updated": "2026-04-08",
+  "model_routing": "references/model-routing.md",
   "skills": [
     {
       "name": "commit-push",
       "command": "/commit-push",
       "description": "完整 Git 提交流程：品質檢查 → 修改日誌 → README 更新 → commit → push → 重啟評估",
+      "model": "sonnet",
       "trigger": "手動呼叫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(docker *)"],
-      "files": ["commit-push/SKILL.md", "commit-push/README.md"]
+      "files": ["commit-push/SKILL.md", "commit-push/README.md", "commit-push/references/commit-conventions.md", "commit-push/references/gitignore-safety.md"]
     },
     {
       "name": "create-skill",
       "command": "/create-skill",
       "description": "建立新 Skill：互動式定義 → 生成 SKILL.md + README.md → 註冊索引 → 同步 skill_personal",
+      "model": "sonnet",
       "trigger": "手動呼叫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(mkdir *)", "Bash(date *)", "Bash(git *)", "Bash(cp *)"],
-      "files": ["create-skill/SKILL.md", "create-skill/README.md"]
+      "files": ["create-skill/SKILL.md", "create-skill/README.md", "create-skill/references/model-selection-guide.md", "create-skill/assets/SKILL.md.template", "create-skill/assets/README.md.template"]
     },
     {
       "name": "context-guard",
       "command": "/context-guard",
       "description": "Context window 管理：壓縮通知時自動摘要，手動呼叫整理，對話開始恢復",
+      "model": "sonnet",
       "trigger": "系統壓縮通知 / 手動 / 對話開始",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(wc *)", "Bash(git status*)", "Bash(git log*)", "Bash(date *)"],
       "files": ["context-guard/SKILL.md", "context-guard/README.md"]
@@ -31,14 +35,16 @@
       "name": "md-collab",
       "command": "/md-collab",
       "description": "Markdown 互動式協作：生成核取表/填寫表，使用者編輯後 Claude 讀取並實作",
+      "model": "sonnet",
       "trigger": "手動呼叫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(mkdir *)"],
-      "files": ["md-collab/SKILL.md", "md-collab/README.md"]
+      "files": ["md-collab/SKILL.md", "md-collab/README.md", "md-collab/references/interaction-modes.md", "md-collab/assets/collab-template.md"]
     },
     {
       "name": "modify-log",
       "command": "/modify-log",
       "description": "建立結構化修改日誌，commit 後自動觸發，僅本地不入版控",
+      "model": "haiku",
       "trigger": "commit 後自動 / 手動",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git diff*)", "Bash(git log*)", "Bash(git status*)", "Bash(ls *)", "Bash(date *)"],
       "files": ["modify-log/SKILL.md", "modify-log/README.md"]
@@ -47,14 +53,16 @@
       "name": "quality-check",
       "command": "/quality-check",
       "description": "提交前品質審計：死碼、冗餘、架構一致性、影響評估、安全性掃描",
+      "model": "opus",
       "trigger": "commit 前自動 / 手動",
       "allowed_tools": ["Read", "Grep", "Glob", "Agent"],
-      "files": ["quality-check/SKILL.md", "quality-check/README.md"]
+      "files": ["quality-check/SKILL.md", "quality-check/README.md", "quality-check/references/severity-guide.md"]
     },
     {
       "name": "report",
       "command": "/report",
       "description": "從修改紀錄生成 2-3 分鐘簡報用工作報告",
+      "model": "haiku",
       "trigger": "手動呼叫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git log*)", "Bash(git diff*)", "Bash(ls *)", "Bash(date *)"],
       "files": ["report/SKILL.md", "report/README.md"]
@@ -63,6 +71,7 @@
       "name": "restart-eval",
       "command": "/restart-eval",
       "description": "分析程式碼變更後哪些容器需重啟/重建，輸出具體指令",
+      "model": "haiku",
       "trigger": "commit 後自動 / 手動",
       "allowed_tools": ["Bash(git *)", "Bash(docker *)", "Read", "Glob", "Grep"],
       "files": ["restart-eval/SKILL.md", "restart-eval/README.md"]
@@ -71,22 +80,25 @@
       "name": "restart-volumn",
       "command": "/restart-volumn",
       "description": "執行容器重啟/重建：前置檢查 → 重啟 → 健康驗證 → 日誌掃描 → 自動修復",
+      "model": "haiku",
       "trigger": "手動呼叫",
       "allowed_tools": ["Bash(docker *)", "Bash(sleep *)", "Read", "Grep"],
-      "files": ["restart-volumn/SKILL.md", "restart-volumn/README.md"]
+      "files": ["restart-volumn/SKILL.md", "restart-volumn/README.md", "restart-volumn/references/error-recovery.md", "restart-volumn/references/log-keywords.md"]
     },
     {
       "name": "skill-sync",
       "command": "/skill-sync",
       "description": "Skill 環境同步：遠端 pull/push、規則評估與歸類",
+      "model": "sonnet",
       "trigger": "對話開始自動 / 手動",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(cp *)", "Bash(mkdir *)", "Bash(date *)"],
-      "files": ["skill-sync/SKILL.md", "skill-sync/README.md"]
+      "files": ["skill-sync/SKILL.md", "skill-sync/README.md", "skill-sync/references/version-control-boundaries.md", "skill-sync/references/evaluation-decision-tree.md"]
     },
     {
       "name": "sys-info",
       "command": "/sys-info",
       "description": "系統資訊查詢與文件管理：搜尋/擴充/新建文件",
+      "model": "opus",
       "trigger": "詢問系統問題時自動 / 手動",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(find *)", "Agent"],
       "files": ["sys-info/SKILL.md", "sys-info/README.md"]
@@ -95,6 +107,7 @@
       "name": "todo",
       "command": "/todo",
       "description": "處理 AI 待辦事項：優先級排序、追問細節、執行任務、標記完成",
+      "model": "sonnet",
       "trigger": "手動呼叫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(docker *)", "Bash(mkdir *)"],
       "files": ["todo/SKILL.md", "todo/README.md"]
@@ -103,6 +116,7 @@
       "name": "trace-flow",
       "command": "/trace-flow",
       "description": "端到端資料流追蹤：從 UI 到 DB，識別資料遺失風險",
+      "model": "opus",
       "trigger": "手動呼叫",
       "allowed_tools": ["Read", "Grep", "Glob", "Agent"],
       "files": ["trace-flow/SKILL.md", "trace-flow/README.md"]
@@ -111,12 +125,36 @@
       "name": "pack",
       "command": "/pack",
       "description": "專案打包：收集 AI 上下文、保存專案專屬 skill、清除 skill 環境",
+      "model": "sonnet",
       "trigger": "手動呼叫",
       "allowed_tools": ["Bash(bash *)", "Bash(ls *)", "Bash(cat *)", "Read"],
       "files": ["pack/SKILL.md", "pack/README.md"]
+    },
+    {
+      "name": "tech-notes",
+      "command": "/tech-notes",
+      "description": "將對話中的技術問答整理成結構化技術筆記",
+      "model": "sonnet",
+      "trigger": "手動呼叫 / 偵測提醒",
+      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(mkdir *)"],
+      "files": ["tech-notes/SKILL.md", "tech-notes/README.md"]
+    },
+    {
+      "name": "whiteboard",
+      "command": "/whiteboard",
+      "description": "諮詢討論時建立即時白板文件，follow up 動態更新",
+      "model": "sonnet",
+      "trigger": "諮詢類對話自動 / 手動",
+      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(date *)"],
+      "files": ["whiteboard/SKILL.md", "whiteboard/README.md", "whiteboard/assets/whiteboard-template.md"]
     }
   ],
   "resources": [
+    {
+      "name": "model-routing",
+      "path": "references/model-routing.md",
+      "description": "Model routing 規則與 per-skill 分配表"
+    },
     {
       "name": "hooks",
       "path": "setup/hooks/pre-commit",

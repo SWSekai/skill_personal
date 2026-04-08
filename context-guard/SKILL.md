@@ -1,6 +1,8 @@
 ---
 name: context-guard
 description: "Monitor context window usage. Triggered by: (1) system compression notification, (2) manual /context-guard call, (3) conversation start to recover pending summaries. Summarize work to context_summary/ and prompt /clear."
+model: sonnet
+effort: low
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(wc *), Bash(git status*), Bash(git log*), Bash(date *)
 ---
 

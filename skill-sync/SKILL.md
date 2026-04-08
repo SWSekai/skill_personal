@@ -1,6 +1,8 @@
 ---
 name: skill-sync
 description: "Remote sync and rule evaluation only. Initial setup is handled by setup.bat, NOT this skill. (1) Sync skill_personal/ with remote (fetch → pull → merge → push). (2) Evaluate whether new CLAUDE.md/Memory rules should be added to skills or skill_personal/. Triggered when rules change or user calls /skill-sync."
+model: sonnet
+effort: medium
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(cp *), Bash(mkdir *), Bash(date *), Bash(bash *)
 ---
 
@@ -8,30 +10,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(cp *
 
 ## 版控邊界（重要）
 
-**所有 Skill 相關檔案不屬於專案版控：**
+Skill 相關檔案不屬於專案版控，初始化與同步各有分工。
 
-| 路徑 | 版控歸屬 | 說明 |
-|------|---------|------|
-| `.claude/skills/` | 不入版控 | 專案專屬 Skill，僅本地使用 |
-| `skill_personal/` / `.skill_personal/` | skill_personal 遠端倉庫 | 通用 Skill 模板 |
-| `CLAUDE.md` | 不入版控 | Claude Code 專案規範，僅本地使用 |
-
-**原則：專案 git 僅追蹤專案程式碼。Skill 變更統一透過 `skill_personal/`（自身為 git repo）推送至遠端倉庫管理。**
-
-**版控保護由 `setup.bat` 安裝的 pre-commit hook 強制執行（不依賴規則約束）。**
-
----
-
-## 初始化 vs 同步的分工
-
-| 任務 | 負責工具 | 說明 |
-|------|---------|------|
-| 新專案初始化 | `skill_personal/setup.bat` | 建立 `.claude/skills/`、`skill_personal/`、`CLAUDE.md`、`.gitignore`、pre-commit hook |
-| 驗證環境完整性 | `skill_personal/verify.bat` | 檢查所有保護層是否就位 |
-| 遠端同步 | `/skill-sync`（本 Skill） | Fetch/pull/merge/push skill_personal 遠端 |
-| 規則歸類評估 | `/skill-sync`（本 Skill） | 評估新規則應放入 Skill / CLAUDE.md / Memory |
-
-> **不要用 `/skill-sync` 做初始化。** 若環境未就緒，請執行 `skill_personal/setup.bat`。
+詳見 `${CLAUDE_SKILL_DIR}/references/version-control-boundaries.md`
 
 ---
 
@@ -88,43 +69,9 @@ bash skill_personal/setup/sp-sync.sh
 > 2. 是否具備跨專案通用性？ → 回流至 `skill_personal/` 模板並推送遠端
 > 3. 是否僅適用當前專案？ → 僅 Memory，不回流
 
-### 評估決策樹
+決策樹、5 項評估問題、同步流程步驟：
 
-```
-新規則 / 偏好 / 流程
-    │
-    ├─ 僅限當前對話？ → 不儲存
-    │
-    ├─ 跨對話但僅限本專案？ → CLAUDE.md 或 Memory
-    │
-    └─ 通用（適用所有專案）？
-        │
-        ├─ 屬於既有 Skill 職責？ → 更新該 Skill 的 SKILL.md
-        │   └─ 同步更新 skill_personal/ 對應 Skill（移除專案硬編碼）→ push 至遠端
-        │
-        ├─ 屬於新的可重複流程？ → 評估是否建立新 Skill
-        │   └─ 建立後執行完整性檢查 → 回流至 skill_personal/ → push 至遠端
-        │
-        └─ 屬於行為準則（非流程）？ → 加入 CLAUDE.md 通用模板
-            └─ 更新 skill-sync 的 CLAUDE.md 模板區段
-```
-
-### 評估時必須回答的問題
-
-1. **這條規則是否可從程式碼推導？** → 若是，不需儲存
-2. **這條規則是否只在特定專案有意義？** → 若是，只放 CLAUDE.md / Memory
-3. **這條規則是否改變了某個既有 Skill 的行為？** → 若是，更新該 Skill
-4. **這條規則是否定義了新的可重複流程？** → 若是，評估建立新 Skill
-5. **更新後是否需要同步至 skill_personal/?** → 移除專案硬編碼後回流，並 push 至遠端
-
-### 同步流程
-
-規則確認歸類後：
-1. 更新本專案 `.claude/skills/` 對應檔案
-2. 評估通用性 → 若通用，同步至 `skill_personal/`（移除專案硬編碼）
-3. `skill_personal/` 有更新 → 觸發流程一同步至遠端
-4. 更新相關 README
-5. **以上所有變更不進入專案版控**
+詳見 `${CLAUDE_SKILL_DIR}/references/evaluation-decision-tree.md`
 
 ---
 

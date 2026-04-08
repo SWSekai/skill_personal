@@ -1,6 +1,9 @@
 ---
 name: report
 description: "Generate a concise work report from modification logs for 2-3 minute presentations. Supports full, weekly, or date-range reports."
+model: haiku
+effort: low
+argument-hint: "[full|weekly|MMDD-MMDD]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git log*), Bash(git diff*), Bash(ls *), Bash(date *)
 ---
 

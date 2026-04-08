@@ -113,20 +113,24 @@ cp -r skill_personal/* ~/.claude/skills/
 
 ## Skills Overview / 指令一覽
 
-| Skill | Command | Description |
-|---|---|---|
-| **commit-push** | `/commit-push` | Full commit flow: quality check → modify log → README update → commit → push → service restart eval |
-| **create-skill** | `/create-skill [name]` | 建立新 Skill：互動式定義 → 生成 SKILL.md + README.md → 註冊索引 → 同步 skill_personal |
-| **modify-log** | `/modify-log [topic]` | Create versioned change log (`YYYYMMDD_v1.md`) with structured fields |
-| **restart-eval** | `/restart-eval [range]` | Evaluate which Docker services need restart/rebuild after changes |
-| **restart-volumn** | `/restart-volumn [services]` | Execute container restart/rebuild with health checks & auto-recovery |
-| **trace-flow** | `/trace-flow [field]` | Trace a data field end-to-end through the system (UI → API → DB → processing) |
-| **quality-check** | `/quality-check [files]` | Code quality audit: dead code, redundancy, impact, architecture, security |
-| **report** | `/report [range]` | Generate concise work report from modify logs for 2-3 min presentations |
-| **sys-info** | `/sys-info [question]` | System info query & documentation lifecycle management |
-| **skill-sync** | `/skill-sync` | Auto-init skill environment, sync .skill_personal remote, evaluate rule placement |
-| **md-collab** | `/md-collab [topic]` | Generate structured Markdown with checkboxes/tables for interactive decision-making |
-| **context-guard** | `/context-guard` | Monitor context window usage, auto-summarize & suggest /clear when exceeding 40% |
+| Skill | Command | Model | Description |
+|---|---|:---:|---|
+| **commit-push** | `/commit-push` | sonnet | Full commit flow: quality check → modify log → README update → commit → push → service restart eval |
+| **context-guard** | `/context-guard` | sonnet | Monitor context window usage, auto-summarize & suggest /clear |
+| **create-skill** | `/create-skill` | sonnet | 建立新 Skill：互動式定義 → 生成 SKILL.md + README.md → 註冊索引 → 同步 skill_personal |
+| **md-collab** | `/md-collab` | sonnet | Generate structured Markdown with checkboxes/tables for interactive decision-making |
+| **modify-log** | `/modify-log` | haiku | Create versioned change log with structured fields |
+| **pack** | `/pack` | sonnet | 專案打包：收集 AI 上下文、保存專屬 skill、清除 skill 環境 |
+| **quality-check** | `/quality-check` | opus | Code quality audit: dead code, redundancy, impact, architecture, security |
+| **report** | `/report` | haiku | Generate concise work report from modify logs for 2-3 min presentations |
+| **restart-eval** | `/restart-eval` | haiku | Evaluate which Docker services need restart/rebuild after changes |
+| **restart-volumn** | `/restart-volumn` | haiku | Execute container restart/rebuild with health checks & auto-recovery |
+| **skill-sync** | `/skill-sync` | sonnet | Remote sync skill_personal, evaluate rule placement |
+| **sys-info** | `/sys-info` | opus | System info query & documentation lifecycle management |
+| **tech-notes** | `/tech-notes` | sonnet | 將對話中的技術問答整理成結構化技術筆記 |
+| **todo** | `/todo` | sonnet | AI 待辦事項處理：優先級排序、執行任務、更新 TODO |
+| **trace-flow** | `/trace-flow` | opus | Trace a data field end-to-end through the system (UI → API → DB → processing) |
+| **whiteboard** | `/whiteboard` | sonnet | 諮詢討論時建立即時白板文件，follow up 動態更新 |
 
 ---
 
@@ -297,58 +301,52 @@ These skills are designed to be project-agnostic. To customize for a specific pr
 ## Directory Structure / 目錄結構
 
 ```
-Skill-personal/
+skill_personal/
 ├── README.md                       ← This file（含同步規則）
-├── manifest.json                   ← Skill 結構索引（機器可讀）
+├── manifest.json                   ← Skill 結構索引（含 model 分配）
+├── references/
+│   └── model-routing.md            ← Model routing 共用規則
 │
 ├── setup/                          ← 建置與基礎設施
-│   ├── sp-init.bat                 ← 一鍵建置腳本
-│   ├── sp-verify.bat               ← 環境驗證腳本
-│   ├── hooks/
-│   │   └── pre-commit              ← Git pre-commit hook（防止 Skill 檔案誤入版控）
-│   └── templates/
-│       └── CLAUDE.md.template      ← CLAUDE.md 通用模板（sp-init.bat 使用）
+│   ├── sp-init.bat / sp-sync.sh / sp-verify.bat / sp-pack.sh
+│   ├── hooks/pre-commit
+│   └── templates/CLAUDE.md.template
 │
-├── docs/                           ← 使用者文件
-│   └── QUICKSTART.md               ← 快速上手指南
+├── docs/QUICKSTART.md              ← 快速上手指南
 │
-├── commit-push/                    ← 提交與推送
-│   ├── README.md
-│   └── SKILL.md
-├── create-skill/                   ← 建立新 Skill
-│   ├── README.md
-│   └── SKILL.md
-├── context-guard/                  ← Context Window 管理
-│   ├── README.md
-│   └── SKILL.md
-├── md-collab/                      ← Markdown 互動式協作
-│   ├── README.md
-│   └── SKILL.md
-├── modify-log/                     ← 修改日誌
-│   ├── README.md
-│   └── SKILL.md
-├── quality-check/                  ← 品質與影響檢查
-│   ├── README.md
-│   └── SKILL.md
-├── report/                         ← 工作報告生成
-│   ├── README.md
-│   └── SKILL.md
-├── restart-eval/                   ← 服務重啟評估
-│   ├── README.md
-│   └── SKILL.md
-├── restart-volumn/                 ← 容器重啟與自動修復
-│   ├── README.md
-│   └── SKILL.md
-├── skill-sync/                     ← Skill 環境同步
-│   ├── README.md
-│   └── SKILL.md
-├── sys-info/                       ← 系統資訊查詢
-│   ├── README.md
-│   └── SKILL.md
-├── todo/                           ← AI 待辦事項處理
-│   ├── README.md
-│   └── SKILL.md
-└── trace-flow/                     ← 資料流追蹤
+├── commit-push/                    ← [sonnet] 提交與推送
+│   ├── SKILL.md, README.md
+│   └── references/                 ← commit 格式、gitignore 安全規則
+├── create-skill/                   ← [sonnet] 建立新 Skill
+│   ├── SKILL.md, README.md
+│   ├── references/                 ← model 選擇指引
+│   └── assets/                     ← SKILL.md / README.md 模板
+├── quality-check/                  ← [opus] 品質與影響檢查
+│   ├── SKILL.md, README.md
+│   └── references/                 ← severity 定義
+├── restart-volumn/                 ← [haiku] 容器重啟與自動修復
+│   ├── SKILL.md, README.md
+│   └── references/                 ← error recovery、log keywords
+├── skill-sync/                     ← [sonnet] Skill 環境同步
+│   ├── SKILL.md, README.md
+│   └── references/                 ← 版控邊界、評估決策樹
+├── md-collab/                      ← [sonnet] Markdown 互動式協作
+│   ├── SKILL.md, README.md
+│   ├── references/                 ← 互動模式說明
+│   └── assets/                     ← 協作文件模板
+├── whiteboard/                     ← [sonnet] 即時白板
+│   ├── SKILL.md, README.md
+│   └── assets/                     ← 白板初始模板
+│
+├── context-guard/                  ← [sonnet] Context Window 管理
+├── modify-log/                     ← [haiku] 修改日誌
+├── pack/                           ← [sonnet] 專案打包
+├── report/                         ← [haiku] 工作報告生成
+├── restart-eval/                   ← [haiku] 服務重啟評估
+├── sys-info/                       ← [opus] 系統資訊查詢
+├── tech-notes/                     ← [sonnet] 技術筆記
+├── todo/                           ← [sonnet] AI 待辦事項
+└── trace-flow/                     ← [opus] 資料流追蹤
     ├── README.md
     └── SKILL.md
 ```
