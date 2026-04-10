@@ -43,8 +43,8 @@ if "%BEHIND%"=="0" if "%AHEAD%"=="0" (
 )
 
 if not "%BEHIND%"=="0" (
-    echo [INFO] Remote: %BEHIND% commit(s) behind, %AHEAD% commit(s) ahead
-    echo [Step 1a] Pulling %BEHIND% new commit(s)...
+    echo [INFO] Remote: %BEHIND% commit^(s^) behind, %AHEAD% commit^(s^) ahead
+    echo [Step 1a] Pulling %BEHIND% new commit^(s^)...
     git pull --rebase origin main
     if errorlevel 1 (
         echo [ERROR] git pull failed. Resolve conflicts manually.
@@ -68,12 +68,12 @@ if not exist "%SKILLS_DIR%" mkdir "%SKILLS_DIR%"
 
 for /d %%D in ("%SP_DIR%\*") do (
     set "SKILL_NAME=%%~nxD"
+    set "SKIP=0"
+    if /I "!SKILL_NAME!"=="setup" set "SKIP=1"
+    if /I "!SKILL_NAME!"=="docs" set "SKIP=1"
+    if /I "!SKILL_NAME!"==".git" set "SKIP=1"
 
-    if "!SKILL_NAME!"=="setup" goto :cont
-    if "!SKILL_NAME!"=="docs" goto :cont
-    if "!SKILL_NAME!"==".git" goto :cont
-
-    if exist "%%D\SKILL.md" (
+    if "!SKIP!"=="0" if exist "%%D\SKILL.md" (
         set "TARGET=%SKILLS_DIR%\!SKILL_NAME!"
 
         if not exist "!TARGET!" (
@@ -103,7 +103,6 @@ for /d %%D in ("%SP_DIR%\*") do (
             )
         )
     )
-    :cont
 )
 
 :: --- Step 3: Summary ---
@@ -122,7 +121,7 @@ if %ADDED% GTR 0 (
 )
 
 if not "%AHEAD%"=="0" (
-    echo [INFO] Local has %AHEAD% unpushed commit(s).
+    echo [INFO] Local has %AHEAD% unpushed commit^(s^).
     echo        Run: cd skill_personal ^&^& git push origin main
 )
 
