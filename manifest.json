@@ -1,52 +1,48 @@
 {
-  "version": "2.0",
-  "description": "Skill-personal 結構索引 — Claude 讀取此檔即可掌握全貌，無需逐一掃描目錄。2026-04-10 重構：原 17 個 skill 合併為 6 個（4 子命令式 + 2 獨立）。",
+  "version": "3.0",
+  "description": "Sekai-workflow 結構索引 — Claude 讀取此檔即可掌握全貌。原 17 個 skill 合併為 6 個，場景導向命名。",
   "updated": "2026-04-10",
   "model_routing": "references/model-routing.md",
   "skills": [
     {
-      "name": "dev",
-      "command": "/dev",
-      "description": "開發流程合併：commit-push、品質檢查、修改日誌、容器重啟評估與執行",
+      "name": "build",
+      "command": "/build",
+      "description": "開發全流程：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → commit → push → 重啟評估",
       "model": "sonnet",
       "trigger": "手動呼叫",
-      "subcommands": ["commit", "quality", "log", "restart", "eval"],
+      "subcommands": ["flow", "plan", "impl", "test", "commit", "quality", "log", "restart", "eval"],
       "merged_from": ["commit-push", "quality-check", "modify-log", "restart-volumn", "restart-eval"],
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash(git *)", "Bash(docker *)", "Bash(ls *)", "Bash(date *)", "Bash(sleep *)", "Bash(mkdir *)"],
-      "files": ["dev/SKILL.md", "dev/README.md"]
+      "files": ["build/SKILL.md", "build/README.md"]
     },
     {
-      "name": "collab",
-      "command": "/collab",
-      "description": "互動協作合併：AI TODO、即時白板、Markdown 決策表、技術筆記",
+      "name": "memo",
+      "command": "/memo",
+      "description": "互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記",
       "model": "sonnet",
       "trigger": "手動 / 諮詢類對話自動 / 技術問答偵測提醒",
       "subcommands": ["todo", "board", "decide", "notes"],
       "merged_from": ["todo", "whiteboard", "md-collab", "tech-notes"],
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(mkdir *)"],
-      "files": ["collab/SKILL.md", "collab/README.md"]
+      "files": ["memo/SKILL.md", "memo/README.md"]
     },
     {
-      "name": "admin",
-      "command": "/admin",
-      "description": "Skill 環境管理合併：建立新 Skill、遠端同步、專案打包",
+      "name": "setup",
+      "command": "/setup",
+      "description": "Skill 環境管理：建立新 Skill、遠端同步、專案打包",
       "model": "sonnet",
       "trigger": "手動 / 對話開始自動 sync / 寫入 Memory 時自動 sync",
       "subcommands": ["new", "sync", "pack"],
       "merged_from": ["create-skill", "skill-sync", "pack"],
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(mkdir *)", "Bash(date *)", "Bash(cp *)", "Bash(bash *)", "Bash(cat *)"],
-      "files": ["admin/SKILL.md", "admin/README.md"]
+      "files": ["setup/SKILL.md", "setup/README.md"]
     },
     {
-      "name": "info",
-      "command": "/info",
-      "description": "系統文件與報告合併：系統資訊、資料流追蹤、工作報告",
+      "name": "ask",
+      "command": "/ask",
+      "description": "系統文件與報告：系統資訊查詢、資料流追蹤、工作報告",
       "model": "opus",
-      "trigger": "手動 / 詢問系統相關問題時自動觸發 info",
-      "subcommands": ["info", "trace", "report"],
+      "trigger": "手動 / 詢問系統相關問題時自動觸發 query",
+      "subcommands": ["query", "trace", "report"],
       "merged_from": ["sys-info", "trace-flow", "report"],
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash(ls *)", "Bash(find *)", "Bash(git log*)", "Bash(git diff*)", "Bash(date *)"],
-      "files": ["info/SKILL.md", "info/README.md"]
+      "files": ["ask/SKILL.md", "ask/README.md"]
     },
     {
       "name": "context-guard",
@@ -54,7 +50,6 @@
       "description": "Context window 管理：壓縮通知時自動摘要，手動呼叫整理，對話開始恢復",
       "model": "sonnet",
       "trigger": "系統壓縮通知 / 手動 / 對話開始",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(wc *)", "Bash(git status*)", "Bash(git log*)", "Bash(date *)"],
       "files": ["context-guard/SKILL.md", "context-guard/README.md"]
     },
     {
@@ -63,7 +58,6 @@
       "description": "Memory 跨專案攜帶與整理",
       "model": "sonnet",
       "trigger": "手動呼叫",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(cp *)"],
       "files": ["memory-portable/SKILL.md", "memory-portable/README.md"]
     }
   ],
@@ -75,38 +69,28 @@
     },
     {
       "name": "hooks",
-      "path": "setup/hooks/pre-commit",
+      "path": "_bootstrap/hooks/pre-commit",
       "description": "Git pre-commit hook，防止 Skill 檔案誤入專案版控"
     },
     {
       "name": "templates",
-      "path": "setup/templates/CLAUDE.md.template",
+      "path": "_bootstrap/templates/CLAUDE.md.template",
       "description": "CLAUDE.md 通用模板，sp-init.bat 建置時使用"
     },
     {
       "name": "sp-init.bat",
-      "path": "setup/sp-init.bat",
-      "description": "一鍵建置腳本：建立 .claude/skills/ + .skill_personal/ + CLAUDE.md + hook"
-    },
-    {
-      "name": "sp-verify.bat",
-      "path": "setup/sp-verify.bat",
-      "description": "環境驗證腳本：檢查所有保護層是否就位"
-    },
-    {
-      "name": "QUICKSTART",
-      "path": "docs/QUICKSTART.md",
-      "description": "面向協作使用者的快速上手指南"
+      "path": "_bootstrap/sp-init.bat",
+      "description": "一鍵建置腳本"
     },
     {
       "name": "sp-sync",
-      "path": "setup/sp-sync.sh",
-      "description": "一鍵同步腳本：pull 遠端 → 比對差異 → 更新 .claude/skills/"
+      "path": "_bootstrap/sp-sync.sh",
+      "description": "一鍵同步腳本"
     },
     {
       "name": "sp-pack",
-      "path": "setup/sp-pack.sh",
-      "description": "專案打包腳本：收集 AI 上下文 → 保存專屬 skill → 清除 skill 環境"
+      "path": "_bootstrap/sp-pack.sh",
+      "description": "專案打包腳本"
     }
   ]
 }
