@@ -161,7 +161,7 @@ for %%E in (%GI_ENTRIES%) do (
 )
 
 REM Clean up: remove consecutive blank lines (PowerShell one-liner)
-powershell -NoProfile -Command "$c = Get-Content '!GITIGNORE!' -Raw; $c = $c -replace '(\r?\n){3,}', \"`n`n\"; $c = $c.Trim(); Set-Content '!GITIGNORE!' $c -Encoding UTF8 -NoNewline"
+powershell -NoProfile -Command "$nl = [Environment]::NewLine; [System.IO.File]::WriteAllText('!GITIGNORE!', ([System.IO.File]::ReadAllText('!GITIGNORE!') -replace '(\r?\n){3,}', ($nl + $nl)).Trim(), (New-Object System.Text.UTF8Encoding $false))"
 
 REM ============================
 REM  Step 6: Install pre-commit hook
@@ -279,16 +279,16 @@ if exist "!LOCAL_SETTINGS!" (
     findstr /C:"hooks" "!LOCAL_SETTINGS!" >nul 2>&1
     if errorlevel 1 (
         REM settings.local.json exists but no hooks - merge hooks from template
-        powershell -NoProfile -Command "$local = Get-Content '!LOCAL_SETTINGS!' -Raw | ConvertFrom-Json; $tmpl = (Get-Content '!HOOKS_SRC!' -Raw) -replace '\{\{PROJECT_DIR\}\}', '!PROJECT_DIR_FWD!' | ConvertFrom-Json; $local | Add-Member -NotePropertyName 'hooks' -NotePropertyValue $tmpl.hooks -Force; $local | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
+        powershell -NoProfile -Command "$local = Get-Content '!LOCAL_SETTINGS!' -Raw -Encoding UTF8 | ConvertFrom-Json; $tmpl = (Get-Content '!HOOKS_SRC!' -Raw -Encoding UTF8) -replace '\{\{PROJECT_DIR\}\}', '!PROJECT_DIR_FWD!' | ConvertFrom-Json; $local | Add-Member -NotePropertyName 'hooks' -NotePropertyValue $tmpl.hooks -Force; $local | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
         echo            Merged hooks into settings.local.json
     ) else (
         echo            Hooks already configured - updating hook paths
         REM Update existing hooks with current project path
-        powershell -NoProfile -Command "$content = Get-Content '!LOCAL_SETTINGS!' -Raw; $tmpl = (Get-Content '!HOOKS_SRC!' -Raw) -replace '\{\{PROJECT_DIR\}\}', '!PROJECT_DIR_FWD!' | ConvertFrom-Json; $local = $content | ConvertFrom-Json; $local.hooks = $tmpl.hooks; $local | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
+        powershell -NoProfile -Command "$content = Get-Content '!LOCAL_SETTINGS!' -Raw -Encoding UTF8; $tmpl = (Get-Content '!HOOKS_SRC!' -Raw -Encoding UTF8) -replace '\{\{PROJECT_DIR\}\}', '!PROJECT_DIR_FWD!' | ConvertFrom-Json; $local = $content | ConvertFrom-Json; $local.hooks = $tmpl.hooks; $local | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
     )
 ) else (
     REM Create settings.local.json from hooks template
-    powershell -NoProfile -Command "$tmpl = (Get-Content '!HOOKS_SRC!' -Raw) -replace '\{\{PROJECT_DIR\}\}', '!PROJECT_DIR_FWD!' | ConvertFrom-Json; $out = @{hooks=$tmpl.hooks}; $out | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
+    powershell -NoProfile -Command "$tmpl = (Get-Content '!HOOKS_SRC!' -Raw -Encoding UTF8) -replace '\{\{PROJECT_DIR\}\}', '!PROJECT_DIR_FWD!' | ConvertFrom-Json; $out = @{hooks=$tmpl.hooks}; $out | ConvertTo-Json -Depth 20 | Set-Content '!LOCAL_SETTINGS!' -Encoding UTF8"
     echo            Created settings.local.json with hooks
 )
 
@@ -349,24 +349,24 @@ REM Copy portable memories (skip existing to preserve local modifications)
 set "MEM_RESTORED=0"
 set "MEM_SKIPPED=0"
 for %%F in ("!MEM_PORTABLE!\*.md") do (
-    if "%%~nxF"=="README.md" goto :SkipMem
-    if exist "!MEMORY_TARGET!\%%~nxF" (
-        set /a MEM_SKIPPED+=1
-    ) else (
-        copy /Y "%%F" "!MEMORY_TARGET!\%%~nxF" >nul 2>&1
-        set /a MEM_RESTORED+=1
+    if /I not "%%~nxF"=="README.md" (
+        if exist "!MEMORY_TARGET!\%%~nxF" (
+            set /a MEM_SKIPPED+=1
+        ) else (
+            copy /Y "%%F" "!MEMORY_TARGET!\%%~nxF" >nul 2>&1
+            set /a MEM_RESTORED+=1
+        )
     )
-    :SkipMem
 )
 
 REM Generate/update MEMORY.md index
 if !MEM_RESTORED! GTR 0 (
     REM Rebuild MEMORY.md from all .md files in memory dir
-    powershell -NoProfile -Command "$dir='!MEMORY_TARGET!'; $entries=@(); Get-ChildItem $dir -Filter '*.md' | Where-Object { $_.Name -ne 'MEMORY.md' -and $_.Name -ne 'README.md' } | ForEach-Object { $content=Get-Content $_.FullName -Raw -Encoding UTF8; if($content -match 'name:\s*(.+)') { $name=$Matches[1].Trim() } else { $name=$_.BaseName }; if($content -match 'description:\s*(.+)') { $desc=$Matches[1].Trim() } else { $desc='' }; $entries += \"- [$name]($($_.Name)) — $desc\" }; $entries -join \"`n\" | Set-Content (Join-Path $dir 'MEMORY.md') -Encoding UTF8"
-    echo       Restored !MEM_RESTORED! memories, skipped !MEM_SKIPPED! (already exist)
+    powershell -NoProfile -Command "$dir='!MEMORY_TARGET!'; $entries=@(); Get-ChildItem $dir -Filter '*.md' | Where-Object { $_.Name -ne 'MEMORY.md' -and $_.Name -ne 'README.md' } | ForEach-Object { $content=Get-Content $_.FullName -Raw -Encoding UTF8; if($content -match 'name:\s*(.+)') { $name=$Matches[1].Trim() } else { $name=$_.BaseName }; if($content -match 'description:\s*(.+)') { $desc=$Matches[1].Trim() } else { $desc='' }; $entries += ('- [{0}]({1}) - {2}' -f $name, $_.Name, $desc) }; ($entries -join [Environment]::NewLine) | Set-Content (Join-Path $dir 'MEMORY.md') -Encoding UTF8"
+    echo       Restored !MEM_RESTORED! memories, skipped !MEM_SKIPPED! ^(already exist^)
     echo       Rebuilt MEMORY.md index
 ) else (
-    echo       All portable memories already present (!MEM_SKIPPED! skipped)
+    echo       All portable memories already present ^(!MEM_SKIPPED! skipped^)
 )
 
 :DoneMemory
