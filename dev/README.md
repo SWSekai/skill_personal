@@ -1,12 +1,25 @@
-# /dev — 開發流程合併 Skill
+# /dev — 開發全流程 Skill
 
-整合 commit-push、quality-check、modify-log、restart-eval、restart-volumn 五個原始 Skill。
+涵蓋從需求分析到部署的完整開發生命週期。
 
 ## 使用方式
 
+### 全流程（推薦）
+
+```
+/dev flow <feature description>
+```
+
+自動串接：plan → impl → test → commit，中間不需手動呼叫。
+
+### 分階段呼叫
+
 | 指令 | 說明 |
 |---|---|
-| `/dev` 或 `/dev commit [msg]` | 完整提交流程（品質檢查 → 日誌 → README → commit → push → 重啟評估） |
+| `/dev plan <feature>` | 需求分析 + 方案設計 + 步驟拆解 |
+| `/dev impl [plan-ref]` | 按方案逐步實作 |
+| `/dev test [scope]` | 測試驗證（自動 + 手動 checklist） |
+| `/dev commit [msg]` | 完整提交流程 |
 | `/dev quality [files]` | 獨立品質審計 |
 | `/dev log [topic]` | 建立 / 更新本地修改日誌 |
 | `/dev restart [services]` | 容器重啟與自動修復 |
@@ -17,38 +30,36 @@
 ## Model
 
 - **Skill model**：`sonnet`
-- **commit / log / restart / eval**：標準步驟，sonnet 即可
-- **quality**：需深度分析；於子命令內以 deeper thinking 完成（必要時呼叫 Agent）
+- **quality**：需深度分析，必要時呼叫 Agent
+- **plan**：需深度思考架構影響
 
-## 觸發
+## 完整流程圖
 
-- 手動：使用者呼叫 `/dev <subcommand>`
-- 自動：無
+```
+/dev flow "新增使用者管理功能"
+    │
+    ├─ plan：掃描現有架構 → 影響評估 → 方案設計 → 步驟拆解
+    │   └─ AskUserQuestion 確認方案
+    │
+    ├─ impl：逐步執行 → checkbox 勾對 → 偏離偵測
+    │
+    ├─ test：自動測試 → 手動 checklist → 邊界情境
+    │   └─ 失敗 → 回 impl 修復 → 重測
+    │
+    └─ commit：quality → README → stage → commit → push → restart-eval
+```
 
-## 主要流程
+## 方案文件
 
-### `/dev commit`
-1. 呼叫 quality 子命令做品質審計（含資料流重讀）
-2. 自動更新 README
-3. 列出 staging 狀態
-4. Commit（Conventional Commits + Co-Authored-By）
-5. 呼叫 log 子命令寫修改日誌
-6. Push
-7. 同步 .skill_personal/ 至遠端
-8. 呼叫 eval 子命令輸出重啟指令
-9. 經驗回流至 `.local/docs/<guide>.md`
+plan 階段產生的方案文件存放於 `.local/docs/plans/YYMMDD_<feature>.md`，包含：
 
-### `/dev quality`
-死碼/冗餘/硬編碼/錯誤處理/型別/序列化/安全性掃描，加架構一致性、影響評估、風險報告、資料流重讀。
+- 需求摘要與驗收標準
+- 現況掃描結果
+- 影響範圍表
+- 替代方案比較（若有多種做法）
+- 帶 checkbox 的實作步驟清單
 
-### `/dev log`
-寫入 `.local/modify_logs/YYMMDD_TopicDescription.md`，僅本地。
-
-### `/dev restart`
-Pre-flight → 執行 → 健康檢查 → 日誌掃描 → 自動修復 → 最終驗證。
-
-### `/dev eval`
-從 git diff + docker-compose 推導每個變更檔對應的服務動作，輸出指令清單。
+方案文件的 checkbox 作為 impl 階段的進度追蹤。中斷後可用 `/dev impl <plan-file>` 恢復。
 
 ## 檔案結構
 
@@ -58,14 +69,16 @@ Pre-flight → 執行 → 健康檢查 → 日誌掃描 → 自動修復 → 最
 └── README.md
 ```
 
-無 references/、assets/、scripts/ 子目錄，所有邏輯內含於 SKILL.md。
+## 子命令對應
 
-## 對應原 Skill
-
-| 原 Skill | 子命令 |
+| 子命令 | 前身 |
 |---|---|
-| commit-push | `/dev commit` |
-| quality-check | `/dev quality` |
-| modify-log | `/dev log` |
-| restart-volumn | `/dev restart` |
-| restart-eval | `/dev eval` |
+| `/dev flow` | 新增 |
+| `/dev plan` | 新增（對齊 CLAUDE.md「功能需求規劃先行」） |
+| `/dev impl` | 新增 |
+| `/dev test` | 新增 |
+| `/dev commit` | commit-push |
+| `/dev quality` | quality-check |
+| `/dev log` | modify-log |
+| `/dev restart` | restart-volumn |
+| `/dev eval` | restart-eval |

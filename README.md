@@ -85,7 +85,7 @@ sp-init.bat 自動完成：
 
 | Skill | Command | Model | Description |
 |---|---|:---:|---|
-| **dev** | `/dev <commit\|quality\|log\|restart\|eval>` | sonnet | 開發流程：commit-push、品質檢查、修改日誌、容器重啟評估與執行 |
+| **dev** | `/dev <flow\|plan\|impl\|test\|commit\|quality\|log\|restart\|eval>` | sonnet | 開發全流程：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → commit → 重啟評估 |
 | **collab** | `/collab <todo\|board\|decide\|notes>` | sonnet | 互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記 |
 | **skill** | `/skill <new\|sync\|pack>` | sonnet | Skill 環境管理：建立新 Skill、遠端同步、專案打包 |
 | **doc** | `/doc <info\|trace\|report>` | opus | 系統文件與報告：系統資訊、資料流追蹤、工作報告 |
@@ -96,12 +96,16 @@ sp-init.bat 自動完成：
 
 ## 詳細說明
 
-### `/dev` — 開發流程合併
+### `/dev` — 開發全流程
 
-整合原 `commit-push` + `quality-check` + `modify-log` + `restart-eval` + `restart-volumn`。
+整合需求分析、方案設計、實作引導、測試驗證，加上原 commit-push、quality-check、modify-log、restart-eval、restart-volumn。
 
 | 子命令 | 用途 |
 |---|---|
+| `/dev flow <feature>` | **全流程串接**：plan → impl → test → commit |
+| `/dev plan <feature>` | 需求分析 + 方案設計 + 步驟拆解 |
+| `/dev impl [plan-ref]` | 按方案逐步實作，checkbox 勾對進度 |
+| `/dev test [scope]` | 測試驗證（自動 + 手動 checklist） |
 | `/dev commit [msg]` | 完整提交流程（品質檢查 → 日誌 → README → commit → push → 重啟評估） |
 | `/dev quality [files]` | 獨立品質審計 |
 | `/dev log [topic]` | 建立 / 更新本地修改日誌（僅本地） |
