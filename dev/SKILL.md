@@ -1,27 +1,292 @@
 ---
 name: dev
-description: "開發流程一站式入口：commit-push、品質檢查、修改日誌、容器重啟評估與執行。子命令路由 commit / quality / log / restart。"
+description: "開發全流程一站式入口：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → commit → push → 重啟評估。子命令路由 flow / plan / impl / test / commit / quality / log / restart / eval。"
 model: sonnet
 effort: medium
-argument-hint: "<commit|quality|log|restart|eval> [args...]"
-allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *), Bash(ls *), Bash(date *), Bash(sleep *), Bash(mkdir *)
+argument-hint: "<flow|plan|impl|test|commit|quality|log|restart|eval> [args...]"
+allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *), Bash(ls *), Bash(date *), Bash(sleep *), Bash(mkdir *), Bash(npm *), Bash(npx *), Bash(pytest *), Bash(python *)
 ---
 
-# /dev — 開發流程合併 Skill
+# /dev — 開發全流程 Skill
 
-整合提交流程、品質審計、修改日誌、容器生命週期五項職能。透過第一個參數決定子命令。
+涵蓋從需求分析到部署的完整開發生命週期。透過第一個參數決定子命令。
 
 ## 子命令路由
 
-| 子命令 | 用途 | 對應原 Skill |
-|---|---|---|
-| `/dev commit [msg]` | 完整提交流程（品質檢查 → 日誌 → README → commit → push → 重啟評估） | commit-push |
-| `/dev quality [files...]` | 獨立品質審計（commit 前由 commit 子命令自動觸發） | quality-check |
-| `/dev log [topic]` | 建立 / 更新本地修改日誌 | modify-log |
-| `/dev restart [services...]` | 執行容器重啟與自動修復 | restart-volumn |
-| `/dev eval [commit-range]` | 僅評估哪些容器需重啟 / 重建（不執行） | restart-eval |
+### 開發前期（需求 → 實作 → 驗證）
+
+| 子命令 | 用途 |
+|---|---|
+| `/dev flow <feature>` | **全流程串接**：plan → impl → test → commit，自動銜接每個階段 |
+| `/dev plan <feature>` | 需求分析 + 方案設計 + 步驟拆解，產出方案文件 |
+| `/dev impl [plan-ref]` | 按方案逐步實作，自動勾對進度、偵測偏離 |
+| `/dev test [scope]` | 測試驗證：自動跑測試 + 手動 checklist + 邊界情境 |
+
+### 提交後期（品質 → commit → 部署）
+
+| 子命令 | 用途 |
+|---|---|
+| `/dev commit [msg]` | 完整提交流程（品質檢查 → 日誌 → README → commit → push → 重啟評估） |
+| `/dev quality [files...]` | 獨立品質審計（commit 前由 commit 子命令自動觸發） |
+| `/dev log [topic]` | 建立 / 更新本地修改日誌 |
+| `/dev restart [services...]` | 執行容器重啟與自動修復 |
+| `/dev eval [commit-range]` | 僅評估哪些容器需重啟 / 重建（不執行） |
 
 無參數時預設執行 `commit`。
+
+---
+
+## F. `/dev flow` — 全流程串接
+
+**自動銜接** plan → impl → test → commit 四個階段，中間不需手動呼叫下一步。
+
+### 流程
+
+```
+/dev flow <feature description>
+    │
+    ├─ Step 1: /dev plan（方案設計）
+    │   └─ 使用者透過 AskUserQuestion 確認方案
+    │       ├─ 確認 → 進入 impl
+    │       └─ 修改 → 調整方案後重新確認
+    │
+    ├─ Step 2: /dev impl（逐步實作）
+    │   └─ 所有步驟完成
+    │
+    ├─ Step 3: /dev test（測試驗證）
+    │   └─ 全部通過
+    │       ├─ 是 → 進入 commit
+    │       └─ 否 → 列出失敗項，回到 impl 修復
+    │
+    └─ Step 4: /dev commit（提交推送）
+        └─ 完成
+```
+
+### 中斷與恢復
+
+- 任何階段中斷後，方案文件保留在 `.local/docs/plans/`
+- 恢復方式：`/dev impl <plan-file>` 從上次進度繼續
+- 方案文件中的 checkbox 記錄完成狀態，中斷後可識別未完成步驟
+
+---
+
+## G. `/dev plan` — 需求分析與方案設計
+
+收到功能訴求時，**先設計完整方案，確認後才實作**（對齊 CLAUDE.md 核心規則）。
+
+### Step 1：需求理解
+
+1. **解析使用者描述**：提取核心功能訴求、驗收標準、約束條件
+2. **釐清模糊點**：使用 AskUserQuestion 追問不明確的需求
+   - 只問真正影響方案方向的問題
+   - 可由程式碼推導的細節不問，直接在方案中說明假設
+
+### Step 2：現況掃描
+
+1. **相關程式碼**：Grep / Glob 找出與需求相關的現有實作
+2. **架構認識**：讀 compose、package.json、目錄結構，理解系統分層
+3. **DB schema**：若涉及資料面，掃描 models / migrations / collection 定義
+4. **相關 API**：找出會被影響的 endpoint、前端呼叫點
+
+### Step 3：影響範圍評估
+
+| 維度 | 檢查內容 |
+|---|---|
+| 檔案影響 | 列出所有需新增 / 修改的檔案 |
+| 服務影響 | 哪些 container / service 會被動到 |
+| DB 影響 | 是否需要新增 collection / table / column / index |
+| API 影響 | 新增或修改哪些 endpoint、request / response 結構 |
+| 前端影響 | 哪些頁面 / 元件需要調整 |
+| 向下相容 | 既有功能是否會受影響 |
+
+### Step 4：方案設計
+
+**若存在多種做法**：列出替代方案與優缺點比較表
+
+```markdown
+| 方案 | 說明 | 優點 | 缺點 |
+|---|---|---|---|
+| A | ... | ... | ... |
+| B | ... | ... | ... |
+```
+
+**最終方案**需包含：
+- 技術選型與理由
+- 資料流設計（若涉及跨服務）
+- 錯誤處理策略
+- 效能考量（若涉及大量資料）
+
+### Step 5：步驟拆解
+
+將方案拆成**可逐步執行的實作清單**，每步對應具體的程式碼變更：
+
+```markdown
+## 實作步驟
+
+- [ ] §1 建立 DB model / schema
+  - 檔案：`backend/models/xxx.py`
+  - 新增：XxxModel class，欄位定義
+  
+- [ ] §2 建立 API endpoint
+  - 檔案：`backend/routers/xxx.py`
+  - 新增：GET /api/xxx, POST /api/xxx
+  - 依賴：§1
+
+- [ ] §3 前端頁面
+  - 檔案：`frontend/src/pages/xxx.vue`
+  - 新增：列表頁 + 表單
+  - 依賴：§2
+```
+
+每步須標明：
+- 目標檔案與行為（新增 / 修改）
+- 依賴關係（§ 編號互引）
+- 預估影響行數（粗略即可）
+
+### Step 6：方案確認
+
+使用 **AskUserQuestion** 向使用者呈現方案：
+- 第一選項：`開始執行 (Recommended)`
+- 第二選項：`我要調整`（進入修改流程）
+- 第三選項：`換方案`（若有替代方案）
+
+確認後：
+1. 將方案寫入 `.local/docs/plans/YYMMDD_<feature>.md`
+2. 若在 `/dev flow` 中 → 自動進入 `/dev impl`
+3. 若獨立呼叫 → 告知使用者「方案已存，可用 `/dev impl` 開始實作」
+
+---
+
+## H. `/dev impl` — 按方案實作
+
+### 使用方式
+
+| 用法 | 行為 |
+|---|---|
+| `/dev impl` | 讀取最近的方案文件，從未完成步驟繼續 |
+| `/dev impl <plan-file>` | 指定方案文件 |
+| 由 `/dev flow` 串接進入 | 自動帶入剛確認的方案 |
+
+### Step 1：載入方案
+
+1. 讀取方案文件（`.local/docs/plans/YYMMDD_<feature>.md`）
+2. 解析實作步驟清單與 checkbox 狀態
+3. 找到第一個未勾選（`- [ ]`）的步驟作為起始點
+4. 若全部已勾 → 告知實作已完成，提示 `/dev test`
+
+### Step 2：逐步執行
+
+對每個步驟：
+
+1. **宣告正在執行的步驟**（一句話告知使用者）
+2. **讀取相關檔案**：先理解現有程式碼
+3. **執行實作**：按方案描述新增或修改程式碼
+4. **偏離偵測**：
+   - 若實作過程發現方案有誤或遺漏 → 暫停，向使用者說明偏離原因
+   - 使用者確認調整方向後，**更新方案文件**再繼續
+5. **勾對完成**：在方案文件中將 `- [ ]` 改為 `- [x]`，附 timestamp
+
+```markdown
+- [x] §1 建立 DB model / schema ✓ 2026-04-10 14:30
+```
+
+6. **衍生任務**：若實作過程發現額外需要做的事：
+   - 屬於本功能範圍 → 在方案文件末尾新增步驟
+   - 不屬於本功能 → 加入 `.local/collab/TODO.md`（標 `derived from: <feature>`）
+
+### Step 3：實作完成
+
+所有步驟勾對後：
+
+1. 更新方案文件狀態為 `## 狀態：實作完成`
+2. 列出實作摘要（修改了哪些檔案、新增了什麼）
+3. 若在 `/dev flow` 中 → 自動進入 `/dev test`
+4. 若獨立呼叫 → 提示「實作完成，建議 `/dev test` 驗證」
+
+---
+
+## I. `/dev test` — 測試驗證
+
+### 使用方式
+
+| 用法 | 行為 |
+|---|---|
+| `/dev test` | 自動偵測專案測試框架，跑全部 + 手動 checklist |
+| `/dev test <scope>` | 只跑指定範圍的測試 |
+| 由 `/dev flow` 串接進入 | 自動執行 |
+
+### Step 1：偵測測試框架
+
+掃描專案結構判斷可用的測試工具：
+
+| 偵測條件 | 測試框架 | 執行指令 |
+|---|---|---|
+| `pytest.ini` / `pyproject.toml[tool.pytest]` / `tests/` | pytest | `pytest --tb=short` |
+| `jest.config.*` / `package.json[jest]` | Jest | `npx jest` |
+| `vitest.config.*` | Vitest | `npx vitest run` |
+| `cypress/` / `playwright/` | E2E | 列出但不自動執行 |
+| 無測試框架 | — | 跳至 Step 3 手動 checklist |
+
+### Step 2：執行自動化測試
+
+```bash
+# 依偵測結果選擇
+pytest --tb=short -q 2>&1 | tail -20
+# 或
+npx jest --ci 2>&1 | tail -30
+```
+
+**結果處理**：
+- 全通過 → 進 Step 3
+- 有失敗 → 列出失敗的 test case 與錯誤訊息，分析原因：
+  - **實作 bug** → 標記需修復的檔案和行號
+  - **測試本身過時** → 說明需要更新測試
+  - **環境問題** → 說明需要的環境配置
+
+### Step 3：手動驗證 Checklist
+
+根據方案文件（若存在）或本次改動，生成需人工驗證的清單：
+
+```markdown
+## 手動驗證 Checklist
+
+### 功能驗證
+- [ ] 核心功能正常運作（描述具體操作步驟）
+- [ ] 相關聯功能未受影響
+
+### 邊界情境
+- [ ] 空值 / null 輸入
+- [ ] 超長字串 / 超大數值
+- [ ] 並行操作（多使用者同時觸發）
+- [ ] 網路中斷 / 外部服務不可用
+
+### UI 驗證（若有前端變更）
+- [ ] 不同解析度 / 瀏覽器
+- [ ] Loading 狀態與錯誤提示
+
+### 安全性
+- [ ] 權限控制（未授權使用者不可存取）
+- [ ] 輸入驗證（無 injection 風險）
+```
+
+**僅列出與本次改動相關的項目**，不列無關的 boilerplate。
+
+### Step 4：測試報告
+
+```markdown
+## 測試結果
+
+| 類別 | 結果 | 備註 |
+|---|:---:|---|
+| 自動化測試 | ✓ 32 passed | pytest |
+| 手動 checklist | ◯ 待驗證 | 5 項需人工確認 |
+| 邊界情境 | ✓ 已確認 | 無風險 |
+```
+
+**流程決策**：
+- 自動化全通過 + 無 High 風險 → 可進入 commit
+- 有失敗 → 若在 `/dev flow` 中：回到 impl 修復 → 重測
+- 有手動 checklist 待驗證 → 提示使用者完成後再 commit
 
 ---
 
