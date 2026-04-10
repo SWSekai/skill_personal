@@ -40,11 +40,19 @@ if not exist "%PROJECT_DIR%\.git" (
     echo.
 )
 
-REM Prevent running in Skill-personal repo itself
-if "%PROJECT_DIR%"=="%REPO_ROOT%" (
-    echo [ERROR] Cannot run this script inside the Skill-personal repo itself.
-    echo         Run from the target project directory, or pass the project path as argument.
+REM Prevent running in Skill-personal repo itself or any of its subdirectories
+set "CHECK_DIR=%PROJECT_DIR%"
+:CheckRepoLoop
+if /I "!CHECK_DIR!"=="%REPO_ROOT%" (
+    echo [ERROR] Cannot run this script inside the Skill-personal repo or any subdirectory of it.
+    echo         Current target: %PROJECT_DIR%
+    echo         Run from your target project directory, or pass the project path as argument.
     exit /b 1
+)
+for %%I in ("!CHECK_DIR!\..") do set "PARENT_DIR=%%~fI"
+if /I not "!PARENT_DIR!"=="!CHECK_DIR!" (
+    set "CHECK_DIR=!PARENT_DIR!"
+    goto :CheckRepoLoop
 )
 
 REM ============================
@@ -120,7 +128,7 @@ if exist "%PROJECT_DIR%\CLAUDE.md" (
     REM Get project folder name
     for %%F in ("%PROJECT_DIR%") do set "PROJECT_NAME=%%~nxF"
     REM Copy template and replace placeholder
-    powershell -NoProfile -Command "(Get-Content '!TEMPLATE!' -Raw) -replace '\{\{PROJECT_NAME\}\}', '!PROJECT_NAME!' | Set-Content '%PROJECT_DIR%\CLAUDE.md' -Encoding UTF8"
+    powershell -NoProfile -Command "(Get-Content '!TEMPLATE!' -Raw -Encoding UTF8) -replace '\{\{PROJECT_NAME\}\}', '!PROJECT_NAME!' | Set-Content '%PROJECT_DIR%\CLAUDE.md' -Encoding UTF8"
     echo       Created CLAUDE.md from template
 )
 :DoneClaude
