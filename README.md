@@ -87,8 +87,8 @@ sp-init.bat 自動完成：
 |---|---|:---:|---|
 | **dev** | `/dev <flow\|plan\|impl\|test\|commit\|quality\|log\|restart\|eval>` | sonnet | 開發全流程：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → commit → 重啟評估 |
 | **collab** | `/collab <todo\|board\|decide\|notes>` | sonnet | 互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記 |
-| **skill** | `/skill <new\|sync\|pack>` | sonnet | Skill 環境管理：建立新 Skill、遠端同步、專案打包 |
-| **doc** | `/doc <info\|trace\|report>` | opus | 系統文件與報告：系統資訊、資料流追蹤、工作報告 |
+| **admin** | `/admin <new\|sync\|pack>` | sonnet | Skill 環境管理：建立新 Skill、遠端同步、專案打包 |
+| **info** | `/info <query\|trace\|report>` | opus | 系統文件與報告：系統資訊、資料流追蹤、工作報告 |
 | **context-guard** | `/context-guard` | sonnet | Context Window 管理（系統壓縮、手動、對話開始） |
 | **memory-portable** | `/memory-portable` | sonnet | Memory 跨專案攜帶 |
 
@@ -123,25 +123,25 @@ sp-init.bat 自動完成：
 | `/collab decide <topic>` | Markdown 互動式決策表（核取／填寫） |
 | `/collab notes [topic]` | 結構化技術筆記 |
 
-### `/skill` — Skill 環境管理合併
+### `/admin` — Skill 環境管理
 
 整合原 `create-skill` + `skill-sync` + `pack`。
 
 | 子命令 | 用途 |
 |---|---|
-| `/skill new [name] [desc]` | 互動式建立新 Skill |
-| `/skill sync` | `.skill_personal/` 遠端同步、規則評估 |
-| `/skill pack` | 專案打包並清除 skill 環境 |
+| `/admin new [name] [desc]` | 建立新 Skill |
+| `/admin sync` | `.skill_personal/` 遠端同步、規則評估 |
+| `/admin pack` | 專案打包並清除 skill 環境 |
 
-### `/doc` — 系統文件與報告合併
+### `/info` — 系統文件與報告
 
 整合原 `sys-info` + `trace-flow` + `report`。
 
 | 子命令 | 用途 |
 |---|---|
-| `/doc info [topic]` | 系統資訊查詢與文件管理（自動觸發於系統相關問題） |
-| `/doc trace <field>` | 端到端資料流追蹤 |
-| `/doc report [scope]` | 從修改紀錄生成簡報用工作報告 |
+| `/info query [topic]` | 系統資訊查詢與文件管理（系統相關問題時自動觸發） |
+| `/info trace <field>` | 端到端資料流追蹤 |
+| `/info report [scope]` | 從修改紀錄生成簡報用工作報告 |
 
 ### `/context-guard` — Context Window 管理
 
@@ -162,14 +162,14 @@ sp-init.bat 自動完成：
 ```
 .local/
 ├── modify_logs/   ← /dev log（含 /dev commit、/dev restart 報告）
-├── docs/          ← /doc info、/doc trace、/collab board、/collab decide、/collab notes
+├── docs/          ← /info query、/info trace、/collab board、/collab decide、/collab notes
 │   ├── whiteboards/
 │   ├── decisions/
 │   └── tech-notes/
 ├── summary/       ← /context-guard
-├── reports/       ← /doc report
+├── reports/       ← /info report
 ├── collab/        ← /collab todo（TODO.md）
-└── ai-context/    ← /skill pack 打包輸出
+└── ai-context/    ← /admin pack 打包輸出
 ```
 
 ### 入版控文件
@@ -178,7 +178,7 @@ sp-init.bat 自動完成：
 |---|---|---|
 | `/dev commit` | 目錄 README.md 自動更新 | 變更目錄下的 README.md |
 
-### Skill 設定檔（由 `/skill sync` 管理）
+### Skill 設定檔（由 `/admin sync` 管理）
 
 | 檔案 | 位置 | 備註 |
 |---|---|---|
@@ -190,7 +190,7 @@ sp-init.bat 自動完成：
 | 子命令 | 輸出內容 |
 |---|---|
 | `/dev quality` | Risk Report 表格（Severity / File / Mitigation） |
-| `/doc trace` | 端到端資料流表格（Layer / File:Line / Variable / Type / Risk） |
+| `/info trace` | 端到端資料流表格（Layer / File:Line / Variable / Type / Risk） |
 | `/dev eval` | 服務重啟分類 + 執行指令清單 |
 | `/dev restart` | 重啟報告（Service / Action / Status / Duration） |
 
@@ -231,10 +231,10 @@ These skills are designed to be project-agnostic. To customize for a specific pr
 ├── collab/                     ← [sonnet] 互動協作合併
 │   ├── SKILL.md
 │   └── README.md
-├── skill/                      ← [sonnet] Skill 環境管理合併
+├── admin/                      ← [sonnet] Skill 環境管理
 │   ├── SKILL.md
 │   └── README.md
-├── doc/                        ← [opus] 系統文件與報告合併
+├── info/                       ← [opus] 系統文件與報告
 │   ├── SKILL.md
 │   └── README.md
 ├── context-guard/              ← [sonnet] Context Window 管理
@@ -260,11 +260,11 @@ These skills are designed to be project-agnostic. To customize for a specific pr
 | whiteboard | `/collab board` |
 | md-collab | `/collab decide` |
 | tech-notes | `/collab notes` |
-| create-skill | `/skill new` |
-| skill-sync | `/skill sync` |
-| pack | `/skill pack` |
-| sys-info | `/doc info` |
-| trace-flow | `/doc trace` |
-| report | `/doc report` |
+| create-skill | `/admin new` |
+| skill-sync | `/admin sync` |
+| pack | `/admin pack` |
+| sys-info | `/info query` |
+| trace-flow | `/info trace` |
+| report | `/info report` |
 | context-guard | `/context-guard`（保持獨立） |
 | memory-portable | `/memory-portable`（保持獨立） |

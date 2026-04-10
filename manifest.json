@@ -27,26 +27,26 @@
       "files": ["collab/SKILL.md", "collab/README.md"]
     },
     {
-      "name": "skill",
-      "command": "/skill",
+      "name": "admin",
+      "command": "/admin",
       "description": "Skill 環境管理合併：建立新 Skill、遠端同步、專案打包",
       "model": "sonnet",
       "trigger": "手動 / 對話開始自動 sync / 寫入 Memory 時自動 sync",
       "subcommands": ["new", "sync", "pack"],
       "merged_from": ["create-skill", "skill-sync", "pack"],
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(mkdir *)", "Bash(date *)", "Bash(cp *)", "Bash(bash *)", "Bash(cat *)"],
-      "files": ["skill/SKILL.md", "skill/README.md"]
+      "files": ["admin/SKILL.md", "admin/README.md"]
     },
     {
-      "name": "doc",
-      "command": "/doc",
+      "name": "info",
+      "command": "/info",
       "description": "系統文件與報告合併：系統資訊、資料流追蹤、工作報告",
       "model": "opus",
       "trigger": "手動 / 詢問系統相關問題時自動觸發 info",
       "subcommands": ["info", "trace", "report"],
       "merged_from": ["sys-info", "trace-flow", "report"],
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash(ls *)", "Bash(find *)", "Bash(git log*)", "Bash(git diff*)", "Bash(date *)"],
-      "files": ["doc/SKILL.md", "doc/README.md"]
+      "files": ["info/SKILL.md", "info/README.md"]
     },
     {
       "name": "context-guard",

@@ -363,7 +363,7 @@ push 失敗 → 告知使用者，不阻塞主流程。
 若本次改動含**非顯而易見的根因、繞道方法、設定差異**：
 1. 加入或新建 `.local/docs/<guide>.md`
 2. 格式：**症狀 → 原因 → 解決方式 → 注意事項**
-3. 告知使用者「已寫入 `.local/docs/<guide>.md`，/skill pack 時會帶走」
+3. 告知使用者「已寫入 `.local/docs/<guide>.md`，/admin pack 時會帶走」
 
 ---
 

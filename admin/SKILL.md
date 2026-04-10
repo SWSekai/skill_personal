@@ -1,5 +1,5 @@
 ---
-name: skill
+name: admin
 description: "Skill 環境管理一站式入口：建立新 Skill、遠端同步、專案打包。子命令路由 new / sync / pack。"
 model: sonnet
 effort: medium
@@ -7,7 +7,7 @@ argument-hint: "<new|sync|pack> [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(mkdir *), Bash(date *), Bash(cp *), Bash(bash *), Bash(cat *)
 ---
 
-# /skill — Skill 環境管理合併 Skill
+# /admin — Skill 環境管理合併 Skill
 
 整合 create-skill、skill-sync、pack 三項職能。透過第一個參數決定子命令。
 
@@ -15,15 +15,15 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(mkdi
 
 | 子命令 | 用途 | 對應原 Skill |
 |---|---|---|
-| `/skill new [name] [desc]` | 建立新 Skill | create-skill |
-| `/skill sync` | 遠端同步 + 規則評估 | skill-sync |
-| `/skill pack` | 專案打包（清除 skill 環境） | pack |
+| `/admin new [name] [desc]` | 建立新 Skill | create-skill |
+| `/admin sync` | 遠端同步 + 規則評估 | skill-sync |
+| `/admin pack` | 專案打包（清除 skill 環境） | pack |
 
 無參數時要求使用者指定子命令。
 
 ---
 
-## A. `/skill new` — 建立新 Skill
+## A. `/admin new` — 建立新 Skill
 
 互動式建立全新 Claude Code Skill，遵循既有結構規範並完成所有註冊。
 
@@ -125,7 +125,7 @@ git commit -m "feat: 新增 <name> skill"
 git push
 ```
 
-專案專屬 Skill：僅在 `.claude/skills/`，不同步，告知使用者「不會隨 /skill pack 帶走」。
+專案專屬 Skill：僅在 `.claude/skills/`，不同步，告知使用者「不會隨 /admin pack 帶走」。
 
 ### Step 8：完整性驗證
 
@@ -161,7 +161,7 @@ Model：<model> (effort: <effort>)
 
 ---
 
-## B. `/skill sync` — 遠端同步、規則評估
+## B. `/admin sync` — 遠端同步、規則評估
 
 ### 觸發時機
 
@@ -220,13 +220,13 @@ bash .skill_personal/setup/sp-sync.sh
 
 ---
 
-## C. `/skill pack` — 專案打包
+## C. `/admin pack` — 專案打包
 
 將專案中所有 AI 維護相關檔案打包到 `.local/ai-context/`，然後刪除 skill 環境，還原乾淨的專案目錄。
 
 ### 觸發
 
-手動呼叫 `/skill pack`
+手動呼叫 `/admin pack`
 
 ### 執行
 
