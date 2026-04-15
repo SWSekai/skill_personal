@@ -382,6 +382,25 @@ for %%F in ("!MEM_PORTABLE!\*.md") do (
     )
 )
 
+REM ----------------------------------------------------------------
+REM  Step 8b: Also restore PACKED memory from .local/ai-context/memory/
+REM  (produced by /setup pack). These are per-project archived
+REM  memories; restore them alongside the generic portable ones.
+REM ----------------------------------------------------------------
+set "PACKED_MEM=%PROJECT_DIR%\.local\ai-context\memory"
+if exist "!PACKED_MEM!" (
+    for %%F in ("!PACKED_MEM!\*.md") do (
+        if /I not "%%~nxF"=="README.md" (
+            if exist "!MEMORY_TARGET!\%%~nxF" (
+                set /a MEM_SKIPPED+=1
+            ) else (
+                copy /Y "%%F" "!MEMORY_TARGET!\%%~nxF" >nul 2>&1
+                set /a MEM_RESTORED+=1
+            )
+        )
+    )
+)
+
 REM Generate/update MEMORY.md index
 if !MEM_RESTORED! GTR 0 (
     REM Rebuild MEMORY.md from all .md files in memory dir
