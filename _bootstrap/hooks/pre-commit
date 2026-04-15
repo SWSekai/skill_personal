@@ -4,7 +4,7 @@
 #  Installed by Skill-personal/sp-init.bat
 # =============================================================
 
-BLOCKED_PATTERNS=".claude/ .skill_personal/ Skill-personal/ CLAUDE.md .hanschen/"
+BLOCKED_PATTERNS=".claude/ .Sekai_workflow/ Skill-personal/ CLAUDE.md .hanschen/"
 
 # Get list of staged files
 STAGED=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null)

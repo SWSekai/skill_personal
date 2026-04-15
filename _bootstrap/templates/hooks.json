@@ -13,12 +13,12 @@
           {
             "type": "prompt",
             "if": "Write(*memory*)",
-            "prompt": "[Hook: Rule 9 三方同步] 你剛寫入了 Memory 檔案。評估：1) 此內容是否也應寫入 .claude/skills/ 的 Skill 規格？2) 是否需要同步到 skill_personal/？如需更新，立即執行並推送 skill_personal remote。"
+            "prompt": "[Hook: Rule 9 三方同步] 你剛寫入了 Memory 檔案。評估：1) 此內容是否也應寫入 .claude/skills/ 的 Skill 規格？2) 是否需要同步到 Sekai_workflow/？如需更新，立即執行並推送 Sekai_workflow remote。"
           },
           {
             "type": "prompt",
             "if": "Write(*skills*SKILL.md)",
-            "prompt": "[Hook: Rule 9+10 Skill 同步與完整性] 你剛寫入了 Skill 檔案。檢查：1) skill_personal/ 對應資料夾是否需同步？2) 該 Skill 有 SKILL.md + README.md？3) .claude/skills/README.md 已更新？4) CLAUDE.md Available Skills 已更新？如需修正立即執行，skill_personal 變更後推送 remote。"
+            "prompt": "[Hook: Rule 9+10 Skill 同步與完整性] 你剛寫入了 Skill 檔案。檢查：1) Sekai_workflow/ 對應資料夾是否需同步？2) 該 Skill 有 SKILL.md + README.md？3) .claude/skills/README.md 已更新？4) CLAUDE.md Available Skills 已更新？如需修正立即執行，Sekai_workflow 變更後推送 remote。"
           }
         ]
       },
@@ -32,12 +32,12 @@
           {
             "type": "prompt",
             "if": "Edit(*memory*)",
-            "prompt": "[Hook: Rule 9 三方同步] 你剛編輯了 Memory 檔案。評估：1) 此變更是否也應反映到 .claude/skills/？2) 是否需要同步到 skill_personal/？如需更新，立即執行並推送 skill_personal remote。"
+            "prompt": "[Hook: Rule 9 三方同步] 你剛編輯了 Memory 檔案。評估：1) 此變更是否也應反映到 .claude/skills/？2) 是否需要同步到 Sekai_workflow/？如需更新，立即執行並推送 Sekai_workflow remote。"
           },
           {
             "type": "prompt",
             "if": "Edit(*skills*SKILL.md)",
-            "prompt": "[Hook: Rule 9 Skill 同步] 你剛編輯了 Skill 檔案。檢查 skill_personal/ 對應資料夾是否需同步？如需更新，立即執行並推送 skill_personal remote。"
+            "prompt": "[Hook: Rule 9 Skill 同步] 你剛編輯了 Skill 檔案。檢查 Sekai_workflow/ 對應資料夾是否需同步？如需更新，立即執行並推送 Sekai_workflow remote。"
           }
         ]
       }

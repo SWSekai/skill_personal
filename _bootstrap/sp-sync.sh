@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
-# sp-sync.sh — skill_personal 遠端同步 + 專案 Skills 更新
-# 用法：在專案根目錄執行 bash skill_personal/setup/sp-sync.sh
+# sp-sync.sh — Sekai_workflow 遠端同步 + 專案 Skills 更新
+# 用法：在專案根目錄執行 bash Sekai_workflow/setup/sp-sync.sh
 # ============================================================
 
 set -euo pipefail
@@ -13,10 +13,10 @@ SKILLS_DIR="$PROJECT_DIR/.claude/skills"
 
 echo ""
 echo "========================================"
-echo " skill_personal Sync Tool"
+echo " Sekai_workflow Sync Tool"
 echo "========================================"
 echo ""
-echo "[INFO] skill_personal : $SP_DIR"
+echo "[INFO] Sekai_workflow : $SP_DIR"
 echo "[INFO] Project skills : $SKILLS_DIR"
 echo ""
 
@@ -126,7 +126,7 @@ fi
 
 if [ "$AHEAD" != "0" ]; then
     echo "[INFO] Local has $AHEAD unpushed commit(s)."
-    echo "       Run: cd skill_personal && git push origin main"
+    echo "       Run: cd Sekai_workflow && git push origin main"
 fi
 
 echo "[DONE]"

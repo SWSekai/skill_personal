@@ -1,5 +1,5 @@
 ---
-name: collab
+name: memo
 description: "互動協作一站式入口：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記整理。子命令路由 todo / board / decide / notes。"
 model: sonnet
 effort: medium
@@ -7,7 +7,7 @@ argument-hint: "<todo|board|decide|notes> [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(mkdir *)
 ---
 
-# /collab — 互動協作合併 Skill
+# /memo — 互動協作合併 Skill
 
 整合四種與使用者互動的協作模式。透過第一個參數決定子命令。
 
@@ -15,25 +15,25 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 | 子命令 | 用途 | 對應原 Skill |
 |---|---|---|
-| `/collab todo [add/list/<n>]` | 處理 AI TODO 清單 | todo |
-| `/collab board [topic]` | 即時白板（諮詢／規劃類對話） | whiteboard |
-| `/collab decide <topic>` | Markdown 互動式決策表 | md-collab |
-| `/collab notes [topic]` | 結構化技術筆記 | tech-notes |
+| `/memo todo [add/list/<n>]` | 處理 AI TODO 清單 | todo |
+| `/memo board [topic]` | 即時白板（諮詢／規劃類對話） | whiteboard |
+| `/memo decide <topic>` | Markdown 互動式決策表 | md-collab |
+| `/memo notes [topic]` | 結構化技術筆記 | tech-notes |
 
 無參數時要求使用者指定子命令。
 
 ---
 
-## A. `/collab todo` — AI TODO 處理
+## A. `/memo todo` — AI TODO 處理
 
 ### 用法
 
 | 用法 | 行為 |
 |---|---|
-| `/collab todo` | 處理待辦項目（依優先度由高至低） |
-| `/collab todo add <desc>` | 快速新增（支援 `@high` / `@low`） |
-| `/collab todo list` | 列出所有待辦 |
-| `/collab todo <n>` | 處理指定編號 |
+| `/memo todo` | 處理待辦項目（依優先度由高至低） |
+| `/memo todo add <desc>` | 快速新增（支援 `@high` / `@low`） |
+| `/memo todo list` | 列出所有待辦 |
+| `/memo todo <n>` | 處理指定編號 |
 
 ### Step 1：讀取與解析
 
@@ -75,11 +75,11 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ### Step 6：收尾
 
-呈現處理摘要（完成 / 延後 / 衍生），有未 commit 變更時提示可呼叫 `/dev commit`。
+呈現處理摘要（完成 / 延後 / 衍生），有未 commit 變更時提示可呼叫 `/build commit`。
 
 ---
 
-## B. `/collab board` — 即時白板
+## B. `/memo board` — 即時白板
 
 諮詢、規劃、排錯類對話建立持續更新的 markdown，作為即時白板。
 
@@ -117,7 +117,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 1. 狀態改為 **已完成** 或 **暫停**
 2. 確認所有待辦有負責人或後續計畫
 3. 文件留在 `.local/docs/`，不入版控
-4. 含可重用經驗 → 評估寫入 guide（同 `/dev commit` Step 9）
+4. 含可重用經驗 → 評估寫入 guide（同 `/build commit` Step 9）
 
 ### 設計原則
 
@@ -129,7 +129,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ---
 
-## C. `/collab decide` — Markdown 互動式決策表
+## C. `/memo decide` — Markdown 互動式決策表
 
 產生結構化 markdown 讓使用者勾選、Claude 讀回實作。
 
@@ -197,7 +197,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ---
 
-## D. `/collab notes` — 技術筆記整理
+## D. `/memo notes` — 技術筆記整理
 
 將對話中的技術問答整理成結構化筆記，存於 `.local/docs/tech-notes/`。
 

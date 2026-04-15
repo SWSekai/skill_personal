@@ -36,8 +36,8 @@
 
 | Skill | 觸發時機 | 產出檔案格式 | 存放位置 | 用途 |
 |-------|---------|-------------|---------|------|
-| **skill-sync** | 對話開始 / 手動 `/skill-sync` | `SKILL.md`, `README.md` | `.claude/skills/[name]/` | 同步 skill_personal 至專案 |
-| **create-skill** | 手動 `/create-skill` | `SKILL.md`, `README.md` | `.claude/skills/[name]/` + `skill_personal/` | 建立新 Skill 定義 |
+| **skill-sync** | 對話開始 / 手動 `/skill-sync` | `SKILL.md`, `README.md` | `.claude/skills/[name]/` | 同步 Sekai_workflow 至專案 |
+| **create-skill** | 手動 `/create-skill` | `SKILL.md`, `README.md` | `.claude/skills/[name]/` + `Sekai_workflow/` | 建立新 Skill 定義 |
 
 ---
 

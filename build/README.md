@@ -1,84 +1,59 @@
-# /dev — 開發全流程 Skill
+# build — 開發全流程
 
-涵蓋從需求分析到部署的完整開發生命週期。
+## 功能說明
+
+整合需求分析、方案設計、實作引導、測試驗證，加上提交推送、品質檢查、修改日誌、容器重啟評估與執行。
 
 ## 使用方式
 
-### 全流程（推薦）
-
 ```
-/dev flow <feature description>
+/build <flow|plan|impl|test|commit|quality|log|restart|eval> [args...]
 ```
-
-自動串接：plan → impl → test → commit，中間不需手動呼叫。
-
-### 分階段呼叫
-
-| 指令 | 說明 |
-|---|---|
-| `/dev plan <feature>` | 需求分析 + 方案設計 + 步驟拆解 |
-| `/dev impl [plan-ref]` | 按方案逐步實作 |
-| `/dev test [scope]` | 測試驗證（自動 + 手動 checklist） |
-| `/dev commit [msg]` | 完整提交流程 |
-| `/dev quality [files]` | 獨立品質審計 |
-| `/dev log [topic]` | 建立 / 更新本地修改日誌 |
-| `/dev restart [services]` | 容器重啟與自動修復 |
-| `/dev eval [range]` | 重啟評估（不執行） |
-
-無參數時預設執行 `commit`。
 
 ## Model
 
-- **Skill model**：`sonnet`
-- **quality**：需深度分析，必要時呼叫 Agent
-- **plan**：需深度思考架構影響
+- **建議 model**: `sonnet`
+- **Effort**: `medium`
+- **理由**: 多步驟編排流程，需要判斷力但不需跨檔深度分析（quality 子命令內部以 deeper thinking 處理）
 
-## 完整流程圖
+## 觸發條件
 
-```
-/dev flow "新增使用者管理功能"
-    │
-    ├─ plan：掃描現有架構 → 影響評估 → 方案設計 → 步驟拆解
-    │   └─ AskUserQuestion 確認方案
-    │
-    ├─ impl：逐步執行 → checkbox 勾對 → 偏離偵測
-    │
-    ├─ test：自動測試 → 手動 checklist → 邊界情境
-    │   └─ 失敗 → 回 impl 修復 → 重測
-    │
-    └─ commit：quality → README → stage → commit → push → restart-eval
-```
+手動呼叫
 
-## 方案文件
+## 執行流程
 
-plan 階段產生的方案文件存放於 `.local/docs/plans/YYMMDD_<feature>.md`，包含：
-
-- 需求摘要與驗收標準
-- 現況掃描結果
-- 影響範圍表
-- 替代方案比較（若有多種做法）
-- 帶 checkbox 的實作步驟清單
-
-方案文件的 checkbox 作為 impl 階段的進度追蹤。中斷後可用 `/dev impl <plan-file>` 恢復。
-
-## 檔案結構
-
-```
-.claude/skills/dev/
-├── SKILL.md
-└── README.md
-```
-
-## 子命令對應
-
-| 子命令 | 前身 |
+| 子命令 | 用途 |
 |---|---|
-| `/dev flow` | 新增 |
-| `/dev plan` | 新增（對齊 CLAUDE.md「功能需求規劃先行」） |
-| `/dev impl` | 新增 |
-| `/dev test` | 新增 |
-| `/dev commit` | commit-push |
-| `/dev quality` | quality-check |
-| `/dev log` | modify-log |
-| `/dev restart` | restart-volumn |
-| `/dev eval` | restart-eval |
+| `flow <feature>` | 全流程串接：plan → impl → test → commit |
+| `plan <feature>` | 需求分析 + 方案設計 + 步驟拆解 |
+| `impl [plan-ref]` | 按方案逐步實作 |
+| `test [scope]` | 測試驗證 |
+| `commit [msg]` | 完整提交流程（品質 → 日誌 → README → commit → push → 重啟評估） |
+| `quality [files]` | 獨立品質審計 |
+| `log [topic]` | 建立 / 更新本地修改日誌 |
+| `restart [services]` | 容器重啟與自動修復 |
+| `eval [range]` | 重啟評估（不執行） |
+
+## 目錄結構
+
+```
+build/
+├── SKILL.md
+├── README.md
+└── references/
+    ├── commit-conventions.md    ← commit 格式規範
+    ├── gitignore-safety.md      ← .gitignore 安全規則
+    ├── severity-guide.md        ← 風險嚴重等級定義 + 實作後驗證
+    ├── error-recovery.md        ← 容器錯誤自動修復流程
+    └── log-keywords.md          ← 日誌關鍵字嚴重等級
+```
+
+## 整合來源
+
+| 原 Skill | 對應子命令 |
+|---|---|
+| commit-push | `commit` |
+| quality-check | `quality` |
+| modify-log | `log` |
+| restart-volumn | `restart` |
+| restart-eval | `eval` |

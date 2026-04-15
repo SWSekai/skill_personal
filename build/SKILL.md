@@ -1,5 +1,5 @@
 ---
-name: dev
+name: build
 description: "開發全流程一站式入口：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → commit → push → 重啟評估。子命令路由 flow / plan / impl / test / commit / quality / log / restart / eval。"
 model: sonnet
 effort: medium
@@ -7,7 +7,7 @@ argument-hint: "<flow|plan|impl|test|commit|quality|log|restart|eval> [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *), Bash(ls *), Bash(date *), Bash(sleep *), Bash(mkdir *), Bash(npm *), Bash(npx *), Bash(pytest *), Bash(python *)
 ---
 
-# /dev — 開發全流程 Skill
+# /build — 開發全流程 Skill
 
 涵蓋從需求分析到部署的完整開發生命週期。透過第一個參數決定子命令。
 
@@ -17,60 +17,60 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *)
 
 | 子命令 | 用途 |
 |---|---|
-| `/dev flow <feature>` | **全流程串接**：plan → impl → test → commit，自動銜接每個階段 |
-| `/dev plan <feature>` | 需求分析 + 方案設計 + 步驟拆解，產出方案文件 |
-| `/dev impl [plan-ref]` | 按方案逐步實作，自動勾對進度、偵測偏離 |
-| `/dev test [scope]` | 測試驗證：自動跑測試 + 手動 checklist + 邊界情境 |
+| `/build flow <feature>` | **全流程串接**：plan → impl → test → commit，自動銜接每個階段 |
+| `/build plan <feature>` | 需求分析 + 方案設計 + 步驟拆解，產出方案文件 |
+| `/build impl [plan-ref]` | 按方案逐步實作，自動勾對進度、偵測偏離 |
+| `/build test [scope]` | 測試驗證：自動跑測試 + 手動 checklist + 邊界情境 |
 
 ### 提交後期（品質 → commit → 部署）
 
 | 子命令 | 用途 |
 |---|---|
-| `/dev commit [msg]` | 完整提交流程（品質檢查 → 日誌 → README → commit → push → 重啟評估） |
-| `/dev quality [files...]` | 獨立品質審計（commit 前由 commit 子命令自動觸發） |
-| `/dev log [topic]` | 建立 / 更新本地修改日誌 |
-| `/dev restart [services...]` | 執行容器重啟與自動修復 |
-| `/dev eval [commit-range]` | 僅評估哪些容器需重啟 / 重建（不執行） |
+| `/build commit [msg]` | 完整提交流程（品質檢查 → 日誌 → README → commit → push → 重啟評估） |
+| `/build quality [files...]` | 獨立品質審計（commit 前由 commit 子命令自動觸發） |
+| `/build log [topic]` | 建立 / 更新本地修改日誌 |
+| `/build restart [services...]` | 執行容器重啟與自動修復 |
+| `/build eval [commit-range]` | 僅評估哪些容器需重啟 / 重建（不執行） |
 
 無參數時預設執行 `commit`。
 
 ---
 
-## F. `/dev flow` — 全流程串接
+## F. `/build flow` — 全流程串接
 
 **自動銜接** plan → impl → test → commit 四個階段，中間不需手動呼叫下一步。
 
 ### 流程
 
 ```
-/dev flow <feature description>
+/build flow <feature description>
     │
-    ├─ Step 1: /dev plan（方案設計）
+    ├─ Step 1: /build plan（方案設計）
     │   └─ 使用者透過 AskUserQuestion 確認方案
     │       ├─ 確認 → 進入 impl
     │       └─ 修改 → 調整方案後重新確認
     │
-    ├─ Step 2: /dev impl（逐步實作）
+    ├─ Step 2: /build impl（逐步實作）
     │   └─ 所有步驟完成
     │
-    ├─ Step 3: /dev test（測試驗證）
+    ├─ Step 3: /build test（測試驗證）
     │   └─ 全部通過
     │       ├─ 是 → 進入 commit
     │       └─ 否 → 列出失敗項，回到 impl 修復
     │
-    └─ Step 4: /dev commit（提交推送）
+    └─ Step 4: /build commit（提交推送）
         └─ 完成
 ```
 
 ### 中斷與恢復
 
 - 任何階段中斷後，方案文件保留在 `.local/docs/plans/`
-- 恢復方式：`/dev impl <plan-file>` 從上次進度繼續
+- 恢復方式：`/build impl <plan-file>` 從上次進度繼續
 - 方案文件中的 checkbox 記錄完成狀態，中斷後可識別未完成步驟
 
 ---
 
-## G. `/dev plan` — 需求分析與方案設計
+## G. `/build plan` — 需求分析與方案設計
 
 收到功能訴求時，**先設計完整方案，確認後才實作**（對齊 CLAUDE.md 核心規則）。
 
@@ -152,27 +152,27 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *)
 
 確認後：
 1. 將方案寫入 `.local/docs/plans/YYMMDD_<feature>.md`
-2. 若在 `/dev flow` 中 → 自動進入 `/dev impl`
-3. 若獨立呼叫 → 告知使用者「方案已存，可用 `/dev impl` 開始實作」
+2. 若在 `/build flow` 中 → 自動進入 `/build impl`
+3. 若獨立呼叫 → 告知使用者「方案已存，可用 `/build impl` 開始實作」
 
 ---
 
-## H. `/dev impl` — 按方案實作
+## H. `/build impl` — 按方案實作
 
 ### 使用方式
 
 | 用法 | 行為 |
 |---|---|
-| `/dev impl` | 讀取最近的方案文件，從未完成步驟繼續 |
-| `/dev impl <plan-file>` | 指定方案文件 |
-| 由 `/dev flow` 串接進入 | 自動帶入剛確認的方案 |
+| `/build impl` | 讀取最近的方案文件，從未完成步驟繼續 |
+| `/build impl <plan-file>` | 指定方案文件 |
+| 由 `/build flow` 串接進入 | 自動帶入剛確認的方案 |
 
 ### Step 1：載入方案
 
 1. 讀取方案文件（`.local/docs/plans/YYMMDD_<feature>.md`）
 2. 解析實作步驟清單與 checkbox 狀態
 3. 找到第一個未勾選（`- [ ]`）的步驟作為起始點
-4. 若全部已勾 → 告知實作已完成，提示 `/dev test`
+4. 若全部已勾 → 告知實作已完成，提示 `/build test`
 
 ### Step 2：逐步執行
 
@@ -200,20 +200,20 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *)
 
 1. 更新方案文件狀態為 `## 狀態：實作完成`
 2. 列出實作摘要（修改了哪些檔案、新增了什麼）
-3. 若在 `/dev flow` 中 → 自動進入 `/dev test`
-4. 若獨立呼叫 → 提示「實作完成，建議 `/dev test` 驗證」
+3. 若在 `/build flow` 中 → 自動進入 `/build test`
+4. 若獨立呼叫 → 提示「實作完成，建議 `/build test` 驗證」
 
 ---
 
-## I. `/dev test` — 測試驗證
+## I. `/build test` — 測試驗證
 
 ### 使用方式
 
 | 用法 | 行為 |
 |---|---|
-| `/dev test` | 自動偵測專案測試框架，跑全部 + 手動 checklist |
-| `/dev test <scope>` | 只跑指定範圍的測試 |
-| 由 `/dev flow` 串接進入 | 自動執行 |
+| `/build test` | 自動偵測專案測試框架，跑全部 + 手動 checklist |
+| `/build test <scope>` | 只跑指定範圍的測試 |
+| 由 `/build flow` 串接進入 | 自動執行 |
 
 ### Step 1：偵測測試框架
 
@@ -285,16 +285,16 @@ npx jest --ci 2>&1 | tail -30
 
 **流程決策**：
 - 自動化全通過 + 無 High 風險 → 可進入 commit
-- 有失敗 → 若在 `/dev flow` 中：回到 impl 修復 → 重測
+- 有失敗 → 若在 `/build flow` 中：回到 impl 修復 → 重測
 - 有手動 checklist 待驗證 → 提示使用者完成後再 commit
 
 ---
 
-## A. `/dev commit` — 完整提交流程
+## A. `/build commit` — 完整提交流程
 
 依序執行以下步驟，**不可跳步**。
 
-### Step 1：品質檢查（呼叫 `/dev quality`）
+### Step 1：品質檢查（呼叫 `/build quality`）
 
 進入 B 區的 quality 子命令邏輯，對暫存／工作區內所有改動執行：
 - 死碼、冗餘、硬編碼掃描
@@ -329,7 +329,7 @@ git log --oneline origin/$(git rev-parse --abbrev-ref HEAD)..HEAD
 
 採 Conventional Commits 風格，HEREDOC 格式，附 `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`。Prefix 用 `feat / fix / ui / docs / refactor`。
 
-### Step 5：建立修改日誌（呼叫 `/dev log`）
+### Step 5：建立修改日誌（呼叫 `/build log`）
 
 進入 C 區的 log 子命令邏輯，使用剛產生的 commit hash，寫入 `.local/modify_logs/YYMMDD_TopicDescription.md`。**僅本地，不入版控**。
 
@@ -341,12 +341,12 @@ git push
 
 push 失敗時報告錯誤與建議，不嘗試 `--force`。
 
-### Step 7：同步 `.skill_personal/` 至遠端
+### Step 7：同步 `Sekai_workflow/` 至遠端
 
-若本次有變更 `.skill_personal/` 內容：
+若本次有變更 `Sekai_workflow/` 內容：
 
 ```bash
-cd .skill_personal
+cd Sekai_workflow
 git add <files>
 git commit -m "<mirrored message>"
 git push
@@ -354,9 +354,9 @@ git push
 
 push 失敗 → 告知使用者，不阻塞主流程。
 
-### Step 8：服務重啟評估（呼叫 `/dev eval`）
+### Step 8：服務重啟評估（呼叫 `/build eval`）
 
-進入 E 區的 eval 子命令邏輯，輸出指令清單。若有需重啟服務，提示可直接 `/dev restart` 執行。
+進入 E 區的 eval 子命令邏輯，輸出指令清單。若有需重啟服務，提示可直接 `/build restart` 執行。
 
 ### Step 9：經驗回流至 guide
 
@@ -367,7 +367,7 @@ push 失敗 → 告知使用者，不阻塞主流程。
 
 ---
 
-## B. `/dev quality` — 品質審計
+## B. `/build quality` — 品質審計
 
 可獨立呼叫，亦由 commit 子命令在 Step 1 觸發。
 
@@ -411,7 +411,7 @@ push 失敗 → 告知使用者，不阻塞主流程。
 
 ### 5. Skill 完整性檢查（若改動 Skill 檔案）
 
-每個 skill 資料夾須有 `SKILL.md` + `README.md`；`.claude/skills/README.md`、`CLAUDE.md`「可用 Skills」、`.skill_personal/manifest.json` 同步更新。
+每個 skill 資料夾須有 `SKILL.md` + `README.md`；`.claude/skills/README.md`、`CLAUDE.md`「可用 Skills」、`Sekai_workflow/manifest.json` 同步更新。
 
 ### 5c. 實作後資料流重讀
 
@@ -428,7 +428,7 @@ push 失敗 → 告知使用者，不阻塞主流程。
 
 ---
 
-## C. `/dev log` — 修改日誌
+## C. `/build log` — 修改日誌
 
 由 commit 子命令於 Step 5 自動呼叫，亦可手動使用。**所有日誌僅存本地，永不入版控**。
 
@@ -473,15 +473,15 @@ git diff --numstat HEAD~1
 
 ---
 
-## D. `/dev restart` — 容器重啟與自動修復
+## D. `/build restart` — 容器重啟與自動修復
 
-執行容器重啟/重建的完整生命週期。可在 `/dev eval` 後接續執行。
+執行容器重啟/重建的完整生命週期。可在 `/build eval` 後接續執行。
 
 ### Step 1：決定重啟目標
 
 - 無參數 → 從 `git diff --name-only HEAD~1` + `docker-compose.yml` 自動推導
-- `/dev restart all` → 全部容器
-- `/dev restart svc1 svc2` → 指定服務
+- `/build restart all` → 全部容器
+- `/build restart svc1 svc2` → 指定服務
 
 列出目標後**直接執行**，不發確認訊息（讓 tool permission UI 處理）。
 
@@ -553,9 +553,9 @@ docker compose logs --tail=30 <service>
 
 ---
 
-## E. `/dev eval` — 重啟評估（不執行）
+## E. `/build eval` — 重啟評估（不執行）
 
-僅做評估，輸出指令清單，使用者再決定是否 `/dev restart`。
+僅做評估，輸出指令清單，使用者再決定是否 `/build restart`。
 
 ### Step 1：找出變更檔
 

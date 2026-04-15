@@ -1,6 +1,6 @@
 # Model Routing Reference
 
-> 最後更新：2026-04-08
+> 最後更新：2026-04-10
 
 本文件定義 skill 執行時的 model 選擇規則。每個 skill 的 `model` frontmatter 欄位應依此規則設定。
 
@@ -40,26 +40,36 @@
 
 ---
 
-## 完整分配表
+## 完整分配表（合併後 6 Skill）
 
-| Skill | Model | Effort | 理由 |
-|-------|-------|--------|------|
-| quality-check | opus | high | 跨檔分析、安全掃描、使用 Agent 子代理 |
-| trace-flow | opus | high | 跨層資料流追蹤、使用 Agent 子代理 |
-| sys-info | opus | medium | 文件生命週期管理、使用 Agent 子代理 |
-| commit-push | sonnet | medium | 10 步驟編排流程，呼叫其他 skill |
-| create-skill | sonnet | medium | 多檔生成 + 多處索引註冊 |
-| whiteboard | sonnet | medium | 增量式 markdown 管理，需判斷結構 |
-| md-collab | sonnet | medium | 結構化互動 markdown 生成 |
-| todo | sonnet | medium | 解析/執行/更新工作流 |
-| skill-sync | sonnet | medium | Git 同步 + 規則評估決策樹 |
-| tech-notes | sonnet | medium | 結構化技術文章生成 |
-| context-guard | sonnet | low | 摘要生成，固定模板流程 |
-| pack | sonnet | low | 執行腳本 + 合併邏輯 |
-| modify-log | haiku | low | 從 git 資料填充模板 |
-| restart-eval | haiku | low | 檔案分類對照表查找 |
-| restart-volumn | haiku | low | 程序化操作：執行指令、檢查狀態 |
-| report | haiku | low | 讀取日誌填充報告模板 |
+| Skill | Model | Effort | 理由 | 子命令 effort 備註 |
+|-------|-------|--------|------|-------------------|
+| build | sonnet | medium | 多步驟編排流程 | quality 子命令內部用 high/Agent |
+| memo | sonnet | medium | 增量式互動 markdown | — |
+| setup | sonnet | medium | 多檔生成 + Git 同步 | — |
+| ask | opus | medium | 跨檔分析、Agent 子代理 | report 子命令可用 low |
+| context-guard | sonnet | low | 摘要生成，固定模板 | — |
+| memory-portable | sonnet | low | 檔案複製操作 | — |
+
+### 子命令級 effort 參考（合併前原始值）
+
+| 原 Skill → 子命令 | 原 Model | 原 Effort |
+|---|---|---|
+| commit-push → `/build commit` | sonnet | medium |
+| quality-check → `/build quality` | opus | high |
+| modify-log → `/build log` | haiku | low |
+| restart-volumn → `/build restart` | haiku | low |
+| restart-eval → `/build eval` | haiku | low |
+| todo → `/memo todo` | sonnet | medium |
+| whiteboard → `/memo board` | sonnet | medium |
+| md-collab → `/memo decide` | sonnet | medium |
+| tech-notes → `/memo notes` | sonnet | medium |
+| create-skill → `/setup new` | sonnet | medium |
+| skill-sync → `/setup sync` | sonnet | medium |
+| pack → `/setup pack` | sonnet | low |
+| sys-info → `/ask query` | opus | medium |
+| trace-flow → `/ask trace` | opus | high |
+| report → `/ask report` | haiku | low |
 
 ---
 

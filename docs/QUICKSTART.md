@@ -26,7 +26,7 @@ cd /path/to/your-project
 
 完成後你的專案會多出：
 - `.claude/skills/` — 專案專屬 Skill（已客製化）
-- `.skill_personal/` — 通用模板同步用（指向本倉庫）
+- `.Sekai_workflow/` — 通用模板同步用（指向本倉庫）
 - `CLAUDE.md` — AI 行為規範
 - `.git/hooks/pre-commit` — 防止 Skill 檔案誤入版控
 
@@ -79,7 +79,7 @@ cd /path/to/your-project
 ```
 Skill-personal (遠端倉庫)     ← 通用模板，跨專案共享
        ↓ clone / sync
-.skill_personal/ (專案內)     ← 通用模板本地副本
+.Sekai_workflow/ (專案內)     ← 通用模板本地副本
        ↓ customize
 .claude/skills/ (專案內)      ← 專案專屬 Skill，可客製化
 ```
@@ -93,7 +93,7 @@ Skill-personal (遠端倉庫)     ← 通用模板，跨專案共享
 |------|--------|:------------:|
 | 你的程式碼 | 專案 git | ✓ |
 | `.claude/skills/` | 本地，不版控 | ✗ |
-| `.skill_personal/` | Skill-personal 遠端倉庫 | ✗ |
+| `.Sekai_workflow/` | Skill-personal 遠端倉庫 | ✗ |
 | `CLAUDE.md` | 本地，不版控 | ✗ |
 | 修改日誌 / 摘要 | 本地工作紀錄 | ✗ |
 
