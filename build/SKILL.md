@@ -1,64 +1,72 @@
 ---
 name: build
-description: "開發全流程一站式入口：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → commit → push → 重啟評估。子命令路由 flow / plan / impl / test / commit / quality / log / restart / eval。"
+description: "開發全流程一站式入口：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → review → deploy。Commit 推送走獨立 `/commit-push`。子命令路由 flow / plan / impl / test / quality / review / deploy。"
 model: sonnet
 effort: medium
-argument-hint: "<flow|plan|impl|test|commit|quality|log|restart|eval> [args...]"
+argument-hint: "<flow|plan|impl|test|quality|review|deploy> [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *), Bash(ls *), Bash(date *), Bash(sleep *), Bash(mkdir *), Bash(npm *), Bash(npx *), Bash(pytest *), Bash(python *)
 ---
 
 # /build — 開發全流程 Skill
 
-涵蓋從需求分析到部署的完整開發生命週期。透過第一個參數決定子命令。
+涵蓋從需求分析到部署驗證的完整開發生命週期。透過第一個參數決定子命令。
+
+**架構說明**：commit 流程已獨立為 `/commit-push`（主要入口）。`/build` 負責 commit **前**的開發工作與 commit **後**的部署驗證。
 
 ## 子命令路由
 
 ### 開發前期（需求 → 實作 → 驗證）
 
-| 子命令 | 用途 |
-|---|---|
-| `/build flow <feature>` | **全流程串接**：plan → impl → test → commit，自動銜接每個階段 |
-| `/build plan <feature>` | 需求分析 + 方案設計 + 步驟拆解，產出方案文件 |
-| `/build impl [plan-ref]` | 按方案逐步實作，自動勾對進度、偵測偏離 |
-| `/build test [scope]` | 測試驗證：自動跑測試 + 手動 checklist + 邊界情境 |
+| 子命令 | 用途 | Model |
+|---|---|---|
+| `/build flow <feature>` | **全流程串接**：plan → impl → test → review → `/commit-push` → deploy | sonnet |
+| `/build plan <feature>` | 需求分析 + 方案設計 + 步驟拆解，產出方案文件 | **opus** |
+| `/build impl [plan-ref]` | 按方案逐步實作，自動勾對進度、偵測偏離 | sonnet |
+| `/build test [scope]` | 測試驗證：自動跑測試 + 手動 checklist + 邊界情境 | sonnet |
 
-### 提交後期（品質 → commit → 部署）
+### 提交前後（品質 → review → deploy）
 
-| 子命令 | 用途 |
-|---|---|
-| `/build commit [msg]` | 完整提交流程（品質檢查 → 日誌 → README → commit → push → 重啟評估） |
-| `/build quality [files...]` | 獨立品質審計（commit 前由 commit 子命令自動觸發） |
-| `/build log [topic]` | 建立 / 更新本地修改日誌 |
-| `/build restart [services...]` | 執行容器重啟與自動修復 |
-| `/build eval [commit-range]` | 僅評估哪些容器需重啟 / 重建（不執行） |
+| 子命令 | 用途 | Model |
+|---|---|---|
+| `/build quality [files...]` | 獨立品質審計（可獨立呼叫，`/commit-push` Step 1 亦會內嵌） | **opus** |
+| `/build review` | Commit 前最後人工確認 checklist（大改動時強烈建議） | sonnet |
+| `/build deploy [--plan\|--run] [services...]` | 合併重啟評估 + 執行。預設先列計畫再執行 | sonnet |
 
-無參數時預設執行 `commit`。
+無參數時 → 要求使用者指定子命令。
+
+**Commit 推送**：使用 `/commit-push`（獨立 Skill，內含品質檢查 / 修改日誌 / README / commit / push / deploy --plan / context 清理）。
 
 ---
 
 ## F. `/build flow` — 全流程串接
 
-**自動銜接** plan → impl → test → commit 四個階段，中間不需手動呼叫下一步。
+**自動銜接** plan → impl → test → review → `/commit-push` → deploy 六個階段，中間不需手動呼叫下一步。
 
 ### 流程
 
 ```
 /build flow <feature description>
     │
-    ├─ Step 1: /build plan（方案設計）
+    ├─ Step 1: /build plan（Opus 方案設計）
     │   └─ 使用者透過 AskUserQuestion 確認方案
     │       ├─ 確認 → 進入 impl
     │       └─ 修改 → 調整方案後重新確認
     │
-    ├─ Step 2: /build impl（逐步實作）
+    ├─ Step 2: /build impl（Sonnet 逐步實作）
     │   └─ 所有步驟完成
     │
     ├─ Step 3: /build test（測試驗證）
     │   └─ 全部通過
-    │       ├─ 是 → 進入 commit
+    │       ├─ 是 → 進入 review
     │       └─ 否 → 列出失敗項，回到 impl 修復
     │
-    └─ Step 4: /build commit（提交推送）
+    ├─ Step 4: /build review（人工最後確認 checklist）
+    │   └─ 使用者勾選完成 → 進入 commit-push
+    │
+    ├─ Step 5: /commit-push（品質 → 日誌 → commit → push）
+    │   └─ 完成
+    │
+    └─ Step 6: /build deploy（重啟評估 + 執行）
         └─ 完成
 ```
 
@@ -70,9 +78,11 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *)
 
 ---
 
-## G. `/build plan` — 需求分析與方案設計
+## G. `/build plan` — 需求分析與方案設計（Opus）
 
 收到功能訴求時，**先設計完整方案，確認後才實作**（對齊 CLAUDE.md 核心規則）。
+
+本子命令屬於「評估 / 規劃 / 架構決策」屬性，建議透過 Agent 工具呼叫 Opus 子任務（對齊 CLAUDE.md 第 18 條）。
 
 ### Step 1：需求理解
 
@@ -126,7 +136,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *)
 - [ ] §1 建立 DB model / schema
   - 檔案：`backend/models/xxx.py`
   - 新增：XxxModel class，欄位定義
-  
+
 - [ ] §2 建立 API endpoint
   - 檔案：`backend/routers/xxx.py`
   - 新增：GET /api/xxx, POST /api/xxx
@@ -157,7 +167,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *)
 
 ---
 
-## H. `/build impl` — 按方案實作
+## H. `/build impl` — 按方案實作（Sonnet）
 
 ### 使用方式
 
@@ -205,7 +215,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *)
 
 ---
 
-## I. `/build test` — 測試驗證
+## I. `/build test` — 測試驗證（Sonnet）
 
 ### 使用方式
 
@@ -284,92 +294,17 @@ npx jest --ci 2>&1 | tail -30
 ```
 
 **流程決策**：
-- 自動化全通過 + 無 High 風險 → 可進入 commit
+- 自動化全通過 + 無 High 風險 → 可進入 review
 - 有失敗 → 若在 `/build flow` 中：回到 impl 修復 → 重測
-- 有手動 checklist 待驗證 → 提示使用者完成後再 commit
+- 有手動 checklist 待驗證 → 提示使用者完成後再進 review
 
 ---
 
-## A. `/build commit` — 完整提交流程
+## B. `/build quality` — 品質審計（Opus）
 
-依序執行以下步驟，**不可跳步**。
+獨立的深度品質審計入口。**建議透過 Agent 工具呼叫 Opus** 子任務（對齊 CLAUDE.md 第 18 條，品質分析屬於評估 / 思考屬性）。
 
-### Step 1：品質檢查（呼叫 `/build quality`）
-
-進入 B 區的 quality 子命令邏輯，對暫存／工作區內所有改動執行：
-- 死碼、冗餘、硬編碼掃描
-- 架構一致性檢查
-- 上下游影響評估
-- 風險報告（High／Medium／Low）
-- 實作後資料流重讀（Step 5c）
-
-若出現 High 風險或 ✗ 項目，**停止 commit**，先修復。
-
-### Step 2：自動更新 README.md
-
-掃描變更檔所屬目錄，若該目錄含 `README.md` 且結構/功能受影響，同步更新。  
-**新增功能性目錄** → 建立 README，包含用途、檔案結構、關鍵功能。
-
-### Step 3：狀態總覽與 staging
-
-```bash
-git status
-git diff --stat
-git log --oneline origin/$(git rev-parse --abbrev-ref HEAD)..HEAD
-```
-
-向使用者列出：
-- 未暫存修改（含一句話摘要）
-- 已暫存未 commit
-- 已 commit 未 push
-
-讀取 `.gitignore` 確認待 stage 檔案不在忽略清單。**禁止使用 `git add -f` 或 `git add -A`**，僅 stage 具體檔名。
-
-### Step 4：Commit
-
-採 Conventional Commits 風格，HEREDOC 格式，附 `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`。Prefix 用 `feat / fix / ui / docs / refactor`。
-
-### Step 5：建立修改日誌（呼叫 `/build log`）
-
-進入 C 區的 log 子命令邏輯，使用剛產生的 commit hash，寫入 `.local/modify_logs/YYMMDD_TopicDescription.md`。**僅本地，不入版控**。
-
-### Step 6：Push
-
-```bash
-git push
-```
-
-push 失敗時報告錯誤與建議，不嘗試 `--force`。
-
-### Step 7：同步 `Sekai_workflow/` 至遠端
-
-若本次有變更 `Sekai_workflow/` 內容：
-
-```bash
-cd Sekai_workflow
-git add <files>
-git commit -m "<mirrored message>"
-git push
-```
-
-push 失敗 → 告知使用者，不阻塞主流程。
-
-### Step 8：服務重啟評估（呼叫 `/build eval`）
-
-進入 E 區的 eval 子命令邏輯，輸出指令清單。若有需重啟服務，提示可直接 `/build restart` 執行。
-
-### Step 9：經驗回流至 guide
-
-若本次改動含**非顯而易見的根因、繞道方法、設定差異**：
-1. 加入或新建 `.local/docs/<guide>.md`
-2. 格式：**症狀 → 原因 → 解決方式 → 注意事項**
-3. 告知使用者「已寫入 `.local/docs/<guide>.md`，/setup pack 時會帶走」
-
----
-
-## B. `/build quality` — 品質審計
-
-可獨立呼叫，亦由 commit 子命令在 Step 1 觸發。
+`/commit-push` Step 1 會內嵌呼叫類似邏輯；此處提供獨立入口供「不想跑完整 commit 流程，只想做品質掃描」的情境。
 
 ### 1. 掃描項目
 
@@ -409,9 +344,29 @@ push 失敗 → 告知使用者，不阻塞主流程。
 
 無風險時明確輸出：「品質檢查通過，無風險」
 
-### 5. Skill 完整性檢查（若改動 Skill 檔案）
+### 5. Skill 更新偵測
 
-每個 skill 資料夾須有 `SKILL.md` + `README.md`；`.claude/skills/README.md`、`CLAUDE.md`「可用 Skills」、`Sekai_workflow/manifest.json` 同步更新。
+若本次改動引入新的慣例、模式或工作流程需求：
+- **直接執行對應 SKILL.md 的 Edit**，由 Tool Confirmation UI 處理 approve / deny（對齊 CLAUDE.md 第 15 條）
+- **禁止**文字詢問「是否要更新 Skill 定義？」
+
+### 5b. Skill 完整性檢查（若改動 Skill 檔案）
+
+若本次變更動到任何 SKILL.md / README.md / 新建 Skill 資料夾，逐項驗證：
+
+1. **每個 skill 資料夾**同時含 `SKILL.md` 與 `README.md`
+2. **Skills README 三段同步**：
+   - `.claude/skills/README.md` 的命令總覽表已更新
+   - 詳細描述段落已更新
+   - 目錄結構樹已更新
+3. **通用 vs 專案專屬判斷樹**：
+   - 通用改進（不綁專案細節）→ 同步至 `sekai-workflow/`，**剝除所有專案特化硬編碼值**
+   - 專案專屬修正 → 僅存 `.claude/skills/`，**不同步**
+4. **通用 skills README** 已更新
+5. **CLAUDE.md 的「可用 Skills」列表**已更新
+6. **明示聲明**：Skill 變更走 `sekai-workflow` 獨立遠端倉庫，**不進專案 git**
+
+任一項未符合 → 停止流程，要求使用者補齊。
 
 ### 5c. 實作後資料流重讀
 
@@ -428,134 +383,74 @@ push 失敗 → 告知使用者，不阻塞主流程。
 
 ---
 
-## C. `/build log` — 修改日誌
+## R. `/build review` — Commit 前最後人工確認（Sonnet）
 
-由 commit 子命令於 Step 5 自動呼叫，亦可手動使用。**所有日誌僅存本地，永不入版控**。
+用於 **大改動前的最後 checklist 關卡**。與 `/build quality` 的差異：
 
-### 檔名
+| 差異點 | `/build quality` | `/build review` |
+|---|---|---|
+| 目的 | 深度程式碼品質掃描 | 架構 / 規則層人工確認 |
+| Model | Opus | Sonnet |
+| 輸出 | 風險報告 | 待確認 checklist |
+| 是否阻斷 | High 風險會阻斷 | 僅列清單不阻斷 |
+| 使用時機 | 每次 commit 都應跑 | 改到 CLAUDE.md / SKILL.md / 架構檔時 |
 
-`.local/modify_logs/YYMMDD_TopicDescription.md`（同日同主題 → 更新該檔；不同主題 → 另建）
-
-### 內容
+### Step 1：掃描變更檔
 
 ```bash
-git log --oneline -1
-git diff --stat HEAD~1
-git diff --numstat HEAD~1
+git status --short
+git diff --stat
 ```
+
+辨識**架構層變更**：
+- `CLAUDE.md` — 專案規則
+- `*/SKILL.md`、`*/README.md` — Skill 定義
+- 根目錄 config（`docker-compose.yml`、`package.json`、`pyproject.toml`）
+- Database schema / migrations
+
+### Step 2：生成人工確認 Checklist
+
+針對掃描結果，列出**本次改動可能需要同步更新但尚未處理**的項目：
 
 ```markdown
-# [標題]
+## Commit 前人工確認 Checklist
 
-## 變更資訊
-- **日期時間**：YYYY-MM-DD HH:MM
-- **版本**：`<git-short-hash>`
-- **更動原因**：[動機 / 問題描述 / 需求來源]
+### 規則層同步（改到 CLAUDE.md / SKILL.md 時）
+- [ ] 新規則是否已寫入 Memory（對齊 CLAUDE.md 第 9 條三向連動）
+- [ ] 對應 SKILL.md 是否同步更新
+- [ ] `.claude/skills/` 與 `sekai-workflow/` 是否雙向同步
+- [ ] manifest.json 是否更新
+- [ ] 可用 Skills 列表（CLAUDE.md 第 18 條後）是否更新
 
-## 變更明細
-| 檔案 | 影響行數 | 說明 |
-|---|---|---|
+### 架構層同步（改到 config / schema 時）
+- [ ] docker-compose 變更是否需更新部署文件
+- [ ] DB schema 變更是否有對應 migration
+- [ ] 環境變數新增是否有 .env.example 對應項
 
-## 技術說明
-（資料流、邏輯、架構決策）
-
-## 影響範圍
-- 受影響模組／功能
-- 容器重啟需求（若有）
-- DB migration 需求（若有）
-
-## 潛在風險
-- 邊界情境或相容性議題
-- 無風險時：「無已知風險」
+### 文件層同步
+- [ ] 受影響目錄的 README.md 是否更新
+- [ ] 若為新功能 → 是否有對應的 .local/docs/<guide>.md
 ```
 
-語言對齊專案慣例（vision-ai 為台灣繁體中文）。
+### Step 3：互動確認
+
+逐項詢問使用者（使用 AskUserQuestion 或直接列清單等回覆），未完成項目 → 回到對應 Skill 補齊後再進 commit-push。
+
+**本子命令不阻斷 commit** — 只負責提醒。使用者可選擇「全部確認」直接跳過。
 
 ---
 
-## D. `/build restart` — 容器重啟與自動修復
+## D. `/build deploy` — 部署評估與執行（合併原 restart + eval）
 
-執行容器重啟/重建的完整生命週期。可在 `/build eval` 後接續執行。
+**統一入口**，根據 flag 決定行為：
 
-### Step 1：決定重啟目標
-
-- 無參數 → 從 `git diff --name-only HEAD~1` + `docker-compose.yml` 自動推導
-- `/build restart all` → 全部容器
-- `/build restart svc1 svc2` → 指定服務
-
-列出目標後**直接執行**，不發確認訊息（讓 tool permission UI 處理）。
-
-### Step 2：Pre-flight
-
-```bash
-docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Service}}"
-```
-
-- **背景任務檢查**（worker / queue 服務）：偵測 Celery / Sidekiq / Bull 等的 active task，有任務就警告
-- **串流服務檢查**（WebSocket / RTSP / SSE）：警告連線會中斷
-- **掛載類型判斷**：volume mount → restart；image baked → build + up
-
-### Step 3：執行
-
-```bash
-# Volume mount
-docker compose restart <svc>
-
-# Image baked
-docker compose build <svc1> <svc2>
-docker compose up -d <svc1> <svc2>
-```
-
-### Step 4：健康檢查
-
-```bash
-sleep 8
-docker compose ps | grep -E "<services>"
-```
-
-期望 `Up X seconds (healthy)`；若 `Restarting` / `Exited` → 進 Step 5。
-
-### Step 5：日誌掃描
-
-```bash
-docker compose logs --tail=30 <service>
-```
-
-| Keyword | Severity |
+| 呼叫方式 | 行為 |
 |---|---|
-| `Error` / `ERROR` | HIGH |
-| `ImportError` / `ModuleNotFoundError` / `Cannot find module` | HIGH |
-| `ConnectionRefusedError` | MEDIUM |
-| `WARNING` | LOW |
-| `Application startup complete` / `Listening on` / `ready` | OK |
-
-### Step 6：自動修復
-
-| 症狀 | 自動修復 | Fallback |
-|---|---|---|
-| ImportError / Module not found | `docker compose build --no-cache <svc>` | 釘版本 |
-| ConnectionRefused | `docker compose up -d --wait <dep>` → restart | 查 dep log |
-| Port 衝突 | `docker compose down <svc>` → `up -d` | 找 PID kill |
-| DB migration error | 報告需要的 DDL | 手動執行 |
-| 無法自動修復 | 完整 log 摘要 + 根因 + 手動修復步驟 | — |
-
-### Step 7：最終驗證
-
-- API 健康：`curl http://localhost:<port>/health` 或 `/docs`
-- Worker 連線：`celery -A <app> inspect ping`
-
-輸出：
-
-```
-| Service | Action | Status | Duration |
-|---|---|---|---|
-```
-
----
-
-## E. `/build eval` — 重啟評估（不執行）
-
-僅做評估，輸出指令清單，使用者再決定是否 `/build restart`。
+| `/build deploy` | **預設**：先 eval 列出計畫 → 等待確認 → 執行 restart |
+| `/build deploy --plan` | 僅 eval 不執行（等同舊 `/build eval`） |
+| `/build deploy --run` | 跳過 eval 直接執行（等同舊 `/build restart`） |
+| `/build deploy svc1 svc2` | 指定服務 |
+| `/build deploy --run all` | 全部容器 |
 
 ### Step 1：找出變更檔
 
@@ -572,7 +467,7 @@ cat docker-compose.yml 2>/dev/null || cat compose.yml 2>/dev/null
 
 對每個 service 判斷：volume mount paths / baked-in paths / auto-reload 能力 / 靜態檔案。
 
-### Step 3：分類
+### Step 3：分類（Eval 階段）
 
 | Mount type | Auto-reload | Action |
 |---|---|---|
@@ -584,12 +479,80 @@ cat docker-compose.yml 2>/dev/null || cat compose.yml 2>/dev/null
 | Dockerfile | N/A | rebuild |
 | compose 檔本身 | N/A | `docker compose up -d` |
 
-### Step 4：輸出
+### Step 4：輸出計畫
 
 1. 變更檔 → 服務 → 動作 對照表
 2. 去重後的指令清單，按執行順序
 3. 副作用警告（停機、連線中斷、job 中斷）
 4. 若 DB init script 改動且 DB 已存在 → 列出需手動跑的 migration
+
+### Step 5：Pre-flight（Run 階段）
+
+```bash
+docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Service}}"
+```
+
+- **背景任務檢查**（worker / queue 服務）：偵測 Celery / Sidekiq / Bull 等的 active task，有任務就警告
+- **串流服務檢查**（WebSocket / RTSP / SSE）：警告連線會中斷
+- **掛載類型判斷**：volume mount → restart；image baked → build + up
+
+### Step 6：執行
+
+```bash
+# Volume mount
+docker compose restart <svc>
+
+# Image baked
+docker compose build <svc1> <svc2>
+docker compose up -d <svc1> <svc2>
+```
+
+列出目標後**直接執行**，不發確認訊息（讓 tool permission UI 處理，對齊 CLAUDE.md 第 15 條）。
+
+### Step 7：健康檢查
+
+```bash
+sleep 8
+docker compose ps | grep -E "<services>"
+```
+
+期望 `Up X seconds (healthy)`；若 `Restarting` / `Exited` → 進 Step 8。
+
+### Step 8：日誌掃描
+
+```bash
+docker compose logs --tail=30 <service>
+```
+
+| Keyword | Severity |
+|---|---|
+| `Error` / `ERROR` | HIGH |
+| `ImportError` / `ModuleNotFoundError` / `Cannot find module` | HIGH |
+| `ConnectionRefusedError` | MEDIUM |
+| `WARNING` | LOW |
+| `Application startup complete` / `Listening on` / `ready` | OK |
+
+### Step 9：自動修復
+
+| 症狀 | 自動修復 | Fallback |
+|---|---|---|
+| ImportError / Module not found | `docker compose build --no-cache <svc>` | 釘版本 |
+| ConnectionRefused | `docker compose up -d --wait <dep>` → restart | 查 dep log |
+| Port 衝突 | `docker compose down <svc>` → `up -d` | 找 PID kill |
+| DB migration error | 報告需要的 DDL | 手動執行 |
+| 無法自動修復 | 完整 log 摘要 + 根因 + 手動修復步驟 | — |
+
+### Step 10：最終驗證
+
+- API 健康：`curl http://localhost:<port>/health` 或 `/docs`
+- Worker 連線：`celery -A <app> inspect ping`
+
+輸出：
+
+```
+| Service | Action | Status | Duration |
+|---|---|---|---|
+```
 
 ### 非容器化專案
 
@@ -597,16 +560,23 @@ cat docker-compose.yml 2>/dev/null || cat compose.yml 2>/dev/null
 
 ---
 
-## 各子命令的 Model 使用建議
+## 各子命令的 Model 使用建議（對齊 CLAUDE.md 第 18 條）
 
-| 子命令 | 建議 effort |
-|---|---|
-| commit | medium（流程順序固定） |
-| quality | high（需深度分析，必要時呼叫 Agent） |
-| log | low（結構化填表） |
-| restart | low |
-| eval | low |
+| 子命令 | 建議 model | 原因 |
+|---|---|---|
+| flow | sonnet | 串接元命令，主體為 Sonnet 執行 |
+| **plan** | **opus** | 需求分析 / 方案設計 / 架構決策（thinking 屬性） |
+| impl | sonnet | 逐步執行（execution 屬性） |
+| test | sonnet | 多步驟執行 + 檢查 |
+| **quality** | **opus** | 深度品質審計 / 架構評估（thinking 屬性） |
+| review | sonnet | 列 checklist / 互動確認 |
+| deploy | sonnet | 容器操作執行 |
 
-子命令本身共用 Skill model `sonnet`。需要更深思考時於該子命令內以 deeper thinking 完成。
+Skill 本體 `model: sonnet`。需要 Opus 深度分析的子命令（plan / quality）建議透過 **Agent 工具**呼叫 Opus 子任務，不改變 Skill 本體 model 設定。
+
+**三層分層原則**（CLAUDE.md 第 18 條）：
+- **Opus**：評估、規劃、架構決策、深度品質分析
+- **Sonnet**：多步驟執行、檔案讀寫、中低複雜度任務
+- **Haiku**：結構化文字撰寫、模板填充、日誌產生
 
 Arguments: $ARGUMENTS （第一個 token 為子命令，其餘為該子命令參數）

@@ -1,20 +1,29 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "description": "Sekai_workflow 結構索引 — Claude 讀取此檔即可掌握全貌，無需逐一掃描目錄",
-  "updated": "2026-04-10",
+  "updated": "2026-04-15",
   "model_routing": "references/model-routing.md",
-  "note": "v2.0: 17 個獨立 Skill 合併為 6 個（4 子命令式 + 2 獨立）；/commit-push 保留為獨立入口，與 /build commit 並存",
+  "note": "v2.1: /commit-push 提升為主要 commit 入口；/build 移除 commit/log/restart/eval 子命令，新增 review，restart+eval 合併為 deploy。模型三層分層（Opus/Sonnet/Haiku）原則納入 CLAUDE.md 第 18 條。",
   "skills": [
     {
       "name": "build",
       "command": "/build",
-      "description": "開發全流程一站式入口：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → commit → push → 重啟評估",
-      "subcommands": ["flow", "plan", "impl", "test", "commit", "quality", "log", "restart", "eval"],
+      "description": "開發全流程一站式入口：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → review → deploy。Commit 推送走獨立 /commit-push。",
+      "subcommands": ["flow", "plan", "impl", "test", "quality", "review", "deploy"],
       "model": "sonnet",
       "trigger": "手動呼叫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash(git *)", "Bash(docker *)", "Bash(ls *)", "Bash(date *)", "Bash(sleep *)", "Bash(mkdir *)", "Bash(npm *)", "Bash(npx *)", "Bash(pytest *)", "Bash(python *)"],
-      "files": ["build/SKILL.md", "build/README.md", "build/references/commit-conventions.md", "build/references/gitignore-safety.md", "build/references/severity-guide.md", "build/references/error-recovery.md", "build/references/log-keywords.md"],
-      "merged_from": ["commit-push", "quality-check", "modify-log", "restart-volumn", "restart-eval"]
+      "files": ["build/SKILL.md", "build/README.md"],
+      "merged_from": ["quality-check", "restart-volumn", "restart-eval"],
+      "subcommand_models": {
+        "plan": "opus",
+        "quality": "opus",
+        "flow": "sonnet",
+        "impl": "sonnet",
+        "test": "sonnet",
+        "review": "sonnet",
+        "deploy": "sonnet"
+      }
     },
     {
       "name": "team-office",
@@ -70,11 +79,17 @@
     {
       "name": "commit-push",
       "command": "/commit-push",
-      "description": "獨立 commit & push 入口：品質檢查 → 修改日誌 → README 更新 → commit → push → 重啟評估（與 /build commit 並存，供單獨使用）",
+      "description": "主要 commit & push 入口：品質檢查（Opus 內嵌）→ 修改日誌（Haiku 內嵌）→ README 更新 → commit → push → sekai-workflow 同步 → deploy 評估 → Context 清理 → 經驗回流。10 個步驟完整流程，所有日誌僅存本地。",
       "model": "sonnet",
       "trigger": "手動呼叫",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(docker *)"],
-      "files": ["commit-push/SKILL.md", "commit-push/README.md", "commit-push/references/commit-conventions.md", "commit-push/references/gitignore-safety.md"]
+      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(docker *)"],
+      "files": ["commit-push/SKILL.md", "commit-push/README.md", "commit-push/references/commit-conventions.md", "commit-push/references/gitignore-safety.md"],
+      "embedded_models": {
+        "step_1_quality": "opus",
+        "step_5_modify_log": "haiku",
+        "main": "sonnet"
+      },
+      "merged_from": ["quality-check", "modify-log"]
     }
   ],
   "resources": [
@@ -120,11 +135,11 @@
     }
   ],
   "merge_map": {
-    "commit-push": "build commit",
-    "quality-check": "build quality",
-    "modify-log": "build log",
-    "restart-volumn": "build restart",
-    "restart-eval": "build eval",
+    "commit-push": "commit-push (主要入口，已恢復獨立)",
+    "quality-check": "commit-push Step 1 (內嵌 Opus) + build quality (獨立呼叫)",
+    "modify-log": "commit-push Step 5 (內嵌 Haiku)",
+    "restart-volumn": "build deploy --run",
+    "restart-eval": "build deploy --plan",
     "todo": "team-office todo",
     "whiteboard": "team-office board",
     "md-collab": "team-office decide",
