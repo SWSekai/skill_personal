@@ -90,26 +90,49 @@ if "!MODE!"=="init" (
 echo       Processed !SKILL_COUNT! skills
 
 REM ============================
-REM  Step 3: Create Sekai_workflow/
+REM  Step 3: Plan source repo rename
+REM  Goal: avoid duplicating the whole repo. If the source repo lives
+REM  inside PROJECT_DIR, we just rename it to .sekai-workflow (O(1) fs op)
+REM  after all other steps finish. Otherwise fall back to xcopy.
 REM ============================
-echo [3/9] Setting up Sekai_workflow/ ...
+echo [3/9] Planning source repo rename...
 
-if exist "%PROJECT_DIR%\Sekai_workflow" (
-    echo       Sekai_workflow/ already exists - skipped
+for %%I in ("%REPO_ROOT%") do set "REPO_NAME=%%~nxI"
+for %%I in ("%REPO_ROOT%\..") do set "REPO_PARENT=%%~fI"
+set "TARGET_NAME=.sekai-workflow"
+set "TARGET_PATH=!REPO_PARENT!\!TARGET_NAME!"
+set "DO_RENAME=0"
+set "DO_FALLBACK_COPY=0"
+
+if /I "!REPO_NAME!"=="!TARGET_NAME!" (
+    echo       Source already named !TARGET_NAME! - nothing to do
+) else if exist "!TARGET_PATH!" (
+    echo       WARN: !TARGET_PATH! already exists - rename skipped
+) else if /I "!REPO_PARENT!"=="%PROJECT_DIR%" (
+    set "DO_RENAME=1"
+    echo       Will rename !REPO_NAME! -^> !TARGET_NAME! after final step
 ) else (
-    xcopy "%REPO_ROOT%" "%PROJECT_DIR%\Sekai_workflow\" /E /I /Y /Q >nul 2>&1
-    REM Re-init git and link to remote repo
-    if exist "%PROJECT_DIR%\Sekai_workflow\.git" (
-        rmdir /S /Q "%PROJECT_DIR%\Sekai_workflow\.git" 2>nul
+    set "DO_FALLBACK_COPY=1"
+    echo       Source repo is outside project - will copy to %PROJECT_DIR%\!TARGET_NAME!
+)
+
+if "!DO_FALLBACK_COPY!"=="1" (
+    if exist "%PROJECT_DIR%\!TARGET_NAME!" (
+        echo       %PROJECT_DIR%\!TARGET_NAME! already exists - skipped
+    ) else (
+        xcopy "%REPO_ROOT%" "%PROJECT_DIR%\!TARGET_NAME!\" /E /I /Y /Q >nul 2>&1
+        if exist "%PROJECT_DIR%\!TARGET_NAME!\.git" (
+            rmdir /S /Q "%PROJECT_DIR%\!TARGET_NAME!\.git" 2>nul
+        )
+        pushd "%PROJECT_DIR%\!TARGET_NAME!"
+        git init >nul 2>&1
+        git remote add origin https://github.com/SWSekai/sekai-workflow.git >nul 2>&1
+        git fetch origin >nul 2>&1
+        git branch -M main >nul 2>&1
+        git reset --mixed origin/main >nul 2>&1
+        popd
+        echo       Copied to %PROJECT_DIR%\!TARGET_NAME! - git linked to remote
     )
-    pushd "%PROJECT_DIR%\Sekai_workflow"
-    git init >nul 2>&1
-    git remote add origin https://github.com/SWSekai/sekai-workflow.git >nul 2>&1
-    git fetch origin >nul 2>&1
-    git branch -M main >nul 2>&1
-    git reset --mixed origin/main >nul 2>&1
-    popd
-    echo       Created Sekai_workflow/ - independent git, remote: sekai-workflow
 )
 
 REM ============================
@@ -147,7 +170,7 @@ if not exist "!GITIGNORE!" (
 )
 
 REM Define required entries
-set "GI_ENTRIES=CLAUDE.md .claude/ Sekai_workflow/ Sekai_workflow/ .local/"
+set "GI_ENTRIES=CLAUDE.md .claude/ .sekai-workflow/ .local/"
 
 for %%E in (%GI_ENTRIES%) do (
     findstr /X /C:"%%E" "!GITIGNORE!" >nul 2>&1
@@ -388,6 +411,16 @@ if exist "!SYNC_BAT!" (
 )
 
 REM ============================
+REM  Schedule in-place rename (detached, runs after this script exits)
+REM  The script file lives inside REPO_ROOT so we cannot rename it while
+REM  the current cmd.exe holds the .bat handle. Spawn a helper that waits,
+REM  then renames.
+REM ============================
+if "!DO_RENAME!"=="1" (
+    start "" /MIN cmd /c "ping -n 3 127.0.0.1 >nul & ren "%REPO_ROOT%" "!TARGET_NAME!""
+)
+
+REM ============================
 REM  Done
 REM ============================
 echo.
@@ -397,7 +430,7 @@ echo ====================================================
 echo.
 echo   Created:
 echo     - .claude/skills/     - Claude Code skill definitions
-echo     - Sekai_workflow/    - Skill template for sync
+echo     - .sekai-workflow/    - Skill template for sync (renamed from source)
 echo     - .gitignore          - auto-added exclusion entries
 echo     - pre-commit hook     - blocks skill files from project git
 echo     - CLAUDE.md           - project rules, customize as needed
@@ -406,6 +439,10 @@ echo     - hooks               - auto-trigger for skill/memory sync (local only)
 echo     - portable memory     - restored user preferences and habits
 echo     - skill-sync          - synced with remote
 echo.
+if "!DO_RENAME!"=="1" (
+    echo   Note: source repo will be renamed to !TARGET_NAME! right after this window exits.
+    echo.
+)
 echo   Next steps:
 echo     1. Customize CLAUDE.md for your project
 echo     2. Customize .claude/skills/ SKILL.md files

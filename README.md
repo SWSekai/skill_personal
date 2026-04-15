@@ -66,10 +66,19 @@ A portable set of Claude Code skills that work with **any project**. No project-
 
 ### 方法 1：一鍵建置（推薦）
 
-```bash
-# 在目標專案中執行
-Sekai_workflow/_bootstrap/sp-init.bat
+```cmd
+REM 在目標專案根目錄開啟 cmd 執行（資料夾名為 sekai-workflow，小寫+連字號）
+sekai-workflow\_bootstrap\sp-init.bat
+
+REM 或從任意位置帶目標路徑執行
+D:\path\to\sekai-workflow\_bootstrap\sp-init.bat D:\your-project
 ```
+
+> ⚠️ 請勿在 `sekai-workflow\` 或其子目錄（例如 `_bootstrap\`）內雙擊執行，
+> 腳本會偵測到並以錯誤碼結束；若是雙擊執行，視窗會立即關閉看不到訊息。
+
+> ℹ️ 首次執行完成後，`sekai-workflow\` 會被自動更名為 `.sekai-workflow\`（直接 rename，不複製）。
+> 後續若要重跑請改用 `.sekai-workflow\_bootstrap\sp-init.bat`。
 
 sp-init.bat 自動完成：
 1. 建立 `.claude/skills/` 並複製所有 Skill
@@ -89,6 +98,7 @@ sp-init.bat 自動完成：
 | **ask** | `/ask <query\|trace\|report>` | opus | 系統文件與報告：系統資訊、資料流追蹤、工作報告 |
 | **context-guard** | `/context-guard` | sonnet | Context Window 管理（系統壓縮、手動、對話開始） |
 | **memory-portable** | `/memory-portable` | sonnet | Memory 跨專案攜帶 |
+| **commit-push** | `/commit-push [msg]` | sonnet | 獨立 commit & push 入口（與 `/build commit` 並存，供單獨使用） |
 
 ---
 
