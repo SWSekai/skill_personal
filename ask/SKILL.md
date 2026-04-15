@@ -185,7 +185,7 @@ docs/             ← 官方專案文件
 - `weekly` → 近 7 天（依檔名日期前綴篩選）
 - `YYMMDD YYMMDD` → 指定區間
 
-來源：`.local/modify_logs/`
+來源：`.local/modify_log/`
 
 ### Step 2：讀取並分析
 
@@ -234,7 +234,7 @@ docs/             ← 官方專案文件
 
 ### Step 4：輸出
 
-寫入 `.local/reports/`。
+寫入 `.local/report/`。
 
 ### 撰寫原則
 

@@ -42,12 +42,12 @@ commit-push/
 | 2. README 更新 | 掃描變更檔所屬目錄，同步或新建 README.md |
 | 3. 狀態總覽 + staging | `git status` / `diff --stat` / `log origin..HEAD` 三段展示 → `.gitignore` 安全檢查 → `git add <檔名>` |
 | 4. Commit | Conventional Commits 11 個 prefix + HEREDOC + **動態 Co-Author** |
-| 5. 修改日誌 | `.local/modify_logs/YYMMDD_主題.md`，格式對齊原版：基本資訊 → 影響檔案（`+N -M`）→ 影響範圍 → 技術說明 → 潛在風險 |
+| 5. 修改日誌 | `.local/modify_log/YYMMDD_主題.md`，格式對齊原版：基本資訊 → 影響檔案（`+N -M`）→ 影響範圍 → 技術說明 → 潛在風險 |
 | 6. Push | `git push`，失敗不 `--force` |
 | 7. sekai-workflow 同步 | 若動到 `sekai-workflow/` → 獨立遠端 commit & push |
 | 8. Deploy 評估 | 呼叫 `/build deploy --plan` 輸出重啟計畫 |
 | 9. Context 清理 | context-guard 摘要 + `.local/context_summary/` 維護 + 提示 `/clear` |
-| 10. 經驗回流 | 非顯而易見修正寫入 `.local/docs/guides/<topic>.md` |
+| 10. 經驗回流 | 非顯而易見修正寫入 `.local/docs/guide/<topic>.md` |
 
 ## 特性
 

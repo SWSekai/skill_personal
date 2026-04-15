@@ -2,16 +2,16 @@
 
 > 所有 Skill 會自動產生的文件、觸發時機、存放位置、用途一覽。
 >
-> Last updated: 2026-04-15（v2.1 統一路徑方案）
+> Last updated: 2026-04-15（v2.2 單數命名 + samples 慣例）
 
 ---
 
 ## 命名原則（對齊 CLAUDE.md）
 
-- **`.local/docs/` = 給人讀的文件**（plans、decisions、summaries、whiteboards、tech-notes、guides、knowledge）
-- **`.local/` 根 = AI 運維紀錄**（modify_logs、context_summary、reports、collab、ai-context）
-- 所有子目錄使用**名詞複數**（plans / decisions / summaries / whiteboards / modify_logs / guides）
-- 例外：`tech-notes`（已是名詞形式）、`ai-context`（pack 產出）、`knowledge`（抽象名詞）
+- **`.local/docs/` = 給人讀的文件**（plan、decision、summary、whiteboard、tech-note、guide、knowledge）
+- **`.local/` 根 = AI 運維紀錄**（modify_log、context_summary、report、collab、samples、ai-context）
+- 所有子目錄使用**名詞單數**（plan / decision / summary / whiteboard / tech-note / guide / modify_log / report）
+- 例外：`knowledge`（抽象名詞）、`context_summary`（固有名）、`ai-context`（固有名）、`collab`（縮寫）
 
 ---
 
@@ -21,24 +21,25 @@
 
 | Skill | 子命令 / 步驟 | 觸發時機 | 檔名格式 | 存放位置 | 用途 |
 |---|---|---|---|---|---|
-| **build** | `plan` | 方案設計完成 | `YYMMDD_<feature>.md` | `.local/docs/plans/` | 實作方案文件（含 checkbox 步驟清單）|
-| **team-office** | `decide` | 手動觸發 | `<topic>.md` | `.local/docs/decisions/` | 互動式決策表（執行後刪除，摘要留 summaries）|
-| **team-office** | `decide` Step 6 | 決策執行完成 | `YYMMDD_<topic>_summary.md` | `.local/docs/summaries/` | 決策摘要（永久保留，含非單一路線的保留候選）|
-| **team-office** | `board` | 手動觸發 | `YYMMDD_<topic>.md` | `.local/docs/whiteboards/` | 白板討論紀錄（不刪除）|
-| **team-office** | `notes` | 手動觸發 | `<topic>.md` | `.local/docs/tech-notes/` | 技術問答結構化筆記 |
-| **commit-push** | Step 10 | commit 後若含踩坑經驗 | `<topic>.md` | `.local/docs/guides/` | 實戰經驗指南（症狀→原因→解法→注意事項）|
+| **build** | `plan` | 方案設計完成 | `YYMMDD_<feature>.md` | `.local/docs/plan/` | 實作方案文件（含 checkbox 步驟清單）|
+| **team-office** | `decide` | 手動觸發 | `<topic>.md` | `.local/docs/decision/` | 互動式決策表（執行後刪除，摘要留 summary）|
+| **team-office** | `decide` Step 6 | 決策執行完成 | `YYMMDD_<topic>_summary.md` | `.local/docs/summary/` | 決策摘要（永久保留，含非單一路線的保留候選）|
+| **team-office** | `board` | 手動觸發 | `YYMMDD_<topic>.md` | `.local/docs/whiteboard/` | 白板討論紀錄（不刪除）|
+| **team-office** | `notes` | 手動觸發 | `<topic>.md` | `.local/docs/tech-note/` | 技術問答結構化筆記 |
+| **commit-push** | Step 10 | commit 後若含踩坑經驗 | `<topic>.md` | `.local/docs/guide/` | 實戰經驗指南（症狀→原因→解法→注意事項）|
 | **ask** | `query` | 自動（查詢時）/ 手動 | `<topic_description>.md` | `.local/docs/knowledge/` | 系統知識庫（架構、資料流、設定）|
 
 ### AI 運維紀錄（`.local/` 根）
 
 | Skill | 子命令 / 步驟 | 觸發時機 | 檔名格式 | 存放位置 | 用途 |
 |---|---|---|---|---|---|
-| **commit-push** | Step 5 | commit 後（Haiku 內嵌）| `YYMMDD_<主題>.md` | `.local/modify_logs/` | 修改日誌（格式對齊原版 +N -M）|
+| **commit-push** | Step 5 | commit 後（Haiku 內嵌）| `YYMMDD_<主題>.md` | `.local/modify_log/` | 修改日誌（格式對齊原版 +N -M）|
 | **context-guard** | 系統壓縮 / 手動 / 對話開始 | — | `YYMMDD_HHMM_<主題>.md` | `.local/context_summary/` | Context 工作狀態摘要 |
 | **context-guard** | 同上 | — | `current_topic.md` | `.local/context_summary/` | 當前工作主題（任務切換偵測）|
-| **ask** | `report` | 手動 `/ask report` | `YYMMDD_<type>_report.md` | `.local/reports/` | 從 modify_logs 統整的工作報告（簡報用）|
+| **ask** | `report` | 手動 `/ask report` | `YYMMDD_<type>_report.md` | `.local/report/` | 從 modify_log 統整的工作報告（簡報用）|
 | **team-office** | `todo` | 手動 `/team-office todo` | `TODO.md` | `.local/collab/` | AI 待辦事項清單 |
 | **build** | `impl` | 衍生任務時 | 追加至 TODO.md | `.local/collab/` | 從 impl 發現的衍生 TODO |
+| （使用者手動） | — | 需要時提供範例 | `<類別>/*.md` | `.local/samples/` | 使用者提供的參考樣本（格式模板、範例檔等）|
 | **setup** | `pack` | 手動 `/setup pack` | 打包結果 + `manifest.txt` | `.local/ai-context/` | AI 上下文打包（含 memory、guides、project-skills）|
 
 ---
@@ -74,19 +75,20 @@
 ```
 .local/
 ├── docs/                       ← 給人讀的文件
-│   ├── plans/                  #build plan
-│   ├── decisions/              #team-office decide（一次性，執行後刪除）
-│   ├── summaries/              #team-office decide 執行後持久化（永久）
-│   ├── whiteboards/            #team-office board
-│   ├── tech-notes/             #team-office notes
-│   ├── guides/                 #commit-push Step 10 經驗指南
+│   ├── plan/                   #build plan
+│   ├── decision/               #team-office decide（一次性，執行後刪除）
+│   ├── summary/                #team-office decide 執行後持久化（永久）
+│   ├── whiteboard/             #team-office board
+│   ├── tech-note/              #team-office notes
+│   ├── guide/                  #commit-push Step 10 經驗指南
 │   └── knowledge/              #ask query 系統知識庫
 │
-├── modify_logs/                ← commit-push Step 5（Haiku 內嵌產出）
+├── modify_log/                 ← commit-push Step 5（Haiku 內嵌產出）
 ├── context_summary/            ← context-guard 摘要與 current_topic.md
-├── reports/                    ← ask report
+├── report/                     ← ask report
 ├── collab/
 │   └── TODO.md                 ← team-office todo + build impl 衍生任務
+├── samples/                    ← 使用者提供的參考樣本（按需建立）
 └── ai-context/                 ← setup pack 打包結果（含 memory 子目錄）
 ```
 
@@ -96,14 +98,20 @@
 
 - `.local/` 整個目錄由 `.gitignore` 排除，不入專案版控
 - 目錄由各 Skill 首次使用時自動建立
-- `/ask report` 依賴 `.local/modify_logs/` 的內容來生成報告
+- `/ask report` 依賴 `.local/modify_log/` 的內容來生成報告
 - `/setup pack` 會收集 `.local/` 下所有子目錄打包至 `.local/ai-context/`
 - `/setup pack` 另外收集 Memory 至 `.local/ai-context/memory/`，由 `sp-init.bat` Step 8b 自動還原
+- `.local/samples/` 是樣本專用資料夾：當使用者需要提供格式範例、模板參考時，統一丟到此目錄，AI 需要範例時只從這裡找
 
-## v2.1 變更記錄
+## v2.2 變更記錄（2026-04-15）
+
+- 子目錄統一**名詞單數**：`plans → plan`、`decisions → decision`、`summaries → summary`、`whiteboards → whiteboard`、`tech-notes → tech-note`、`guides → guide`、`modify_logs → modify_log`、`reports → report`
+- 新增 `.local/samples/` 慣例：使用者提供的參考樣本統一存放位置
+- 清除 `.local/modify_log/` 中原用於格式參考的 48 份歷史樣本（依 §1.4.d 決策）
+
+## v2.1 變更記錄（2026-04-15 先前）
 
 - `.local/summary/` → `.local/context_summary/`（明確名）
 - `.local/asks/` → `.local/docs/knowledge/`（併入 docs/ 大目錄）
-- `.local/docs/` 散落 guide → `.local/docs/guides/`（明確子目錄）
-- `modify_log/modify_log/*` → `.local/modify_logs/`（48 份歷史實例遷入）
+- `.local/docs/` 散落 guide → `.local/docs/guide/`（明確子目錄）
 - 確立 `.local/docs/` = 人讀文件 vs `.local/` 根 = AI 運維紀錄 的語義分層
