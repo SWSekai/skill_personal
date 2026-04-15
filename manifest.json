@@ -3,7 +3,7 @@
   "description": "Sekai_workflow 結構索引 — Claude 讀取此檔即可掌握全貌，無需逐一掃描目錄",
   "updated": "2026-04-10",
   "model_routing": "references/model-routing.md",
-  "note": "v2.0: 17 個獨立 Skill 合併為 6 個（4 子命令式 + 2 獨立）",
+  "note": "v2.0: 17 個獨立 Skill 合併為 6 個（4 子命令式 + 2 獨立）；/commit-push 保留為獨立入口，與 /build commit 並存",
   "skills": [
     {
       "name": "build",
@@ -66,6 +66,15 @@
       "trigger": "手動 / sp-init.bat 還原 / sp-pack.sh 回寫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(cp *)", "Bash(git *)"],
       "files": ["memory-portable/SKILL.md", "memory-portable/README.md"]
+    },
+    {
+      "name": "commit-push",
+      "command": "/commit-push",
+      "description": "獨立 commit & push 入口：品質檢查 → 修改日誌 → README 更新 → commit → push → 重啟評估（與 /build commit 並存，供單獨使用）",
+      "model": "sonnet",
+      "trigger": "手動呼叫",
+      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(docker *)"],
+      "files": ["commit-push/SKILL.md", "commit-push/README.md", "commit-push/references/commit-conventions.md", "commit-push/references/gitignore-safety.md"]
     }
   ],
   "resources": [
