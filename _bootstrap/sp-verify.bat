@@ -32,7 +32,7 @@ if not exist "!GI!" (
     set /a FAIL+=1
 ) else (
     set "GI_OK=1"
-    for %%E in (".claude/" ".skill_personal/" ".hanschen/") do (
+    for %%E in (".claude/" ".Sekai_workflow/" ".hanschen/") do (
         findstr /B /C:%%E "!GI!" >nul 2>&1
         if errorlevel 1 (
             echo       FAIL: %%~E not in .gitignore
@@ -41,7 +41,7 @@ if not exist "!GI!" (
         )
     )
     if "!GI_OK!"=="1" (
-        echo       PASS: .claude/ .skill_personal/ .hanschen/ all present
+        echo       PASS: .claude/ .Sekai_workflow/ .hanschen/ all present
         set /a PASS+=1
     )
 )
@@ -72,13 +72,13 @@ if not exist "%PROJECT_DIR%\.claude\skills" (
     set /a PASS+=1
 )
 
-REM --- Check 4: .skill_personal/ exists ---
-echo [Check 4] .skill_personal/ directory...
-if not exist "%PROJECT_DIR%\.skill_personal" (
-    echo       FAIL: .skill_personal/ not found
+REM --- Check 4: .Sekai_workflow/ exists ---
+echo [Check 4] .Sekai_workflow/ directory...
+if not exist "%PROJECT_DIR%\.Sekai_workflow" (
+    echo       FAIL: .Sekai_workflow/ not found
     set /a FAIL+=1
 ) else (
-    echo       PASS: .skill_personal/ exists
+    echo       PASS: .Sekai_workflow/ exists
     set /a PASS+=1
 )
 

@@ -1,5 +1,5 @@
 ---
-name: admin
+name: setup
 description: "Skill 環境管理一站式入口：建立新 Skill、遠端同步、專案打包。子命令路由 new / sync / pack。"
 model: sonnet
 effort: medium
@@ -54,7 +54,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(mkdi
 
 ### Step 2：名稱衝突檢查
 
-檢查 `.claude/skills/<name>/` 與 `.skill_personal/<name>/`：
+檢查 `.claude/skills/<name>/` 與 `Sekai_workflow/<name>/`：
 - 已存在且有內容 → 警告，問「覆寫」或「更新」
 - 已存在但空 → 視為新建
 - 不存在 → 繼續
@@ -101,7 +101,7 @@ allowed-tools: <allowed_tools>
 三個位置加入新 Skill：
 1. **Skills Overview 表格**：按字母順序插入新行
 2. **詳細說明區段**：按字母順序插入說明區塊
-3. **Directory Structure 樹狀圖**：在 `skill_personal/` 結構中加入新資料夾
+3. **Directory Structure 樹狀圖**：在 `Sekai_workflow/` 結構中加入新資料夾
 
 ### Step 6：更新 CLAUDE.md
 
@@ -110,16 +110,16 @@ allowed-tools: <allowed_tools>
 - `/command` — 描述
 ```
 
-### Step 7：同步至 `.skill_personal/`（通用 Skill 才做）
+### Step 7：同步至 `Sekai_workflow/`（通用 Skill 才做）
 
 通用 Skill：
-1. 複製整個 skill 目錄至 `.skill_personal/<name>/`
-2. 更新 `.skill_personal/manifest.json`（含 `model` 欄位、所有 files 路徑）
-3. 更新 `.skill_personal/README.md`（表格 + 說明 + 樹狀圖）
+1. 複製整個 skill 目錄至 `Sekai_workflow/<name>/`
+2. 更新 `Sekai_workflow/manifest.json`（含 `model` 欄位、所有 files 路徑）
+3. 更新 `Sekai_workflow/README.md`（表格 + 說明 + 樹狀圖）
 4. commit + push：
 
 ```bash
-cd .skill_personal
+cd Sekai_workflow
 git add <name>/ manifest.json README.md
 git commit -m "feat: 新增 <name> skill"
 git push
@@ -137,9 +137,9 @@ git push
 | 子目錄檔案存在（若有規劃） | |
 | `.claude/skills/README.md` 已更新 | |
 | `CLAUDE.md` 已更新 | |
-| `.skill_personal/<name>/` 已同步（若通用） | |
-| `.skill_personal/manifest.json` 已更新（若通用） | |
-| `.skill_personal/README.md` 已更新（若通用） | |
+| `Sekai_workflow/<name>/` 已同步（若通用） | |
+| `Sekai_workflow/manifest.json` 已更新（若通用） | |
+| `Sekai_workflow/README.md` 已更新（若通用） | |
 
 ### Step 9：輸出摘要
 
@@ -156,7 +156,7 @@ Model：<model> (effort: <effort>)
 已更新：
 - .claude/skills/README.md
 - CLAUDE.md
-- .skill_personal/ (若通用)
+- Sekai_workflow/ (若通用)
 ```
 
 ---
@@ -166,41 +166,41 @@ Model：<model> (effort: <effort>)
 ### 觸發時機
 
 1. **新增規則至 CLAUDE.md 或 Memory 時**（自動）：評估是否應加入 Skill
-2. **修改 `.skill_personal/` 時**（自動）：同步至遠端
+2. **修改 `Sekai_workflow/` 時**（自動）：同步至遠端
 3. **手動呼叫**：強制執行完整同步流程
 4. **對話開始時**（可選）：檢查遠端差異
 
-### 流程一：`.skill_personal/` 遠端同步
+### 流程一：`Sekai_workflow/` 遠端同步
 
 直接執行自動化腳本：
 
 ```bash
-bash .skill_personal/setup/sp-sync.sh
+bash Sekai_workflow/setup/sp-sync.sh
 ```
 
 腳本完成：
 1. `git fetch origin` 取得遠端更新
 2. 比較本地與遠端 commit
 3. 若有更新 → `git pull --rebase origin main`
-4. 逐一比對 `.skill_personal/` 與 `.claude/skills/` 各 skill 的 SKILL.md / README.md
+4. 逐一比對 `Sekai_workflow/` 與 `.claude/skills/` 各 skill 的 SKILL.md / README.md
 5. 自動複製新增或差異 skill 到 `.claude/skills/`
 6. 輸出 Added / Updated / No change 摘要
 
 **腳本無法處理（需手動）**：
 - Pull 衝突 → 中止，需手動 resolve 後重跑
 - 新增 skill → 腳本只複製檔案，需手動更新 `CLAUDE.md` 可用 Skills
-- Push 本地變更 → 腳本不自動 push，須 `cd .skill_personal && git push origin main`
+- Push 本地變更 → 腳本不自動 push，須 `cd Sekai_workflow && git push origin main`
 
 ### 流程二：規則評估與三向連動（強制）
 
 > **寫入 Memory 時，必須在同一回覆中完成評估與執行。不可僅寫 Memory 就結束。**
 >
-> Memory 多為使用者習慣與行為偏好，具備跨專案通用性。僅存 Memory 的規則只對當前專案有效，無法隨 `.skill_personal` 帶到新專案。
+> Memory 多為使用者習慣與行為偏好，具備跨專案通用性。僅存 Memory 的規則只對當前專案有效，無法隨 `Sekai_workflow` 帶到新專案。
 
 **寫入 Memory 後立即判斷**：
 
 1. **是否為可重複套用的行為約束或流程規則？** → 同步更新 `CLAUDE.md`
-2. **是否具備跨專案通用性？** → 回流至 `.skill_personal/` 模板並推送遠端
+2. **是否具備跨專案通用性？** → 回流至 `Sekai_workflow/` 模板並推送遠端
 3. **是否僅適用當前專案？** → 僅 Memory，不回流
 
 完整決策樹與 5 項評估問題：
@@ -213,7 +213,7 @@ bash .skill_personal/setup/sp-sync.sh
 |---|---|
 | `CLAUDE.md` | 不入版控（本地） |
 | `.claude/skills/` | 不入版控（本地） |
-| `.skill_personal/` | `Skill-personal` 遠端倉庫 |
+| `Sekai_workflow/` | `Skill-personal` 遠端倉庫 |
 | `.local/` | 不入版控 |
 
 **禁止 `git add -f`**：所有 `.gitignore` 中的檔案不得以任何方式加入專案版控。
@@ -233,17 +233,17 @@ bash .skill_personal/setup/sp-sync.sh
 直接執行自動化腳本：
 
 ```bash
-bash .skill_personal/setup/sp-pack.sh
+bash Sekai_workflow/setup/sp-pack.sh
 ```
 
 ### 腳本行為
 
 1. **收集** — `CLAUDE.md`、`.local/` 工作紀錄、Memory、skills 快照
-2. **偵測專案專屬 skill** — 比對 `.claude/skills/` vs `.skill_personal/`，差集即為專案專屬
+2. **偵測專案專屬 skill** — 比對 `.claude/skills/` vs `Sekai_workflow/`，差集即為專案專屬
 3. **保存專案專屬 skill** → `.local/ai-context/project-skills/`
 4. **收集通用指南** — 掃描 `.local/docs/`、`docs/`、根目錄，含 `guide` 或 `指南` 的文件至 `guides/`
 5. **產生 manifest.txt** — 打包時間、檔案清單、還原指引
-6. **清除** — 刪除 `.claude/skills/`、`.skill_personal/`、`CLAUDE.md`
+6. **清除** — 刪除 `.claude/skills/`、`Sekai_workflow/`、`CLAUDE.md`
 
 ### 腳本後 — AI 合併指南（必須執行）
 
@@ -267,8 +267,8 @@ bash .skill_personal/setup/sp-pack.sh
 
 ### 還原流程
 
-1. `.skill_personal/setup/sp-init.bat` — 重建環境
-2. `bash .skill_personal/setup/sp-sync.sh` — 同步最新 skill
+1. `Sekai_workflow/setup/sp-init.bat` — 重建環境
+2. `bash Sekai_workflow/setup/sp-sync.sh` — 同步最新 skill
 3. 將 `project-skills/` 複製回 `.claude/skills/`
 4. 將 `CLAUDE.md` 複製回根目錄
 5. 將 `memory/` 複製回 `~/.claude/projects/.../memory/`

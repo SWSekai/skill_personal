@@ -90,26 +90,26 @@ if "!MODE!"=="init" (
 echo       Processed !SKILL_COUNT! skills
 
 REM ============================
-REM  Step 3: Create .skill_personal/
+REM  Step 3: Create .Sekai_workflow/
 REM ============================
-echo [3/9] Setting up .skill_personal/ ...
+echo [3/9] Setting up .Sekai_workflow/ ...
 
-if exist "%PROJECT_DIR%\.skill_personal" (
-    echo       .skill_personal/ already exists - skipped
+if exist "%PROJECT_DIR%\.Sekai_workflow" (
+    echo       .Sekai_workflow/ already exists - skipped
 ) else (
-    xcopy "%REPO_ROOT%" "%PROJECT_DIR%\.skill_personal\" /E /I /Y /Q >nul 2>&1
+    xcopy "%REPO_ROOT%" "%PROJECT_DIR%\.Sekai_workflow\" /E /I /Y /Q >nul 2>&1
     REM Re-init git and link to remote repo
-    if exist "%PROJECT_DIR%\.skill_personal\.git" (
-        rmdir /S /Q "%PROJECT_DIR%\.skill_personal\.git" 2>nul
+    if exist "%PROJECT_DIR%\.Sekai_workflow\.git" (
+        rmdir /S /Q "%PROJECT_DIR%\.Sekai_workflow\.git" 2>nul
     )
-    pushd "%PROJECT_DIR%\.skill_personal"
+    pushd "%PROJECT_DIR%\.Sekai_workflow"
     git init >nul 2>&1
     git remote add origin https://github.com/SWSekai/Skill-personal.git >nul 2>&1
     git fetch origin >nul 2>&1
     git branch -M main >nul 2>&1
     git reset --mixed origin/main >nul 2>&1
     popd
-    echo       Created .skill_personal/ - independent git, remote: Skill-personal
+    echo       Created .Sekai_workflow/ - independent git, remote: Skill-personal
 )
 
 REM ============================
@@ -147,7 +147,7 @@ if not exist "!GITIGNORE!" (
 )
 
 REM Define required entries
-set "GI_ENTRIES=CLAUDE.md .claude/ skill_personal/ .skill_personal/ .local/"
+set "GI_ENTRIES=CLAUDE.md .claude/ Sekai_workflow/ .Sekai_workflow/ .local/"
 
 for %%E in (%GI_ENTRIES%) do (
     findstr /X /C:"%%E" "!GITIGNORE!" >nul 2>&1
@@ -252,7 +252,7 @@ set "HOOK_SCRIPTS_SRC=%REPO_ROOT%\hooks"
 set "HOOK_SCRIPTS_DST=%PROJECT_DIR%\.claude\hooks"
 
 if not exist "!HOOK_SCRIPTS_SRC!" (
-    echo            WARN: hooks/ directory not found in skill_personal - skipped
+    echo            WARN: hooks/ directory not found in Sekai_workflow - skipped
 ) else (
     if not exist "!HOOK_SCRIPTS_DST!" mkdir "!HOOK_SCRIPTS_DST!" 2>nul
     set "HOOK_COPIED=0"
@@ -302,7 +302,7 @@ echo [8/9] Restoring portable memory...
 set "MEM_PORTABLE=%REPO_ROOT%\memory-portable"
 
 if not exist "!MEM_PORTABLE!" (
-    echo       WARN: memory-portable/ not found in skill_personal - skipped
+    echo       WARN: memory-portable/ not found in Sekai_workflow - skipped
     goto :DoneMemory
 )
 
@@ -397,7 +397,7 @@ echo ====================================================
 echo.
 echo   Created:
 echo     - .claude/skills/     - Claude Code skill definitions
-echo     - .skill_personal/    - Skill template for sync
+echo     - .Sekai_workflow/    - Skill template for sync
 echo     - .gitignore          - auto-added exclusion entries
 echo     - pre-commit hook     - blocks skill files from project git
 echo     - CLAUDE.md           - project rules, customize as needed

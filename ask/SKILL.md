@@ -1,5 +1,5 @@
 ---
-name: info
+name: ask
 description: "系統文件與報告一站式入口：系統資訊查詢、資料流追蹤、工作報告生成。子命令路由 info / trace / report。"
 model: opus
 effort: medium

@@ -3,13 +3,13 @@ chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
 
 :: ============================================================
-:: sp-sync.bat — skill_personal 遠端同步 + 專案 Skills 更新
-:: 用法：在專案根目錄執行 skill_personal\setup\sp-sync.bat
+:: sp-sync.bat — Sekai_workflow 遠端同步 + 專案 Skills 更新
+:: 用法：在專案根目錄執行 Sekai_workflow\setup\sp-sync.bat
 :: ============================================================
 
 echo.
 echo ========================================
-echo  skill_personal Sync Tool
+echo  Sekai_workflow Sync Tool
 echo ========================================
 echo.
 
@@ -19,7 +19,7 @@ pushd "%SCRIPT_DIR%..\" && set "SP_DIR=!CD!" && popd
 pushd "%SCRIPT_DIR%..\..\" && set "PROJECT_DIR=!CD!" && popd
 set "SKILLS_DIR=%PROJECT_DIR%\.claude\skills"
 
-echo [INFO] skill_personal : %SP_DIR%
+echo [INFO] Sekai_workflow : %SP_DIR%
 echo [INFO] Project skills : %SKILLS_DIR%
 echo.
 
@@ -122,7 +122,7 @@ if %ADDED% GTR 0 (
 
 if not "%AHEAD%"=="0" (
     echo [INFO] Local has %AHEAD% unpushed commit^(s^).
-    echo        Run: cd skill_personal ^&^& git push origin main
+    echo        Run: cd Sekai_workflow ^&^& git push origin main
 )
 
 :end

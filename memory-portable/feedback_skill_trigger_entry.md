@@ -11,6 +11,6 @@ type: feedback
 **How to apply:**
 1. 新增 skill/機制時，評估是否需要 PostToolUse hook 來自動觸發
 2. Hook 設定放 `.claude/settings.local.json`（不影響共用帳號）
-3. Hook 模板放 `skill_personal/setup/templates/hooks.json`（可移植）
+3. Hook 模板放 `Sekai_workflow/setup/templates/hooks.json`（可移植）
 4. sp-init.bat 自動安裝（自動化）
 5. 設計原則：不影響共用帳號、可移植、自動化、高效、可轉移、客製化

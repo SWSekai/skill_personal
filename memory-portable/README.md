@@ -6,7 +6,7 @@
 
 - 只收錄 `feedback` 和 `user` type 的 memory（跨專案通用的偏好與習慣）
 - `project` 和 `reference` type 留在專案本地（跟專案綁定）
-- 隨 skill_personal git 攜帶，任何帳號 clone 後 `sp-init.bat` 即還原
+- 隨 Sekai_workflow git 攜帶，任何帳號 clone 後 `sp-init.bat` 即還原
 
 ## 自動化流程
 
@@ -14,10 +14,10 @@
 |------|------|------|
 | 還原 | `sp-init.bat` | 複製到當前帳號的 `~/.claude/projects/{project}/memory/` |
 | 回寫 | `sp-pack.sh` | 打包時將新的 feedback/user memory 回寫到此目錄 |
-| 推送 | skill_personal commit+push | 偏好隨 git 帶走 |
+| 推送 | Sekai_workflow commit+push | 偏好隨 git 帶走 |
 
 ## 注意事項
 
 - 還原時不覆蓋已存在的同名檔案（保留專案本地修改）
 - MEMORY.md 索引會自動生成/合併
-- 新增 memory 後記得 commit + push skill_personal
+- 新增 memory 後記得 commit + push Sekai_workflow

@@ -19,7 +19,7 @@ process.stdin.on('end', () => {
       const result = {
         decision: 'block',
         reason: 'Memory→Skill 同步未完成',
-        additionalContext: `[Hook 攔截] 你寫入了 Memory 檔案 (${pendingFile}) 但尚未同步到 .claude/skills/。根據 Rule 9 三方同步規則，你必須評估此 Memory 是否應寫入 Skill。如果應該，立即建立或更新對應的 Skill 檔案並同步 skill_personal/；如果不適合作為 Skill，請在回應中明確說明原因，然後刪除 flag 檔案 (${FLAG_FILE})。`
+        additionalContext: `[Hook 攔截] 你寫入了 Memory 檔案 (${pendingFile}) 但尚未同步到 .claude/skills/。根據 Rule 9 三方同步規則，你必須評估此 Memory 是否應寫入 Skill。如果應該，立即建立或更新對應的 Skill 檔案並同步 Sekai_workflow/；如果不適合作為 Skill，請在回應中明確說明原因，然後刪除 flag 檔案 (${FLAG_FILE})。`
       };
       process.stdout.write(JSON.stringify(result));
     }
