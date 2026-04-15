@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
 # sp-sync.sh — Sekai_workflow 遠端同步 + 專案 Skills 更新
-# 用法：在專案根目錄執行 bash Sekai_workflow/setup/sp-sync.sh
+# 用法：在專案根目錄執行 bash Sekai_workflow/_bootstrap/sp-sync.sh
 # ============================================================
 
 set -euo pipefail

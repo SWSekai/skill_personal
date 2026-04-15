@@ -181,7 +181,7 @@ set "HOOK_SRC=%SCRIPT_DIR%\hooks\pre-commit"
 set "HOOK_DST=%PROJECT_DIR%\.git\hooks\pre-commit"
 
 if not exist "!HOOK_SRC!" (
-    echo       WARN: setup/hooks/pre-commit source not found - skipped
+    echo       WARN: _bootstrap/hooks/pre-commit source not found - skipped
     goto :DoneHook
 )
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
 # sp-pack.sh — 專案打包：收集 AI 上下文 → 清除 skill 環境
-# 用法：bash Sekai_workflow/setup/sp-pack.sh
+# 用法：bash Sekai_workflow/_bootstrap/sp-pack.sh
 #
 # 流程：
 #   1. 收集 AI 上下文到 .local/ai-context/
@@ -264,8 +264,8 @@ fi)
 ----------------------------------------------------------------
  還原指引
 ----------------------------------------------------------------
-1. 執行 Sekai_workflow/setup/sp-init.bat 重建 skill 環境
-2. 執行 bash Sekai_workflow/setup/sp-sync.sh 同步最新 skill
+1. 執行 Sekai_workflow/_bootstrap/sp-init.bat 重建 skill 環境
+2. 執行 bash Sekai_workflow/_bootstrap/sp-sync.sh 同步最新 skill
 3. 將 project-skills/ 內容複製回 .claude/skills/
 4. 將 CLAUDE.md 複製回專案根目錄
 5. Memory 檔案複製回 ~/.claude/projects/.../memory/

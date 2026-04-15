@@ -1,13 +1,13 @@
 ---
 name: ask
-description: "系統文件與報告一站式入口：系統資訊查詢、資料流追蹤、工作報告生成。子命令路由 info / trace / report。"
+description: "系統文件與報告一站式入口：系統資訊查詢、資料流追蹤、工作報告生成。子命令路由 query / trace / report。"
 model: opus
 effort: medium
 argument-hint: "<query|trace|report> [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(ls *), Bash(find *), Bash(git log*), Bash(git diff*), Bash(date *)
 ---
 
-# /info — 系統文件與報告合併 Skill
+# /ask — 系統文件與報告合併 Skill
 
 整合 sys-info、trace-flow、report 三項職能。透過第一個參數決定子命令。
 
@@ -15,15 +15,15 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(ls *), Bash(find *), B
 
 | 子命令 | 用途 | 對應原 Skill |
 |---|---|---|
-| `/info query [topic]` | 系統資訊查詢與文件管理 | sys-info |
-| `/info trace <field>` | 端到端資料流追蹤 | trace-flow |
-| `/info report [scope]` | 從修改紀錄生成工作報告 | report |
+| `/ask query [topic]` | 系統資訊查詢與文件管理 | sys-info |
+| `/ask trace <field>` | 端到端資料流追蹤 | trace-flow |
+| `/ask report [scope]` | 從修改紀錄生成工作報告 | report |
 
 無參數時要求使用者指定子命令。
 
 ---
 
-## A. `/info query` — 系統資訊查詢與文件管理
+## A. `/ask query` — 系統資訊查詢與文件管理
 
 當使用者詢問系統如何運作，本子命令同時管理「答覆」與「文件生命週期」。
 
@@ -32,7 +32,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(ls *), Bash(find *), B
 掃描所有文件來源：
 
 ```
-.local/infos/      ← 主要知識庫（本子命令管理）
+.local/asks/      ← 主要知識庫（本子命令管理）
 docs/             ← 官方專案文件
 **/README.md      ← 各目錄 README
 ```
@@ -62,7 +62,7 @@ docs/             ← 官方專案文件
 #### 路徑 C — 無相關文件
 
 1. 先回答問題
-2. 整理為結構化文件，存至 `.local/infos/[topic_description].md`
+2. 整理為結構化文件，存至 `.local/asks/[topic_description].md`
 3. 告知使用者新檔位置
 
 ### Step 3：冗餘檢查
@@ -105,7 +105,7 @@ docs/             ← 官方專案文件
 
 ---
 
-## B. `/info trace` — 端到端資料流追蹤
+## B. `/ask trace` — 端到端資料流追蹤
 
 追蹤指定欄位或功能在系統中的完整流動，識別資料遺失風險。
 
@@ -167,7 +167,7 @@ docs/             ← 官方專案文件
 
 ---
 
-## C. `/info report` — 工作報告生成
+## C. `/ask report` — 工作報告生成
 
 從專案修改紀錄統整生成 **2～3 分鐘簡報** 用的工作報告。
 
@@ -175,9 +175,9 @@ docs/             ← 官方專案文件
 
 | 用法 | 行為 |
 |---|---|
-| `/info report` | 全量報告（全部修改紀錄） |
-| `/info report weekly` | 近 7 天週報 |
-| `/info report YYMMDD YYMMDD` | 指定期間 |
+| `/ask report` | 全量報告（全部修改紀錄） |
+| `/ask report weekly` | 近 7 天週報 |
+| `/ask report YYMMDD YYMMDD` | 指定期間 |
 
 ### Step 1：確定範圍
 
