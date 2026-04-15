@@ -175,7 +175,7 @@ Model：<model> (effort: <effort>)
 直接執行自動化腳本：
 
 ```bash
-bash Sekai_workflow/setup/sp-sync.sh
+bash Sekai_workflow/_bootstrap/sp-sync.sh
 ```
 
 腳本完成：
@@ -233,7 +233,7 @@ bash Sekai_workflow/setup/sp-sync.sh
 直接執行自動化腳本：
 
 ```bash
-bash Sekai_workflow/setup/sp-pack.sh
+bash Sekai_workflow/_bootstrap/sp-pack.sh
 ```
 
 ### 腳本行為
@@ -267,8 +267,8 @@ bash Sekai_workflow/setup/sp-pack.sh
 
 ### 還原流程
 
-1. `Sekai_workflow/setup/sp-init.bat` — 重建環境
-2. `bash Sekai_workflow/setup/sp-sync.sh` — 同步最新 skill
+1. `Sekai_workflow/_bootstrap/sp-init.bat` — 重建環境
+2. `bash Sekai_workflow/_bootstrap/sp-sync.sh` — 同步最新 skill
 3. 將 `project-skills/` 複製回 `.claude/skills/`
 4. 將 `CLAUDE.md` 複製回根目錄
 5. 將 `memory/` 複製回 `~/.claude/projects/.../memory/`
