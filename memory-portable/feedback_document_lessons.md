@@ -10,6 +10,6 @@ type: feedback
 
 **How to apply:**
 - 每次修正 CI/CD、部署、配置等問題後，評估該經驗是否具通用性
-- 如果是，主動提議寫入 `.local/docs/guides/` 下的對應指南文件（如 k8s-deployment-guide、cicd-troubleshooting 等）
+- 如果是，主動提議寫入 `.local/docs/guide/` 下的對應指南文件（如 k8s-deployment-guide、cicd-troubleshooting 等）
 - 文件格式：問題描述 → 原因 → 解決方式，方便日後查閱
 - 確保這些文件在 /pack 時會被收集到 ai-context 中

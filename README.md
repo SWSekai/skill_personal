@@ -169,16 +169,20 @@ sp-init.bat 自動完成：
 
 ```
 .local/
-├── modify_logs/   ← /build log（含 /build commit、/build restart 報告）
-├── docs/          ← /ask query、/ask trace、/team-office board、/team-office decide、/team-office notes
-│   ├── whiteboards/
-│   ├── decisions/
-│   ├── tech-notes/
-│   └── plans/
-├── summary/       ← /context-guard
-├── reports/       ← /ask report
-├── collab/        ← /team-office todo（TODO.md）
-└── ai-context/    ← /setup pack 打包輸出
+├── modify_log/       ← /commit-push Step 5（Haiku 內嵌產出）
+├── docs/             ← 給人讀的文件（ask / team-office / commit-push guide）
+│   ├── plan/         ← /build plan
+│   ├── decision/     ← /team-office decide（一次性，執行後刪除）
+│   ├── summary/      ← /team-office decide 執行後持久化（永久）
+│   ├── whiteboard/   ← /team-office board
+│   ├── tech-note/    ← /team-office notes
+│   ├── guide/        ← /commit-push Step 10 經驗指南
+│   └── knowledge/    ← /ask query 系統知識庫
+├── context_summary/  ← /context-guard 摘要 + current_topic.md
+├── report/           ← /ask report
+├── collab/           ← /team-office todo（TODO.md）
+├── samples/          ← 使用者提供的參考樣本（按需建立）
+└── ai-context/       ← /setup pack 打包輸出
 ```
 
 ### 入版控文件

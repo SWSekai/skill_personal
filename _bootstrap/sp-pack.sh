@@ -86,7 +86,7 @@ fi
 
 # --- Step 3: 收集 .local/ 子目錄 ---
 echo "[Step 2] 收集 .local/ 工作紀錄..."
-for subdir in docs modify_logs summary reports; do
+for subdir in docs modify_log context_summary report collab samples; do
     src="$PROJECT_DIR/.local/$subdir"
     if [ -d "$src" ] && [ "$(ls -A "$src" 2>/dev/null)" ]; then
         cp -r "$src" "$AI_CONTEXT/$subdir"

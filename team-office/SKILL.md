@@ -90,7 +90,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ### Step 1：建立白板
 
-- 路徑：`.local/docs/whiteboards/YYMMDD_主題描述.md`
+- 路徑：`.local/docs/whiteboard/YYMMDD_主題描述.md`
 - 同主題同日 → 更新既存檔，不另開
 - 結構原則：
   - **待辦**：純 checkbox 清單，一眼看完剩什麼要做
@@ -141,7 +141,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ### Step 2：生成互動式 Markdown
 
-預設位置 `.local/docs/decisions/<topic>.md`，使用者可指定。
+預設位置 `.local/docs/decision/<topic>.md`，使用者可指定。
 
 格式規範：
 - 核取方塊 `[ ]` / `[x]`
@@ -192,7 +192,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 **先摘要、再刪除**（對齊 CLAUDE.md 第 17 條）：
 
-1. **建立摘要**於 `.local/docs/summaries/YYMMDD_<topic>_summary.md`（永久保留）
+1. **建立摘要**於 `.local/docs/summary/YYMMDD_<topic>_summary.md`（永久保留）
    - 原問題摘要
    - 最終選定選項 + 使用者補充
    - 執行變更清單（檔案 + commit hash）
@@ -208,10 +208,10 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
        - <選項 C> — 未選原因：<為何這次不選>、重啟時機：<什麼情境下會選>
      ```
    - 候選清理：超過 6 個月未重啟或被新決策取代 → 標註「已作廢」，**不刪除**（保留歷史）
-   - 新對話遇類似需求時先讀 summaries/ 對應區塊，能重啟就重啟，不要重新設計
-3. **主動刪除** `.local/docs/decisions/<topic>.md`（原始互動文件）
+   - 新對話遇類似需求時先讀 summary/ 對應區塊，能重啟就重啟，不要重新設計
+3. **主動刪除** `.local/docs/decision/<topic>.md`（原始互動文件）
 4. 決策文件為一次性產物，摘要才是持久紀錄
-5. 需保留互動歷史（而非決策結果）→ 改用 `/team-office board`（`whiteboards/` 類文件不刪除）
+5. 需保留互動歷史（而非決策結果）→ 改用 `/team-office board`（`whiteboard/` 類文件不刪除）
 6. 使用者若明示「保留決策紀錄」→ 跳過刪除並於回覆註明
 
 ### 設計原則
@@ -226,7 +226,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ## D. `/team-office notes` — 技術筆記整理
 
-將對話中的技術問答整理成結構化筆記，存於 `.local/docs/tech-notes/`。
+將對話中的技術問答整理成結構化筆記，存於 `.local/docs/tech-note/`。
 
 ### 觸發
 
@@ -241,7 +241,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ### 輸出規範
 
-- **路徑**：`.local/docs/tech-notes/`
+- **路徑**：`.local/docs/tech-note/`
 - **檔名**：`{主題類別}_{具體主題}.md`（例：`sql_comments.md`、`git_rebase.md`）
 - **格式**：完整結構化文章，含目錄、架構、範例
 
@@ -276,7 +276,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ### 流程
 
-1. 確認 `.local/docs/tech-notes/` 存在
+1. 確認 `.local/docs/tech-note/` 存在
 2. 檢查同主題文件 → 有則更新補充，無則新建
 3. 撰寫完整結構化文章
 4. 告知使用者檔案路徑

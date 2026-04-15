@@ -72,7 +72,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *)
 
 ### 中斷與恢復
 
-- 任何階段中斷後，方案文件保留在 `.local/docs/plans/`
+- 任何階段中斷後，方案文件保留在 `.local/docs/plan/`
 - 恢復方式：`/build impl <plan-file>` 從上次進度繼續
 - 方案文件中的 checkbox 記錄完成狀態，中斷後可識別未完成步驟
 
@@ -161,7 +161,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *)
 - 第三選項：`換方案`（若有替代方案）
 
 確認後：
-1. 將方案寫入 `.local/docs/plans/YYMMDD_<feature>.md`
+1. 將方案寫入 `.local/docs/plan/YYMMDD_<feature>.md`
 2. 若在 `/build flow` 中 → 自動進入 `/build impl`
 3. 若獨立呼叫 → 告知使用者「方案已存，可用 `/build impl` 開始實作」
 
@@ -179,7 +179,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *)
 
 ### Step 1：載入方案
 
-1. 讀取方案文件（`.local/docs/plans/YYMMDD_<feature>.md`）
+1. 讀取方案文件（`.local/docs/plan/YYMMDD_<feature>.md`）
 2. 解析實作步驟清單與 checkbox 狀態
 3. 找到第一個未勾選（`- [ ]`）的步驟作為起始點
 4. 若全部已勾 → 告知實作已完成，提示 `/build test`
@@ -429,7 +429,7 @@ git diff --stat
 
 ### 文件層同步
 - [ ] 受影響目錄的 README.md 是否更新
-- [ ] 若為新功能 → 是否有對應的 .local/docs/guides/<topic>.md
+- [ ] 若為新功能 → 是否有對應的 .local/docs/guide/<topic>.md
 ```
 
 ### Step 3：互動確認

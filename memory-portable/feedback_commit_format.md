@@ -27,7 +27,7 @@ originSessionId: dddfa0de-6667-4adc-83a2-bc6db4a98bad
 
 ## Modify Log 格式（對齊使用者 `.\modify_log\` 原版標準模板）
 
-**檔名**：`.local/modify_logs/YYMMDD_主題描述.md`（6 位日期 + 描述性主題）
+**檔名**：`.local/modify_log/YYMMDD_主題描述.md`（6 位日期 + 描述性主題）
 
 **章節順序固定**（與重構後版本不同，必須對齊原版）：
 

@@ -201,7 +201,7 @@ EOF
 
 ### 5.1 檔名規則
 
-`.local/modify_logs/YYMMDD_主題描述.md`（6 位日期 + 具描述性主題名）
+`.local/modify_log/YYMMDD_主題描述.md`（6 位日期 + 具描述性主題名）
 
 範例：`260313_video_h264_reencode.md`
 
@@ -345,12 +345,12 @@ docker compose config
    - 設定與文件 / 預設不同？
    - 工具 / 平台限制的 workaround？
 
-2. **若是**，更新對應的 `.local/docs/guides/<topic>.md`：
+2. **若是**，更新對應的 `.local/docs/guide/<topic>.md`：
    - 加入對應的 troubleshooting / FAQ 區塊
    - 格式：**症狀** → **原因** → **解決方式** → **注意事項**
-   - 無對應 guide → 於 `.local/docs/guides/` 新建
+   - 無對應 guide → 於 `.local/docs/guide/` 新建
 
-3. **告知使用者**：「已將此經驗寫入 `.local/docs/guides/<topic>.md`，`/setup pack` 時會一併帶走。」
+3. **告知使用者**：「已將此經驗寫入 `.local/docs/guide/<topic>.md`，`/setup pack` 時會一併帶走。」
 
 確保運維知識沉澱於可攜帶文件，而非丟在對話歷史中。
 
