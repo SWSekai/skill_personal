@@ -44,7 +44,7 @@ A portable set of Claude Code skills that work with **any project**. No project-
 
 ### 規則 3：自動同步至遠端倉庫
 
-- **遠端**：`https://github.com/SWSekai/skill_personal.git`
+- **遠端**：`https://github.com/SWSekai/sekai-workflow.git`
 - **本地**：專案內的 `Sekai_workflow/`（自身為 git repo）
 - **時機**：每次 `Sekai_workflow/` 有變更時，stage、commit、push
 

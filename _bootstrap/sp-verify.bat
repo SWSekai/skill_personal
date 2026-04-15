@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 REM ============================================================
-REM  Skill-personal environment verification
+REM  sekai-workflow environment verification
 REM  Usage: sp-verify.bat [project-path]
 REM  Checks that all protection layers are in place
 REM ============================================================
@@ -32,7 +32,7 @@ if not exist "!GI!" (
     set /a FAIL+=1
 ) else (
     set "GI_OK=1"
-    for %%E in (".claude/" ".Sekai_workflow/" ".hanschen/") do (
+    for %%E in (".claude/" "Sekai_workflow/" ".hanschen/") do (
         findstr /B /C:%%E "!GI!" >nul 2>&1
         if errorlevel 1 (
             echo       FAIL: %%~E not in .gitignore
@@ -41,7 +41,7 @@ if not exist "!GI!" (
         )
     )
     if "!GI_OK!"=="1" (
-        echo       PASS: .claude/ .Sekai_workflow/ .hanschen/ all present
+        echo       PASS: .claude/ Sekai_workflow/ .hanschen/ all present
         set /a PASS+=1
     )
 )
@@ -72,13 +72,13 @@ if not exist "%PROJECT_DIR%\.claude\skills" (
     set /a PASS+=1
 )
 
-REM --- Check 4: .Sekai_workflow/ exists ---
-echo [Check 4] .Sekai_workflow/ directory...
-if not exist "%PROJECT_DIR%\.Sekai_workflow" (
-    echo       FAIL: .Sekai_workflow/ not found
+REM --- Check 4: Sekai_workflow/ exists ---
+echo [Check 4] Sekai_workflow/ directory...
+if not exist "%PROJECT_DIR%\Sekai_workflow" (
+    echo       FAIL: Sekai_workflow/ not found
     set /a FAIL+=1
 ) else (
-    echo       PASS: .Sekai_workflow/ exists
+    echo       PASS: Sekai_workflow/ exists
     set /a PASS+=1
 )
 
@@ -133,7 +133,7 @@ echo.
 
 if !FAIL! GTR 0 (
     echo   Run sp-init.bat to fix issues:
-    echo     Skill-personal\setup\sp-init.bat "%PROJECT_DIR%"
+    echo     Sekai_workflow\_bootstrap\sp-init.bat "%PROJECT_DIR%"
     echo.
     exit /b 1
 )

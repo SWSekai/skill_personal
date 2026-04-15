@@ -38,10 +38,10 @@
 - **必須**建立修改紀錄
 - 必備欄位：日期時間、版本號、更動原因、檔案影響行數、影響範圍、容器重啟需求
 
-### 4. .skill_personal/ 禁止加入專案版控，變更須推送至獨立倉庫
-- `.skill_personal/` 已加入 `.gitignore`，**絕對不可**使用 `git add -f` 或任何方式加入專案版控
-- `.skill_personal/` 屬於 `Skill-personal` 遠端倉庫，僅透過該倉庫管理
-- **每次修改 `.skill_personal/` 內容後，必須同步推送至 Skill-personal 倉庫**
+### 4. Sekai_workflow/ 禁止加入專案版控，變更須推送至獨立倉庫
+- `Sekai_workflow/` 已加入 `.gitignore`，**絕對不可**使用 `git add -f` 或任何方式加入專案版控
+- `Sekai_workflow/` 屬於 `sekai-workflow` 遠端倉庫（`https://github.com/SWSekai/sekai-workflow.git`），僅透過該倉庫管理
+- **每次修改 `Sekai_workflow/` 內容後，必須同步推送至遠端倉庫**
 
 ### 5. 每次 Commit 前 — .gitignore 安全檢查與狀態總覽
 - 讀取 `.gitignore`，確認即將 stage 的檔案不在忽略清單中
@@ -60,36 +60,36 @@
 - 當對話中出現新規則或偏好時，主動詢問是否更新至 Skill 規範
 - 獲得確認後修改 `.claude/skills/` 對應文件
 
-### 9. Memory、Skill、skill_personal 三向連動（強制）
+### 9. Memory、Skill、Sekai_workflow 三向連動（強制）
 > **此規則為強制執行，不依賴 Skill 載入。每次寫入 Memory 時必須在同一回覆中完成以下所有步驟。**
 
 - **步驟 1：寫入 Memory**
 - **步驟 2：立即判斷歸類**（不可拆成下一回覆）
   1. 是否為可重複套用的行為約束或流程規則？ → **同步更新 CLAUDE.md**
-  2. 是否具備跨專案通用性？ → **回流至 `skill_personal/` 模板並推送遠端**
+  2. 是否具備跨專案通用性？ → **回流至 `Sekai_workflow/` 模板並推送遠端**
   3. 是否僅適用當前專案？ → 僅 Memory，不回流
 - **步驟 3：若有對應 Skill**，同步更新 `.claude/skills/` 對應的 SKILL.md
-- **步驟 4：若更新了 `skill_personal/`**，複製至 `../Skill-personal/` 並 commit & push
+- **步驟 4：若更新了 `Sekai_workflow/`**，commit & push 至遠端
 
 **禁止**：僅寫入 Memory 就結束回覆、將同步留給下一回覆、等使用者提醒才補做。
-**原因**：Memory 綁定專案路徑，僅存 Memory 的規則無法隨 skill_personal 帶到新專案。
+**原因**：Memory 綁定專案路徑，僅存 Memory 的規則無法隨 Sekai_workflow 帶到新專案。
 
 ### 10. 新增 Skill 後 — 完整性檢查
 - Skill 資料夾包含 `SKILL.md` 和 `README.md`
 - `.claude/skills/README.md` 已更新
-- `.skill_personal/` 對應資料夾已同步
+- `Sekai_workflow/` 對應資料夾已同步
 - CLAUDE.md 可用 Skills 列表已更新
 
 ### 11. 新專案自動初始化 Skill
 - 進入新專案時，自動偵測並初始化 Skill 環境
-- 觸發 `/skill-sync` 執行完整初始化流程
+- 觸發 `/setup sync` 執行完整初始化流程
 
-### 12. .skill_personal 遠端同步與衝突處理
+### 12. Sekai_workflow 遠端同步與衝突處理
 - 每次對話開始時自動同步
-- 觸發 `/skill-sync` 執行遠端同步流程
+- 觸發 `/setup sync` 執行遠端同步流程
 
 ### 13. 資訊查詢時主動建立文件
-- 被詢問系統架構、功能、資料流等問題時，自動觸發 `/sys-info`
+- 被詢問系統架構、功能、資料流等問題時，自動觸發 `/ask query`
 
 ### 15. Y/N 確認一律由 Tool Confirmation UI 處理（最高優先級）
 - 所有只需 Y/N 回答的操作，**直接執行對應 tool call**，讓使用者透過 tool 權限介面（approve/deny）決定
@@ -103,10 +103,12 @@
 - 關鍵資訊範例：資料庫名稱、collection/table 名稱、待開發功能、API 端點、環境變數、業務規則、第三方服務等
 
 ## 可用 Skills
-- `/commit-push` — 提交推送（含品質檢查、日誌、README 更新、容器評估）
-- `/modify-log` — 建立修改日誌（commit 前自動觸發）
-- `/restart-eval` — 容器重啟評估（commit 後自動觸發）
-- `/trace-flow` — 資料流端到端追蹤
-- `/quality-check` — 程式碼品質與影響檢查（commit 前自動觸發）
-- `/sys-info` — 系統資訊查詢與文件管理
-- `/skill-sync` — Skill 環境初始化、遠端同步、規則評估（對話開始時自動觸發）
+
+合併版（17 → 6），透過子命令路由至原 Skill 對應職能。
+
+- `/build <flow|plan|impl|test|commit|quality|log|restart|eval>` — 開發全流程：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → commit → push → 重啟評估
+- `/memo <todo|board|decide|notes>` — 互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記
+- `/setup <new|sync|pack>` — Skill 環境管理：建立新 Skill、遠端同步、專案打包
+- `/ask <query|trace|report>` — 系統文件與報告：系統資訊、資料流追蹤、工作報告
+- `/context-guard` — Context Window 管理（系統壓縮、手動、對話開始）
+- `/memory-portable` — Memory 跨專案攜帶

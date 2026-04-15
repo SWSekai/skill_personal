@@ -69,7 +69,7 @@ if not exist "%SKILLS_DIR%" mkdir "%SKILLS_DIR%"
 for /d %%D in ("%SP_DIR%\*") do (
     set "SKILL_NAME=%%~nxD"
     set "SKIP=0"
-    if /I "!SKILL_NAME!"=="setup" set "SKIP=1"
+    if /I "!SKILL_NAME!"=="_bootstrap" set "SKIP=1"
     if /I "!SKILL_NAME!"=="docs" set "SKIP=1"
     if /I "!SKILL_NAME!"==".git" set "SKIP=1"
 

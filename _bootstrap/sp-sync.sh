@@ -57,7 +57,7 @@ UNCHANGED=0
 mkdir -p "$SKILLS_DIR"
 
 # 排除非 skill 目錄
-SKIP_DIRS="setup docs .git"
+SKIP_DIRS="_bootstrap docs .git hooks references"
 
 for skill_dir in "$SP_DIR"/*/; do
     [ ! -d "$skill_dir" ] && continue

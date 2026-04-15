@@ -213,7 +213,7 @@ bash Sekai_workflow/setup/sp-sync.sh
 |---|---|
 | `CLAUDE.md` | 不入版控（本地） |
 | `.claude/skills/` | 不入版控（本地） |
-| `Sekai_workflow/` | `Skill-personal` 遠端倉庫 |
+| `Sekai_workflow/` | `sekai-workflow` 遠端倉庫 |
 | `.local/` | 不入版控 |
 
 **禁止 `git add -f`**：所有 `.gitignore` 中的檔案不得以任何方式加入專案版控。

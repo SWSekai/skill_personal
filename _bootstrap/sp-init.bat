@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 REM ============================================================
-REM  Skill-personal project init script
+REM  sekai-workflow project init script
 REM  Usage: setup\sp-init.bat [project-path]
 REM  If no argument given, uses current directory as target
 REM ============================================================
@@ -21,7 +21,7 @@ if "%~1"=="" (
 
 echo.
 echo ====================================================
-echo   Skill-personal Project Init
+echo   Sekai-workflow Project Init
 echo ====================================================
 echo.
 echo   Repo:    %REPO_ROOT%
@@ -40,11 +40,11 @@ if not exist "%PROJECT_DIR%\.git" (
     echo.
 )
 
-REM Prevent running in Skill-personal repo itself or any of its subdirectories
+REM Prevent running in sekai-workflow repo itself or any of its subdirectories
 set "CHECK_DIR=%PROJECT_DIR%"
 :CheckRepoLoop
 if /I "!CHECK_DIR!"=="%REPO_ROOT%" (
-    echo [ERROR] Cannot run this script inside the Skill-personal repo or any subdirectory of it.
+    echo [ERROR] Cannot run this script inside the sekai-workflow repo or any subdirectory of it.
     echo         Current target: %PROJECT_DIR%
     echo         Run from your target project directory, or pass the project path as argument.
     exit /b 1
@@ -90,26 +90,26 @@ if "!MODE!"=="init" (
 echo       Processed !SKILL_COUNT! skills
 
 REM ============================
-REM  Step 3: Create .Sekai_workflow/
+REM  Step 3: Create Sekai_workflow/
 REM ============================
-echo [3/9] Setting up .Sekai_workflow/ ...
+echo [3/9] Setting up Sekai_workflow/ ...
 
-if exist "%PROJECT_DIR%\.Sekai_workflow" (
-    echo       .Sekai_workflow/ already exists - skipped
+if exist "%PROJECT_DIR%\Sekai_workflow" (
+    echo       Sekai_workflow/ already exists - skipped
 ) else (
-    xcopy "%REPO_ROOT%" "%PROJECT_DIR%\.Sekai_workflow\" /E /I /Y /Q >nul 2>&1
+    xcopy "%REPO_ROOT%" "%PROJECT_DIR%\Sekai_workflow\" /E /I /Y /Q >nul 2>&1
     REM Re-init git and link to remote repo
-    if exist "%PROJECT_DIR%\.Sekai_workflow\.git" (
-        rmdir /S /Q "%PROJECT_DIR%\.Sekai_workflow\.git" 2>nul
+    if exist "%PROJECT_DIR%\Sekai_workflow\.git" (
+        rmdir /S /Q "%PROJECT_DIR%\Sekai_workflow\.git" 2>nul
     )
-    pushd "%PROJECT_DIR%\.Sekai_workflow"
+    pushd "%PROJECT_DIR%\Sekai_workflow"
     git init >nul 2>&1
-    git remote add origin https://github.com/SWSekai/Skill-personal.git >nul 2>&1
+    git remote add origin https://github.com/SWSekai/sekai-workflow.git >nul 2>&1
     git fetch origin >nul 2>&1
     git branch -M main >nul 2>&1
     git reset --mixed origin/main >nul 2>&1
     popd
-    echo       Created .Sekai_workflow/ - independent git, remote: Skill-personal
+    echo       Created Sekai_workflow/ - independent git, remote: sekai-workflow
 )
 
 REM ============================
@@ -147,7 +147,7 @@ if not exist "!GITIGNORE!" (
 )
 
 REM Define required entries
-set "GI_ENTRIES=CLAUDE.md .claude/ Sekai_workflow/ .Sekai_workflow/ .local/"
+set "GI_ENTRIES=CLAUDE.md .claude/ Sekai_workflow/ Sekai_workflow/ .local/"
 
 for %%E in (%GI_ENTRIES%) do (
     findstr /X /C:"%%E" "!GITIGNORE!" >nul 2>&1
@@ -397,7 +397,7 @@ echo ====================================================
 echo.
 echo   Created:
 echo     - .claude/skills/     - Claude Code skill definitions
-echo     - .Sekai_workflow/    - Skill template for sync
+echo     - Sekai_workflow/    - Skill template for sync
 echo     - .gitignore          - auto-added exclusion entries
 echo     - pre-commit hook     - blocks skill files from project git
 echo     - CLAUDE.md           - project rules, customize as needed
@@ -425,7 +425,7 @@ set "DIRNAME=%~2"
 
 REM Skip non-skill directories
 if "%DIRNAME%"==".git" exit /b 0
-if "%DIRNAME%"=="setup" exit /b 0
+if "%DIRNAME%"=="_bootstrap" exit /b 0
 if "%DIRNAME%"=="docs" exit /b 0
 if "%DIRNAME%"=="hooks" exit /b 0
 if "%DIRNAME:~0,1%"=="." exit /b 0
