@@ -25,7 +25,7 @@
 ## 執行流程
 
 1. 觸發條件判定
-2. 記錄當前工作狀態至 `.local/summary/`
+2. 記錄當前工作狀態至 `.local/context_summary/`
 3. 更新 topic state file
 4. 任務切換偵測（半自動）
 5. 摘要恢復與生命週期管理
@@ -42,7 +42,7 @@ context-guard/
 ## 摘要儲存位置
 
 ```
-.local/summary/
+.local/context_summary/
 ├── current_topic.md
 └── YYMMDD_HHMM_主題描述.md
 ```

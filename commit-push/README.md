@@ -47,7 +47,7 @@ commit-push/
 | 7. sekai-workflow 同步 | 若動到 `sekai-workflow/` → 獨立遠端 commit & push |
 | 8. Deploy 評估 | 呼叫 `/build deploy --plan` 輸出重啟計畫 |
 | 9. Context 清理 | context-guard 摘要 + `.local/context_summary/` 維護 + 提示 `/clear` |
-| 10. 經驗回流 | 非顯而易見修正寫入 `.local/docs/<guide>.md` |
+| 10. 經驗回流 | 非顯而易見修正寫入 `.local/docs/guides/<topic>.md` |
 
 ## 特性
 

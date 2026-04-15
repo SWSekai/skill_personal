@@ -429,7 +429,7 @@ git diff --stat
 
 ### 文件層同步
 - [ ] 受影響目錄的 README.md 是否更新
-- [ ] 若為新功能 → 是否有對應的 .local/docs/<guide>.md
+- [ ] 若為新功能 → 是否有對應的 .local/docs/guides/<topic>.md
 ```
 
 ### Step 3：互動確認

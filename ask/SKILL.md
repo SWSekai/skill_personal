@@ -32,7 +32,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(ls *), Bash(find *), B
 掃描所有文件來源：
 
 ```
-.local/asks/      ← 主要知識庫（本子命令管理）
+.local/docs/knowledge/      ← 主要知識庫（本子命令管理）
 docs/             ← 官方專案文件
 **/README.md      ← 各目錄 README
 ```
@@ -62,7 +62,7 @@ docs/             ← 官方專案文件
 #### 路徑 C — 無相關文件
 
 1. 先回答問題
-2. 整理為結構化文件，存至 `.local/asks/[topic_description].md`
+2. 整理為結構化文件，存至 `.local/docs/knowledge/[topic_description].md`
 3. 告知使用者新檔位置
 
 ### Step 3：冗餘檢查
