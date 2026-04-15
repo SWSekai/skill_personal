@@ -57,4 +57,31 @@ cp ~/.claude/projects/{project}/memory/user_*.md Sekai_workflow/memory-portable/
 
 ---
 
-Arguments: $ARGUMENTS (optional)
+### Step 5: 對話中主動回流（強制，對齊 CLAUDE.md 第 9 條）
+
+**不要只依賴 sp-pack.sh** — 對話中若寫入新的 `feedback` / `user` type memory，**當回覆**就要判斷是否跨專案通用：
+
+1. **是**（例如「commit 格式」「model 分工」「UI 偏好」）→ 立即 `cp` 至 `sekai-workflow/memory-portable/` + commit + push
+2. **否**（例如「本專案的 alert_rules 欄位名」）→ 僅保留在專案 memory
+
+**順序陷阱**：本 Skill 的 hook (`memory_skill_sync.cjs`) 追蹤寫入順序，若先寫 skills 再寫 memory，flag 會保留 → Stop hook 顯示「未完成」。正確順序：
+
+```
+1. 先寫 memory 檔案（Write ~/.claude/projects/.../memory/xxx.md）
+2. 再寫對應 skill 變更（Write sekai-workflow/xxx/SKILL.md 或 .claude/skills/xxx/SKILL.md）
+```
+
+若順序顛倒，可透過「再次寫入任一 skill 檔案」來清旗。
+
+---
+
+## 本 Skill 直接受益的 Portable Memory
+
+- `feedback_model_tier.md` — Skill Model 三層分工（Opus / Sonnet / Haiku），影響 Skill frontmatter 的 `model:` 欄位選擇
+- `feedback_commit_format.md` — Commit Message 與 Modify Log 嚴格格式，影響 `/commit-push` 執行
+
+新專案 `sp-init.bat` 會自動帶入這兩份，不需手動補。
+
+---
+
+Arguments: $ARGUMENTS (optional — 新專案 sp-init.bat 自動觸發 Step 3)
