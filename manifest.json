@@ -17,14 +17,14 @@
       "merged_from": ["commit-push", "quality-check", "modify-log", "restart-volumn", "restart-eval"]
     },
     {
-      "name": "memo",
-      "command": "/memo",
+      "name": "team-office",
+      "command": "/team-office",
       "description": "互動協作一站式入口：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記整理",
       "subcommands": ["todo", "board", "decide", "notes"],
       "model": "sonnet",
       "trigger": "手動呼叫 / board 自動觸發",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(mkdir *)"],
-      "files": ["memo/SKILL.md", "memo/README.md", "memo/references/interaction-modes.md", "memo/assets/collab-template.md", "memo/assets/whiteboard-template.md"],
+      "files": ["team-office/SKILL.md", "team-office/README.md", "team-office/references/interaction-modes.md", "team-office/assets/collab-template.md", "team-office/assets/whiteboard-template.md"],
       "merged_from": ["todo", "whiteboard", "md-collab", "tech-notes"]
     },
     {
@@ -125,10 +125,10 @@
     "modify-log": "build log",
     "restart-volumn": "build restart",
     "restart-eval": "build eval",
-    "todo": "memo todo",
-    "whiteboard": "memo board",
-    "md-collab": "memo decide",
-    "tech-notes": "memo notes",
+    "todo": "team-office todo",
+    "whiteboard": "team-office board",
+    "md-collab": "team-office decide",
+    "tech-notes": "team-office notes",
     "create-skill": "setup new",
     "skill-sync": "setup sync",
     "pack": "setup pack",

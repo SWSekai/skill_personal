@@ -93,11 +93,11 @@ sp-init.bat 自動完成：
 | Skill | Command | Model | Description |
 |---|---|:---:|---|
 | **build** | `/build <flow\|plan\|impl\|test\|commit\|quality\|log\|restart\|eval>` | sonnet | 開發全流程：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → commit → 重啟評估 |
-| **memo** | `/memo <todo\|board\|decide\|notes>` | sonnet | 互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記 |
+| **team-office** | `/team-office <todo\|board\|decide\|notes>` | sonnet | 互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記 |
 | **setup** | `/setup <new\|sync\|pack>` | sonnet | Skill 環境管理：建立新 Skill、遠端同步、專案打包 |
 | **ask** | `/ask <query\|trace\|report>` | opus | 系統文件與報告：系統資訊、資料流追蹤、工作報告 |
 | **context-guard** | `/context-guard` | sonnet | Context Window 管理（系統壓縮、手動、對話開始） |
-| **memory-portable** | `/memory-portable` | sonnet | Memory 跨專案攜帶 |
+| **memory-portable** | `/team-officery-portable` | sonnet | Memory 跨專案攜帶 |
 | **commit-push** | `/commit-push [msg]` | sonnet | 獨立 commit & push 入口（與 `/build commit` 並存，供單獨使用） |
 
 ---
@@ -120,16 +120,16 @@ sp-init.bat 自動完成：
 | `/build restart [services]` | 容器重啟與自動修復 |
 | `/build eval [range]` | 重啟評估（不執行） |
 
-### `/memo` — 互動協作
+### `/team-office` — 互動協作
 
 整合原 `todo` + `whiteboard` + `md-collab` + `tech-notes`。
 
 | 子命令 | 用途 |
 |---|---|
-| `/memo todo [add\|list\|<n>]` | 處理 AI TODO 清單 |
-| `/memo board [topic]` | 即時白板（諮詢、規劃類對話自動觸發） |
-| `/memo decide <topic>` | Markdown 互動式決策表（核取／填寫） |
-| `/memo notes [topic]` | 結構化技術筆記 |
+| `/team-office todo [add\|list\|<n>]` | 處理 AI TODO 清單 |
+| `/team-office board [topic]` | 即時白板（諮詢、規劃類對話自動觸發） |
+| `/team-office decide <topic>` | Markdown 互動式決策表（核取／填寫） |
+| `/team-office notes [topic]` | 結構化技術筆記 |
 
 ### `/setup` — Skill 環境管理
 
@@ -155,7 +155,7 @@ sp-init.bat 自動完成：
 
 監控 context window 使用狀況，系統壓縮通知時自動摘要、手動呼叫整理、對話開始恢復。
 
-### `/memory-portable` — Memory 跨專案攜帶
+### `/team-officery-portable` — Memory 跨專案攜帶
 
 協助 Memory 規則在不同專案之間攜帶與整理。
 
@@ -170,14 +170,14 @@ sp-init.bat 自動完成：
 ```
 .local/
 ├── modify_logs/   ← /build log（含 /build commit、/build restart 報告）
-├── docs/          ← /ask query、/ask trace、/memo board、/memo decide、/memo notes
+├── docs/          ← /ask query、/ask trace、/team-office board、/team-office decide、/team-office notes
 │   ├── whiteboards/
 │   ├── decisions/
 │   ├── tech-notes/
 │   └── plans/
 ├── summary/       ← /context-guard
 ├── reports/       ← /ask report
-├── collab/        ← /memo todo（TODO.md）
+├── collab/        ← /team-office todo（TODO.md）
 └── ai-context/    ← /setup pack 打包輸出
 ```
 
@@ -251,7 +251,7 @@ Sekai_workflow/
 │       ├── error-recovery.md
 │       └── log-keywords.md
 │
-├── memo/                       ← [sonnet] 互動協作
+├── team-office/                ← [sonnet] 互動協作
 │   ├── SKILL.md
 │   ├── README.md
 │   ├── references/
@@ -296,10 +296,10 @@ Sekai_workflow/
 | modify-log | `/build log` |
 | restart-volumn | `/build restart` |
 | restart-eval | `/build eval` |
-| todo | `/memo todo` |
-| whiteboard | `/memo board` |
-| md-collab | `/memo decide` |
-| tech-notes | `/memo notes` |
+| todo | `/team-office todo` |
+| whiteboard | `/team-office board` |
+| md-collab | `/team-office decide` |
+| tech-notes | `/team-office notes` |
 | create-skill | `/setup new` |
 | skill-sync | `/setup sync` |
 | pack | `/setup pack` |
@@ -307,4 +307,4 @@ Sekai_workflow/
 | trace-flow | `/ask trace` |
 | report | `/ask report` |
 | context-guard | `/context-guard`（保持獨立） |
-| memory-portable | `/memory-portable`（保持獨立） |
+| memory-portable | `/team-officery-portable`（保持獨立） |

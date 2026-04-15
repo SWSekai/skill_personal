@@ -1,4 +1,4 @@
-# memo — 互動協作
+# team-office — 互動協作
 
 ## 功能說明
 
@@ -7,7 +7,7 @@
 ## 使用方式
 
 ```
-/memo <todo|board|decide|notes> [args...]
+/team-office <todo|board|decide|notes> [args...]
 ```
 
 ## Model
@@ -33,7 +33,7 @@
 ## 目錄結構
 
 ```
-memo/
+team-office/
 ├── SKILL.md
 ├── README.md
 ├── references/

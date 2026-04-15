@@ -45,7 +45,7 @@
 | Skill | Model | Effort | 理由 | 子命令 effort 備註 |
 |-------|-------|--------|------|-------------------|
 | build | sonnet | medium | 多步驟編排流程 | quality 子命令內部用 high/Agent |
-| memo | sonnet | medium | 增量式互動 markdown | — |
+| team-office | sonnet | medium | 增量式互動 markdown | — |
 | setup | sonnet | medium | 多檔生成 + Git 同步 | — |
 | ask | opus | medium | 跨檔分析、Agent 子代理 | report 子命令可用 low |
 | context-guard | sonnet | low | 摘要生成，固定模板 | — |
@@ -60,10 +60,10 @@
 | modify-log → `/build log` | haiku | low |
 | restart-volumn → `/build restart` | haiku | low |
 | restart-eval → `/build eval` | haiku | low |
-| todo → `/memo todo` | sonnet | medium |
-| whiteboard → `/memo board` | sonnet | medium |
-| md-collab → `/memo decide` | sonnet | medium |
-| tech-notes → `/memo notes` | sonnet | medium |
+| todo → `/team-office todo` | sonnet | medium |
+| whiteboard → `/team-office board` | sonnet | medium |
+| md-collab → `/team-office decide` | sonnet | medium |
+| tech-notes → `/team-office notes` | sonnet | medium |
 | create-skill → `/setup new` | sonnet | medium |
 | skill-sync → `/setup sync` | sonnet | medium |
 | pack → `/setup pack` | sonnet | low |

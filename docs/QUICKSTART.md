@@ -39,11 +39,11 @@ cd /path/to/your-project
 | Skill | 指令 | 用途 |
 |---|---|---|
 | **build** | `/build <flow\|plan\|impl\|test\|commit\|quality\|log\|restart\|eval>` | 開發全流程 |
-| **memo** | `/memo <todo\|board\|decide\|notes>` | 互動協作 |
+| **team-office** | `/team-office <todo\|board\|decide\|notes>` | 互動協作 |
 | **setup** | `/setup <new\|sync\|pack>` | Skill 環境管理 |
 | **ask** | `/ask <query\|trace\|report>` | 系統文件與報告 |
 | **context-guard** | `/context-guard` | Context Window 管理 |
-| **memory-portable** | `/memory-portable` | Memory 跨專案攜帶 |
+| **memory-portable** | `/team-officery-portable` | Memory 跨專案攜帶 |
 
 ---
 
@@ -92,7 +92,7 @@ Sekai_workflow/ (專案內)       ← 通用模板本地副本
 輸入 `/context-guard`，Claude 會整理摘要存檔，然後你輸入 `/clear` 釋放空間。下次開對話時自動恢復。
 
 ### 「有設計決策要跟 AI 討論」
-輸入 `/memo decide 主題`，Claude 生成一份 Markdown 核取表，你勾選後回覆，Claude 按你的選擇實作。
+輸入 `/team-office decide 主題`，Claude 生成一份 Markdown 核取表，你勾選後回覆，Claude 按你的選擇實作。
 
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: memo
+name: team-office
 description: "互動協作一站式入口：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記整理。子命令路由 todo / board / decide / notes。"
 model: sonnet
 effort: medium
@@ -7,7 +7,7 @@ argument-hint: "<todo|board|decide|notes> [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(mkdir *)
 ---
 
-# /memo — 互動協作合併 Skill
+# /team-office — 互動協作合併 Skill
 
 整合四種與使用者互動的協作模式。透過第一個參數決定子命令。
 
@@ -15,25 +15,25 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 | 子命令 | 用途 | 對應原 Skill |
 |---|---|---|
-| `/memo todo [add/list/<n>]` | 處理 AI TODO 清單 | todo |
-| `/memo board [topic]` | 即時白板（諮詢／規劃類對話） | whiteboard |
-| `/memo decide <topic>` | Markdown 互動式決策表 | md-collab |
-| `/memo notes [topic]` | 結構化技術筆記 | tech-notes |
+| `/team-office todo [add/list/<n>]` | 處理 AI TODO 清單 | todo |
+| `/team-office board [topic]` | 即時白板（諮詢／規劃類對話） | whiteboard |
+| `/team-office decide <topic>` | Markdown 互動式決策表 | md-collab |
+| `/team-office notes [topic]` | 結構化技術筆記 | tech-notes |
 
 無參數時要求使用者指定子命令。
 
 ---
 
-## A. `/memo todo` — AI TODO 處理
+## A. `/team-office todo` — AI TODO 處理
 
 ### 用法
 
 | 用法 | 行為 |
 |---|---|
-| `/memo todo` | 處理待辦項目（依優先度由高至低） |
-| `/memo todo add <desc>` | 快速新增（支援 `@high` / `@low`） |
-| `/memo todo list` | 列出所有待辦 |
-| `/memo todo <n>` | 處理指定編號 |
+| `/team-office todo` | 處理待辦項目（依優先度由高至低） |
+| `/team-office todo add <desc>` | 快速新增（支援 `@high` / `@low`） |
+| `/team-office todo list` | 列出所有待辦 |
+| `/team-office todo <n>` | 處理指定編號 |
 
 ### Step 1：讀取與解析
 
@@ -79,7 +79,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ---
 
-## B. `/memo board` — 即時白板
+## B. `/team-office board` — 即時白板
 
 諮詢、規劃、排錯類對話建立持續更新的 markdown，作為即時白板。
 
@@ -129,7 +129,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ---
 
-## C. `/memo decide` — Markdown 互動式決策表
+## C. `/team-office decide` — Markdown 互動式決策表
 
 產生結構化 markdown 讓使用者勾選、Claude 讀回實作。
 
@@ -150,6 +150,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 - **編號連續**：跨區塊全域編號（方便口頭引用「第 17 項改成 B」）
 - **分類分組**：相關項目歸入同區塊，區塊間以 `---` 分隔
 - 表頭語義清楚（不要只用 A/B/C）
+- **每個決策區塊末尾必須附 `補充說明` 欄位**（引用區塊或空 `> _（請填寫）_`），讓使用者於選項之外自由填寫情境、理由、反例；讀取決策時需一併解析該欄位內容
 
 支援四種互動模式：
 - **單選矩陣**：每列一項目，每行一選項，每列勾一個
@@ -187,17 +188,24 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 2. 逐項實作（修改程式碼/設定）
 3. 完成後回頭比對原始決策表，確保無遺漏
 
+### Step 6：清理決策文件（必須）
+
+1. 實作完成後，**主動刪除** `.local/docs/decisions/<topic>.md`
+2. 決策文件為一次性產物，避免目錄累積過期紀錄造成混淆
+3. 需保留歷史討論紀錄時，改用 `/team-office board`（`whiteboards/` 類文件不刪除）
+4. 使用者若明示「保留決策紀錄」→ 跳過刪除並於回覆註明
+
 ### 設計原則
 
 - 降低認知負擔（預填合理值）
 - 全域編號方便口頭引用
 - 現狀可見
 - 結構化輸出方便後續解析
-- 可追溯（檔案保留作為決策紀錄）
+- **一次性使用**：實作後立即清理；需長期追蹤請改用白板
 
 ---
 
-## D. `/memo notes` — 技術筆記整理
+## D. `/team-office notes` — 技術筆記整理
 
 將對話中的技術問答整理成結構化筆記，存於 `.local/docs/tech-notes/`。
 
