@@ -27,10 +27,8 @@ MEMORY_DIR=""
 CLAUDE_HOME="${HOME:-$USERPROFILE}/.claude/projects"
 
 if [ -d "$CLAUDE_HOME" ]; then
-    # 取得專案絕對路徑，轉換為 Claude Code 的編碼格式
-    ABS_PROJECT=$(cd "$PROJECT_DIR" && pwd -W 2>/dev/null || pwd)
-    # 嘗試在 projects/ 下尋找匹配的 memory 目錄
-    # Claude Code 的路徑編碼會因 OS 而異，直接搜尋最可靠
+    # 直接以專案資料夾名稱於 projects/ 下比對 memory 目錄
+    # （Claude Code 的路徑編碼會因 OS 而異，basename 搜尋最可靠且免除 pwd -W 退化警告）
     PROJECT_BASENAME=$(basename "$PROJECT_DIR")
     for candidate_dir in "$CLAUDE_HOME"/*/memory; do
         [ ! -d "$candidate_dir" ] && continue
@@ -135,13 +133,26 @@ if [ -n "$MEMORY_DIR" ] && [ -d "$MEMORY_DIR" ] && [ -d "$MEM_PORTABLE" ]; then
         echo "  [INFO] portable memory 已是最新"
     else
         echo "  [OK] 回寫 $WRITEBACK_COUNT 個 memory 到 Sekai_workflow/memory-portable/"
-        # Auto commit within Sekai_workflow
+        # Auto commit & push within Sekai_workflow
+        # 必須 push：Step 9 會刪除整個 $SP_DIR（含 .git），未 push 的 commit 將永久遺失
         cd "$SP_DIR"
         git add memory-portable/ 2>/dev/null
-        git commit -m "sync: 回寫 portable memory from $(basename "$PROJECT_DIR")
+        if git commit -m "sync: 回寫 portable memory from $(basename "$PROJECT_DIR")
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>" 2>/dev/null || true
-        echo "  [INFO] 已 commit 到 Sekai_workflow (記得 push)"
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>" 2>/dev/null; then
+            CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+            if git push origin "$CURRENT_BRANCH" 2>/dev/null; then
+                echo "  [OK] 已 commit 並 push 到 Sekai_workflow 遠端 ($CURRENT_BRANCH)"
+            else
+                echo "  [WARN] commit 成功但 push 失敗（網路/權限問題），請手動 push 以避免 Step 9 刪除後遺失"
+                echo "  [WARN] 若繼續 Step 9，memory-portable 更新將永久遺失！"
+                read -p "  是否中止打包以便手動處理？(Y/n) " abort_confirm
+                if [[ ! "$abort_confirm" =~ ^[nN]$ ]]; then
+                    echo "[ABORT] 使用者選擇中止，請進入 $SP_DIR 手動 push 後重新執行"
+                    exit 1
+                fi
+            fi
+        fi
     fi
 else
     echo "  [SKIP] Memory 或 memory-portable/ 不存在"
