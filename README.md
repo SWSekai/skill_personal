@@ -92,13 +92,14 @@ sp-init.bat 自動完成：
 
 | Skill | Command | Model | Description |
 |---|---|:---:|---|
-| **build** | `/build <flow\|plan\|impl\|test\|commit\|quality\|log\|restart\|eval>` | sonnet | 開發全流程：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → commit → 重啟評估 |
+| **hello** | `/hello` | sonnet | 對話初始化：拉取更新 + Skill 同步 + context 恢復 + 狀態總覽 |
+| **build** | `/build <flow\|plan\|impl\|test\|quality\|review\|deploy>` | sonnet | 開發全流程：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → review → 部署驗證 |
 | **team-office** | `/team-office <todo\|board\|decide\|notes\|handoff>` | sonnet | 互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記、交接文件 |
-| **setup** | `/setup <new\|sync\|pack>` | sonnet | Skill 環境管理：建立新 Skill、遠端同步、專案打包 |
+| **setup** | `/setup <new\|sync\|pack>` | sonnet | Skill 環境管理：建立新 Skill、規則評估、專案打包 |
 | **ask** | `/ask <query\|trace\|report>` | opus | 系統文件與報告：系統資訊、資料流追蹤、工作報告 |
 | **context-guard** | `/context-guard` | sonnet | Context Window 管理（系統壓縮、手動、對話開始） |
-| **memory-portable** | `/team-officery-portable` | sonnet | Memory 跨專案攜帶 |
-| **commit-push** | `/commit-push [msg]` | sonnet | 獨立 commit & push 入口（與 `/build commit` 並存，供單獨使用） |
+| **memory-portable** | `/memory-portable` | sonnet | Memory 跨專案攜帶 |
+| **commit-push** | `/commit-push [msg]` | sonnet | 獨立 commit & push 入口（品質檢查 → 日誌 → commit → push → deploy 評估）|
 
 ---
 
