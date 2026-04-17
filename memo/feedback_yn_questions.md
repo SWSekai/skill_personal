@@ -25,3 +25,7 @@ type: feedback
 **Why:** 使用者多次強調（2026-04-02 兩次），文字確認浪費時間且打斷流程。AskUserQuestion 提供結構化 UI，tool permission 提供操作攔截。
 
 **How to apply:** 寫完方案後，立刻呼叫 AskUserQuestion 而非用文字問。操作類直接做。永遠不要在回應尾端放問句。
+
+---
+
+**AskUserQuestion 技術細節**（載入流程、參數 schema、設計規則、範例）：見 [`references/askuserquestion-tool.md`](../references/askuserquestion-tool.md)
