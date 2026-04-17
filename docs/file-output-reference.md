@@ -28,7 +28,8 @@
 | **team-office** | `notes` | 手動觸發 | `<topic>.md` | `.local/docs/tech-note/` | 技術問答結構化筆記 |
 | **commit-push** | Step 10 | commit 後若含踩坑經驗 | `<topic>.md` | `.local/docs/guide/` | 實戰經驗指南（症狀→原因→解法→注意事項）|
 | **ask** | `query` | 自動（查詢時）/ 手動 | `<topic_description>.md` | `.local/docs/knowledge/` | 系統知識庫（架構、資料流、設定）|
-| **team-office** | `handoff` | 手動（下班 / 休假前）| `YYMMDD_handoff.md` | `.local/docs/handoff/`（預設）或 `docs/handoff/`（`--share`）| 交接文件（進度 + 環境 + 待辦 + 恢復指引）|
+| **team-office** | `handoff` | 手動（下班 / 休假前）| `YYMMDD_handoff.md` | `.local/docs/handoff/`（預設）或 `docs/handoff/`（`--share`）| 人類交接文件（進度 + 環境 + 待辦 + 恢復指引）|
+| **team-office** | `handoff` Step 3 | 同上 | `YYMMDD_ai-context/` 目錄 | 同上（子目錄）| AI context bundle（CLAUDE.md + memory + 決策摘要 + guide + modify_log + TODO）|
 
 ### AI 運維紀錄（`.local/` 根）
 
@@ -42,8 +43,6 @@
 | **build** | `impl` | 衍生任務時 | 追加至 TODO.md | `.local/collab/` | 從 impl 發現的衍生 TODO |
 | （使用者手動） | — | 需要時提供範例 | `<類別>/*.md` | `.local/samples/` | 使用者提供的參考樣本（格式模板、範例檔等）|
 | **setup** | `pack` | 手動 `/setup pack` | 打包結果 + `manifest.txt` | `.local/ai-context/` | AI 上下文打包（含 memory、guides、project-skills）|
-| **setup** | `pack` AI Step 2 | 打包後自動 | `environment-info.md` | `.local/ai-context/` | 環境金鑰文件（Docker / env / DB / API / 第三方，值遮蔽）|
-| **setup** | `pack` AI Step 3 | 打包後自動 | `progress-status.md` | `.local/ai-context/` | 進度說明（modify_log 摘要 / TODO / plan / 未 push 變更）|
 
 ---
 
@@ -85,7 +84,9 @@
 │   ├── tech-note/              #team-office notes
 │   ├── guide/                  #commit-push Step 10 經驗指南
 │   ├── knowledge/              #ask query 系統知識庫
-│   └── handoff/                #team-office handoff 交接文件
+│   └── handoff/                #team-office handoff
+│       ├── YYMMDD_handoff.md   #人類交接文件
+│       └── YYMMDD_ai-context/  #AI context bundle
 │
 ├── modify_log/                 ← commit-push Step 5（Haiku 內嵌產出）
 ├── context_summary/            ← context-guard 摘要與 current_topic.md
@@ -93,10 +94,7 @@
 ├── collab/
 │   └── TODO.md                 ← team-office todo + build impl 衍生任務
 ├── samples/                    ← 使用者提供的參考樣本（按需建立）
-└── ai-context/                 ← setup pack 打包結果
-    ├── environment-info.md     #pack AI Step 2 環境金鑰
-    ├── progress-status.md      #pack AI Step 3 進度說明
-    └── ...                     #memory / guides / project-skills / manifest.txt
+└── ai-context/                 ← setup pack 打包結果（Skill 退出歸檔專用）
 ```
 
 ---
