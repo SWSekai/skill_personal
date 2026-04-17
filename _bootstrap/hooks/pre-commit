@@ -4,7 +4,9 @@
 #  Installed by sekai-workflow/sp-init.bat
 # =============================================================
 
-BLOCKED_PATTERNS=".claude/ Sekai_workflow/ CLAUDE.md .hanschen/"
+# 使用者工作資料夾名稱可透過 USER_WORKDIR 環境變數覆寫，預設 .workdir/
+USER_WORKDIR="${USER_WORKDIR:-.workdir/}"
+BLOCKED_PATTERNS=".claude/ Sekai_workflow/ CLAUDE.md ${USER_WORKDIR}"
 
 # Get list of staged files
 STAGED=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null)

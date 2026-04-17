@@ -269,7 +269,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ### 風格
 
-- 繁體中文撰寫（vision-ai 專案）
+- 依專案語言撰寫（預設對齊專案主要語言）
 - 每個語法點附完整可執行範例
 - 標註不同環境/資料庫差異
 - 像教學文章而非筆記片段

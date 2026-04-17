@@ -24,6 +24,9 @@ set "PASS=0"
 set "FAIL=0"
 set "WARN=0"
 
+REM 使用者工作資料夾（可透過 USER_WORKDIR 環境變數覆寫，預設 .workdir/）
+if not defined USER_WORKDIR set "USER_WORKDIR=.workdir/"
+
 REM --- Check 1: .gitignore entries ---
 echo [Check 1] .gitignore entries...
 set "GI=%PROJECT_DIR%\.gitignore"
@@ -32,7 +35,7 @@ if not exist "!GI!" (
     set /a FAIL+=1
 ) else (
     set "GI_OK=1"
-    for %%E in (".claude/" "Sekai_workflow/" ".hanschen/") do (
+    for %%E in (".claude/" "Sekai_workflow/" "!USER_WORKDIR!") do (
         findstr /B /C:%%E "!GI!" >nul 2>&1
         if errorlevel 1 (
             echo       FAIL: %%~E not in .gitignore
@@ -41,7 +44,7 @@ if not exist "!GI!" (
         )
     )
     if "!GI_OK!"=="1" (
-        echo       PASS: .claude/ Sekai_workflow/ .hanschen/ all present
+        echo       PASS: .claude/ Sekai_workflow/ !USER_WORKDIR! all present
         set /a PASS+=1
     )
 )
@@ -114,13 +117,13 @@ if exist "%PROJECT_DIR%\.git" (
     echo       SKIP: not a git repository
 )
 
-REM --- Check 7: .hanschen/ working directory ---
-echo [Check 7] .hanschen/ working directory...
-if not exist "%PROJECT_DIR%\.hanschen" (
-    echo       WARN: .hanschen/ not found
+REM --- Check 7: !USER_WORKDIR! working directory ---
+echo [Check 7] !USER_WORKDIR! working directory...
+if not exist "%PROJECT_DIR%\!USER_WORKDIR!" (
+    echo       WARN: !USER_WORKDIR! not found
     set /a WARN+=1
 ) else (
-    echo       PASS: .hanschen/ exists
+    echo       PASS: !USER_WORKDIR! exists
     set /a PASS+=1
 )
 

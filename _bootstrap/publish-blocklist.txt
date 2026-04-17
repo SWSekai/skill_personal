@@ -1,0 +1,32 @@
+# sekai-workflow publish blocklist（通用樣式）
+# commit-push Step 7.1 會用此清單 + .claude/publish-blocklist.local.txt（若存在）做掃描
+# 命中任一 pattern 即停止 push
+#
+# 格式：每行一個字串樣式（grep -iF，大小寫不敏感、固定字串）
+# 註解行（# 開頭）與空行會被 skill 在執行時過濾
+#
+# --- 私鑰 / 憑證前綴 ---
+BEGIN RSA PRIVATE KEY
+BEGIN OPENSSH PRIVATE KEY
+BEGIN EC PRIVATE KEY
+-----BEGIN CERTIFICATE-----
+#
+# --- 常見第三方憑證前綴 ---
+AKIA
+ASIA
+ghp_
+gho_
+ghu_
+ghs_
+xoxb-
+xoxp-
+sk-ant-
+sk-proj-
+#
+# --- 設定檔字串 ---
+PRIVATE_KEY=
+API_KEY=
+SECRET_KEY=
+#
+# 個人識別字串請放在本地檔案 `.claude/publish-blocklist.local.txt`，勿寫入本檔案。
+# 本檔案會隨 sekai-workflow 公開，任何寫入此處的字串都會暴露。
