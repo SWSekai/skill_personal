@@ -161,6 +161,12 @@ Supports four interaction modes:
 - **Free-form input**: user types a string/number
 - **Hybrid mode**: mix single-select and input fields within a table
 
+**`(已確認)` section-header convention** (2026-04-17 added):
+- User appends `(已確認)` to a finalized section header (e.g., `## §1 後端確認策略 (已確認)`)
+- Signals to Claude: "this block is settled; skip re-analysis and Q&A scanning"
+- User removes the tag if they update the section and want Claude to re-examine it
+- Token-saving mechanism: avoids re-processing stabilized content on every reload
+
 ### Step 3: Guide the User to Edit
 
 ```
@@ -172,6 +178,8 @@ When finished, reply "OK" or "Done", and I will read and implement.
 ```
 
 ### Step 3.5: 補充說明 Round-Trip (In-File Q&A) — Mandatory
+
+**`(已確認)` sections are exempt** (2026-04-17 added): before scanning `補充說明` fields, check whether the section header ends with `(已確認)`. If yes, skip that section entirely — no scanning, no in-file response. The user removes the tag if they want Claude to re-examine.
 
 When the user writes a question, clarification request, or asks for a recommendation **inside a `補充說明` field** (detected by: `?` / `？` / `請說明` / `請詳細` / `進一步說明` / `請解釋` / `你建議` / `你認為` / references to undefined terms), Claude **must answer by editing that same `補充說明` field in the decision file**, NOT by replying in chat only.
 
@@ -199,6 +207,7 @@ When the user writes a question, clarification request, or asks for a recommenda
 ### Step 4: Read the Decisions
 
 1. Re-Read the file
+   - Sections marked `(已確認)` → parse checkbox results only; do not re-read or re-evaluate supplementary notes (2026-04-17 added)
 2. Parse the check results
 3. Compare differences against current state
 4. Generate a change summary table:
