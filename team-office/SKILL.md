@@ -284,4 +284,110 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ---
 
+## E. `/team-office handoff` — 交接文件（Opus）
+
+離開前（下班、休假、轉交專案）產出結構化交接文件，讓同事或未來的自己能快速掌握進度並接手。
+
+**本子命令屬於「評估 / 摘要 / 風險」屬性，建議透過 Agent 工具呼叫 Opus 子任務**（對齊 CLAUDE.md 第 18 條）。
+
+### 觸發
+
+| 用法 | 行為 |
+|---|---|
+| `/team-office handoff` | 產出交接文件至 `.local/docs/handoff/`（僅本機） |
+| `/team-office handoff --share` | 產出至 `docs/handoff/`（入版控，同事可 pull） |
+
+### Step 1：收集專案狀態
+
+並行讀取以下資訊來源：
+
+| 資訊 | 來源 | 用途 |
+|---|---|---|
+| 專案概要 | `CLAUDE.md` / 根目錄 `README.md` | §A 專案概要 |
+| 近期工作 | `.local/modify_log/*.md`（最近 10~20 份）| §B 當前進度 |
+| 待辦事項 | `.local/collab/TODO.md` | §C 預計辦理 |
+| 進行中方案 | `.local/docs/plan/*.md`（未完成步驟）| §C 預計辦理 |
+| 風險紀錄 | `.local/modify_log/` 的「潛在風險」段 | §D 已知風險 |
+| Context 摘要 | `.local/context_summary/` 最新 | §B 補充 |
+| 環境架構 | `docker-compose.yml` / `.env` / config | §E 環境 |
+| Git 狀態 | `git status` / `git log origin..HEAD` / `git branch` | §F 恢復指引 |
+
+### Step 2：產生交接文件
+
+```markdown
+# 🔄 專案交接文件
+
+> 產生日期：YYYY-MM-DD HH:MM
+> 產生者：Claude（/team-office handoff）
+> 專案：<PROJECT_NAME>
+
+---
+
+## A. 專案概要
+
+（從 CLAUDE.md / README 摘取 3~5 句，讓不熟悉的人快速了解專案做什麼）
+
+## B. 當前進度
+
+### 已完成（近期）
+（從 modify_log 按功能分組，每組 1~2 句摘要）
+
+| 功能領域 | 完成項目 | 最後 commit |
+|---|---|---|
+
+### 進行中
+（WIP 分支、未完成的 plan 步驟、TODO 的 In Progress 項目）
+
+## C. 預計辦理事項
+
+### 優先順序建議
+（從 TODO + plan 未完成步驟整合，依優先度排序）
+
+| # | 項目 | 來源 | 優先度 | 預估複雜度 |
+|---|---|---|---|---|
+
+### 接手建議
+（若是同事接手，建議從哪開始；若是自己回來，提醒最關鍵的接續點）
+
+## D. 已知風險與阻塞
+
+| 風險 | 來源 | 影響 | 建議處置 |
+|---|---|---|---|
+
+## E. 環境資訊（精簡版）
+
+### 必要服務
+（Docker 服務清單 + 啟動指令）
+
+### 關鍵連線
+（DB / 外部 API / 第三方服務 — **值遮蔽**）
+
+## F. 如何恢復工作
+
+1. **分支**：目前在 `<branch>`，upstream 為 `<remote/branch>`
+2. **啟動服務**：`docker compose up -d`（列出需要的服務）
+3. **未 push 變更**：有/無（若有，列出 commit）
+4. **未提交變更**：有/無（若有，列出檔案）
+5. **環境準備**：需設定的 env var / 需跑的 migration
+6. **第一步**：接手後建議先做什麼（具體到檔案 + 行為）
+```
+
+### Step 3：輸出與確認
+
+1. 寫入目標路徑：
+   - 預設：`.local/docs/handoff/YYMMDD_handoff.md`
+   - `--share`：`docs/handoff/YYMMDD_handoff.md`
+2. 告知使用者檔案路徑
+3. 若 `--share`：提示可 `git add` + commit 推送給同事
+
+### 設計原則
+
+- **同事友善**：假設讀者不熟悉專案，從零開始也能接手
+- **自己友善**：假設休假回來忘了細節，掃一眼就能恢復記憶
+- **不重複造輪**：環境掃描邏輯復用 `/setup pack` AI Step 2 的模式
+- **遮蔽敏感值**：環境變數只列 key，不列值
+- **可行動**：每個區段結尾都有「下一步建議」
+
+---
+
 Arguments: $ARGUMENTS （第一個 token 為子命令，其餘為該子命令參數）
