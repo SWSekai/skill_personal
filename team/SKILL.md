@@ -181,6 +181,19 @@ When finished, reply "OK" or "Done", and I will read and implement.
 
 **`(已確認)` sections are exempt** (2026-04-17 added): before scanning `補充說明` fields, check whether the section header ends with `(已確認)`. If yes, skip that section entirely — no scanning, no in-file response. The user removes the tag if they want Claude to re-examine.
 
+**Superseded rounds collapse to `<details>` toggle** (2026-04-17 added): when writing a NEW Claude 回覆 that supersedes a prior round in the same `補充說明` block (user's question changed / decision flipped / previous answer obsolete), wrap the older round(s) in:
+
+```markdown
+> <details>
+> <summary>⬇ Claude 回覆（YYYY-MM-DD，第 N 輪 — 一句話說明已被什麼取代）</summary>
+>
+> (older round content with `>` prefix preserved)
+>
+> </details>
+```
+
+Keep the current round visible at the top of the blockquote. Rationale: reduces rendered length and keeps the current answer immediately scannable while preserving history for audit.
+
 When the user writes a question, clarification request, or asks for a recommendation **inside a `補充說明` field** (detected by: `?` / `？` / `請說明` / `請詳細` / `進一步說明` / `請解釋` / `你建議` / `你認為` / references to undefined terms), Claude **must answer by editing that same `補充說明` field in the decision file**, NOT by replying in chat only.
 
 **Rationale**: the decision table is the single source of truth for this interaction. Chat messages are ephemeral and scroll away; in-file answers stay attached to the exact decision block they concern, preserve reviewability, and match the spirit of an interactive document.
