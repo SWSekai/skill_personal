@@ -39,11 +39,11 @@ cd /path/to/your-project
 | Skill | 指令 | 用途 |
 |---|---|---|
 | **build** | `/build <flow\|plan\|impl\|test\|commit\|quality\|log\|restart\|eval>` | 開發全流程 |
-| **team-office** | `/team-office <todo\|board\|decide\|notes>` | 互動協作 |
-| **setup** | `/setup <new\|sync\|pack>` | Skill 環境管理 |
+| **team-office** | `/team <todo\|board\|decide\|notes>` | 互動協作 |
+| **setup** | `/skill <new\|sync\|pack>` | Skill 環境管理 |
 | **ask** | `/ask <query\|trace\|report>` | 系統文件與報告 |
 | **context-guard** | `/context-guard` | Context Window 管理 |
-| **memory-portable** | `/team-officery-portable` | Memory 跨專案攜帶 |
+| **memory-portable** | `/teamry-portable` | Memory 跨專案攜帶 |
 
 ---
 
@@ -59,7 +59,7 @@ Sekai_workflow/ (專案內)       ← 通用模板本地副本
 .claude/skills/ (專案內)       ← 專案專屬 Skill，可客製化
 ```
 
-- **上游更新**：有人改進通用 Skill → `/setup sync` 自動拉取並合併
+- **上游更新**：有人改進通用 Skill → `/skill sync` 自動拉取並合併
 - **下游回流**：你在專案中改進了某個 Skill 且具通用性 → 自動回流至遠端倉庫
 
 ### 版控邊界
@@ -92,7 +92,7 @@ Sekai_workflow/ (專案內)       ← 通用模板本地副本
 輸入 `/context-guard`，Claude 會整理摘要存檔，然後你輸入 `/clear` 釋放空間。下次開對話時自動恢復。
 
 ### 「有設計決策要跟 AI 討論」
-輸入 `/team-office decide 主題`，Claude 生成一份 Markdown 核取表，你勾選後回覆，Claude 按你的選擇實作。
+輸入 `/team decide 主題`，Claude 生成一份 Markdown 核取表，你勾選後回覆，Claude 按你的選擇實作。
 
 ---
 

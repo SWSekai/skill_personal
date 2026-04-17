@@ -1,13 +1,15 @@
-# ask — 系統文件與報告
+# ask — 系統文件與資料流追蹤
 
 ## 功能說明
 
-整合系統資訊查詢與文件管理、端到端資料流追蹤、工作報告生成三項職能。
+整合系統資訊查詢與文件管理、端到端資料流追蹤兩項職能。
+
+> **2026-04-17 調整**：原 `report` 子命令已搬移至 `/team report`（工作報告屬於協作產出，不是文件查詢）。
 
 ## 使用方式
 
 ```
-/ask <query|trace|report> [args...]
+/ask <info|trace> [args...]
 ```
 
 ## Model
@@ -18,17 +20,15 @@
 
 ## 觸發條件
 
-- `query`：詢問系統問題時自動觸發 / 手動
+- `info`：詢問系統問題時自動觸發 / 手動
 - `trace`：手動呼叫
-- `report`：手動呼叫
 
 ## 執行流程
 
 | 子命令 | 用途 |
 |---|---|
-| `query [topic]` | 系統資訊查詢與文件管理（搜尋 → 擴充 → 新建） |
+| `info [topic]` | 系統資訊查詢與文件管理（搜尋 → 擴充 → 新建） |
 | `trace <field>` | 端到端資料流追蹤（UI → API → DB → Processing） |
-| `report [scope]` | 從修改紀錄生成簡報用工作報告 |
 
 ## 目錄結構
 
@@ -40,8 +40,8 @@ ask/
 
 ## 整合來源
 
-| 原 Skill | 對應子命令 |
+| 原 Skill / 子命令 | 對應子命令 |
 |---|---|
-| sys-info | `query` |
+| sys-info | `info` |
 | trace-flow | `trace` |
-| report | `report` |
+| ~~report~~ | 已搬移至 `/team report` |

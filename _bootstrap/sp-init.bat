@@ -322,10 +322,10 @@ REM  Step 8: Restore portable memory
 REM ============================
 echo [8/9] Restoring portable memory...
 
-set "MEM_PORTABLE=%REPO_ROOT%\memory-portable"
+set "MEM_PORTABLE=%REPO_ROOT%\memo"
 
 if not exist "!MEM_PORTABLE!" (
-    echo       WARN: memory-portable/ not found in Sekai_workflow - skipped
+    echo       WARN: memo/ not found in Sekai_workflow - skipped
     goto :DoneMemory
 )
 
@@ -384,7 +384,7 @@ for %%F in ("!MEM_PORTABLE!\*.md") do (
 
 REM ----------------------------------------------------------------
 REM  Step 8b: Also restore PACKED memory from .local/ai-context/memory/
-REM  (produced by /setup pack). These are per-project archived
+REM  (produced by /skill pack). These are per-project archived
 REM  memories; restore them alongside the generic portable ones.
 REM ----------------------------------------------------------------
 set "PACKED_MEM=%PROJECT_DIR%\.local\ai-context\memory"

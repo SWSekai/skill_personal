@@ -5,7 +5,7 @@
 完整的 Git 提交推送流程自動化，**為本工作區的主要 commit 入口**。依序執行 10 個步驟：
 品質檢查（Opus 內嵌）→ README 同步 → 狀態總覽 + staging → commit → 修改日誌（Haiku 內嵌）→ push → sekai-workflow 同步 → deploy 評估 → Context 清理 → 經驗回流。
 
-與 `/build` 的關係：`/build` 負責 commit **前**的開發（plan / impl / test / quality / review）與 commit **後**的部署（deploy）；`/commit-push` 專責 commit 本身。`/build flow` 串接時會自動呼叫本 Skill。
+與 `/build` 的關係：`/build` 負責 commit **前**的開發（plan / impl / test / quality / review）與 commit **後**的部署（deploy）；`/commit-push` 專責 commit 本身。`/build all` 串接時會自動呼叫本 Skill。
 
 ## 目錄結構
 

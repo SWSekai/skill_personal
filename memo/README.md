@@ -1,4 +1,6 @@
-# memory-portable
+# memo — Memory 跨專案攜帶
+
+> **2026-04-17 改名**：`/memory-portable` → `/memo`（名稱過長、補全體驗差）。對應的 `memory-portable/` 資料夾也一併更名為 `memo/`。`sp-init.bat`、`sp-pack.sh`、`CLAUDE.md.template` 的 8 處硬編碼同步更新。
 
 跨專案可攜帶的 Claude Code Memory。
 

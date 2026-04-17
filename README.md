@@ -93,12 +93,12 @@ sp-init.bat 自動完成：
 | Skill | Command | Model | Description |
 |---|---|:---:|---|
 | **hello** | `/hello` | sonnet | 對話初始化：拉取更新 + Skill 同步 + context 恢復 + 狀態總覽 |
-| **build** | `/build <flow\|plan\|impl\|test\|quality\|review\|deploy>` | sonnet | 開發全流程：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → review → 部署驗證 |
-| **team-office** | `/team-office <todo\|board\|decide\|notes\|handoff>` | sonnet | 互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記、交接文件 |
-| **setup** | `/setup <new\|sync\|pack>` | sonnet | Skill 環境管理：建立新 Skill、規則評估、專案打包 |
-| **ask** | `/ask <query\|trace\|report>` | opus | 系統文件與報告：系統資訊、資料流追蹤、工作報告 |
-| **context-guard** | `/context-guard` | sonnet | Context Window 管理（系統壓縮、手動、對話開始） |
-| **memory-portable** | `/memory-portable` | sonnet | Memory 跨專案攜帶 |
+| **build** | `/build <all\|plan\|do\|test\|check\|review\|deploy>` | sonnet | 開發全流程：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → review → 部署驗證 |
+| **team** | `/team <todo\|board\|decide\|note\|handoff\|report>` | sonnet | 互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記、交接文件、工作報告 |
+| **skill** | `/skill <new\|sync\|pack>` | sonnet | Skill 環境管理：建立新 Skill、規則評估、專案打包 |
+| **ask** | `/ask <info\|trace>` | opus | 系統文件追蹤：系統資訊查詢、資料流追蹤 |
+| **clean** | `/clean [check\|force]` | sonnet | Context 清理入口：繼承 context-guard 所有功能，清理舊摘要後執行 /clear，Stop hook 自動提醒 |
+| **memory-portable** | `/memo` | sonnet | Memory 跨專案攜帶 |
 | **commit-push** | `/commit-push [msg]` | sonnet | 獨立 commit & push 入口（品質檢查 → 日誌 → commit → push → deploy 評估）|
 
 ---
@@ -107,56 +107,61 @@ sp-init.bat 自動完成：
 
 ### `/build` — 開發全流程
 
-整合需求分析、方案設計、實作引導、測試驗證，加上原 commit-push、quality-check、modify-log、restart-eval、restart-volumn。
+整合需求分析、方案設計、實作引導、測試驗證、品質審計、review、部署評估。
 
 | 子命令 | 用途 |
 |---|---|
-| `/build flow <feature>` | **全流程串接**：plan → impl → test → commit |
-| `/build plan <feature>` | 需求分析 + 方案設計 + 步驟拆解 |
-| `/build impl [plan-ref]` | 按方案逐步實作，checkbox 勾對進度 |
+| `/build all <feature>` | **全流程串接**：plan → do → test |
+| `/build plan <feature>` | 需求分析 + 方案設計 + 步驟拆解（Opus） |
+| `/build do [plan-ref]` | 按方案逐步實作，checkbox 勾對進度 |
 | `/build test [scope]` | 測試驗證（自動 + 手動 checklist） |
-| `/build commit [msg]` | 完整提交流程（品質檢查 → 日誌 → README → commit → push → 重啟評估） |
-| `/build quality [files]` | 獨立品質審計 |
-| `/build log [topic]` | 建立 / 更新本地修改日誌（僅本地） |
-| `/build restart [services]` | 容器重啟與自動修復 |
-| `/build eval [range]` | 重啟評估（不執行） |
+| `/build check [files]` | 獨立品質審計（Opus） |
+| `/build review` | commit 前互動式人工確認 checklist |
+| `/build deploy [--plan\|--run]` | 部署評估：plan 階段（分類 + 計畫，不執行）；run 階段（重啟 + 健康檢查 + 自動修復） |
 
-### `/team-office` — 互動協作
+> **2026-04-17 清理**：移除已合併的 4 個舊子命令 — `/build commit` 由 `/commit-push` 接手；`/build log` 為 `/commit-push` Step 5 內嵌 Haiku 產出；`/build restart` = `/build deploy --run`、`/build eval` = `/build deploy --plan`。
+
+### `/team` — 互動協作
 
 整合原 `todo` + `whiteboard` + `md-collab` + `tech-notes`。
 
 | 子命令 | 用途 |
 |---|---|
-| `/team-office todo [add\|list\|<n>]` | 處理 AI TODO 清單 |
-| `/team-office board [topic]` | 即時白板（諮詢、規劃類對話自動觸發） |
-| `/team-office decide <topic>` | Markdown 互動式決策表（核取／填寫） |
-| `/team-office notes [topic]` | 結構化技術筆記 |
+| `/team todo [add\|list\|<n>]` | 處理 AI TODO 清單 |
+| `/team board [topic]` | 即時白板（諮詢、規劃類對話自動觸發） |
+| `/team decide <topic>` | Markdown 互動式決策表（核取／填寫） |
+| `/team note [topic]` | 結構化技術筆記 |
 
-### `/setup` — Skill 環境管理
+### `/skill` — Skill 環境管理
 
 整合原 `create-skill` + `skill-sync` + `pack`。
 
 | 子命令 | 用途 |
 |---|---|
-| `/setup new [name] [desc]` | 建立新 Skill |
-| `/setup sync` | `Sekai_workflow/` 遠端同步、規則評估 |
-| `/setup pack` | 專案打包並清除 skill 環境 |
+| `/skill new [name] [desc]` | 建立新 Skill |
+| `/skill sync` | `Sekai_workflow/` 遠端同步、規則評估 |
+| `/skill pack` | 專案打包並清除 skill 環境 |
 
-### `/ask` — 系統文件與報告
+### `/ask` — 系統文件與資料流追蹤
 
-整合原 `sys-info` + `trace-flow` + `report`。
+整合原 `sys-info` + `trace-flow`（原 `report` 子命令已搬移至 `/team report`）。
 
 | 子命令 | 用途 |
 |---|---|
-| `/ask query [topic]` | 系統資訊查詢與文件管理（系統相關問題時自動觸發） |
+| `/ask info [topic]` | 系統資訊查詢與文件管理（系統相關問題時自動觸發） |
 | `/ask trace <field>` | 端到端資料流追蹤 |
-| `/ask report [scope]` | 從修改紀錄生成簡報用工作報告 |
 
-### `/context-guard` — Context Window 管理
+### `/clean` — Context 清理入口
 
-監控 context window 使用狀況，系統壓縮通知時自動摘要、手動呼叫整理、對話開始恢復。
+繼承 `context-guard` 所有功能（摘要生成、任務切換偵測、摘要恢復），新增：清理舊摘要後執行 `/clear`、Stop hook 偵測舊摘要時提醒使用者。
 
-### `/team-officery-portable` — Memory 跨專案攜帶
+| 參數 | 說明 |
+|------|------|
+| `/clean` | 完整流程：摘要 → 清舊摘要 → /clear |
+| `/clean check` | 僅檢查狀態 |
+| `/clean force` | 跳過 commit 確認 |
+
+### `/memo` — Memory 跨專案攜帶
 
 協助 Memory 規則在不同專案之間攜帶與整理。
 
@@ -171,19 +176,19 @@ sp-init.bat 自動完成：
 ```
 .local/
 ├── modify_log/       ← /commit-push Step 5（Haiku 內嵌產出）
-├── docs/             ← 給人讀的文件（ask / team-office / commit-push guide）
+├── docs/             ← 給人讀的文件（ask / team / commit-push guide）
 │   ├── plan/         ← /build plan
-│   ├── decision/     ← /team-office decide（一次性，執行後刪除）
-│   ├── summary/      ← /team-office decide 執行後持久化（永久）
-│   ├── whiteboard/   ← /team-office board
-│   ├── tech-note/    ← /team-office notes
+│   ├── decision/     ← /team decide（一次性，執行後刪除）
+│   ├── summary/      ← /team decide 執行後持久化（永久）
+│   ├── whiteboard/   ← /team board
+│   ├── tech-note/    ← /team note
 │   ├── guide/        ← /commit-push Step 10 經驗指南
-│   └── knowledge/    ← /ask query 系統知識庫
-├── context_summary/  ← /context-guard 摘要 + current_topic.md
-├── report/           ← /ask report
-├── collab/           ← /team-office todo（TODO.md）
+│   └── knowledge/    ← /ask info 系統知識庫
+├── context_summary/  ← /clean 摘要 + current_topic.md
+├── report/           ← /team report
+├── collab/           ← /team todo（TODO.md）
 ├── samples/          ← 使用者提供的參考樣本（按需建立）
-└── ai-context/       ← /setup pack 打包輸出
+└── ai-context/       ← /skill pack 打包輸出
 ```
 
 ### 入版控文件
@@ -192,7 +197,7 @@ sp-init.bat 自動完成：
 |---|---|---|
 | `/build commit` | 目錄 README.md 自動更新 | 變更目錄下的 README.md |
 
-### Skill 設定檔（由 `/setup sync` 管理）
+### Skill 設定檔（由 `/skill sync` 管理）
 
 | 檔案 | 位置 | 備註 |
 |---|---|---|
@@ -203,7 +208,7 @@ sp-init.bat 自動完成：
 
 | 子命令 | 輸出內容 |
 |---|---|
-| `/build quality` | Risk Report 表格（Severity / File / Mitigation） |
+| `/build check` | Risk Report 表格（Severity / File / Mitigation） |
 | `/ask trace` | 端到端資料流表格（Layer / File:Line / Variable / Type / Risk） |
 | `/build eval` | 服務重啟分類 + 執行指令清單 |
 | `/build restart` | 重啟報告（Service / Action / Status / Duration） |
@@ -244,6 +249,7 @@ Sekai_workflow/
 ├── hooks/                      ← Claude Code hooks
 │   ├── check_skill_sync.cjs
 │   ├── check_yn_question.cjs
+│   ├── check_context_reminder.cjs
 │   └── memory_skill_sync.cjs
 │
 ├── build/                      ← [sonnet] 開發全流程
@@ -256,7 +262,7 @@ Sekai_workflow/
 │       ├── error-recovery.md
 │       └── log-keywords.md
 │
-├── team-office/                ← [sonnet] 互動協作
+├── team/                       ← [sonnet] 互動協作
 │   ├── SKILL.md
 │   ├── README.md
 │   ├── references/
@@ -265,7 +271,7 @@ Sekai_workflow/
 │       ├── collab-template.md
 │       └── whiteboard-template.md
 │
-├── setup/                      ← [sonnet] Skill 環境管理
+├── skill/                      ← [sonnet] Skill 環境管理
 │   ├── SKILL.md
 │   ├── README.md
 │   ├── references/
@@ -280,11 +286,11 @@ Sekai_workflow/
 │   ├── SKILL.md
 │   └── README.md
 │
-├── context-guard/              ← [sonnet] Context Window 管理
+├── clean/                      ← [sonnet] Context 清理入口（繼承 context-guard）
 │   ├── SKILL.md
 │   └── README.md
 │
-└── memory-portable/            ← [sonnet] Memory 跨專案攜帶
+└── memo/                       ← [sonnet] Memory 跨專案攜帶
     ├── SKILL.md
     ├── README.md
     └── feedback_*.md           ← 可攜帶的 feedback memory
@@ -297,19 +303,19 @@ Sekai_workflow/
 | 原 Skill | 新位置 |
 |---|---|
 | commit-push | `/build commit` |
-| quality-check | `/build quality` |
+| quality-check | `/build check` |
 | modify-log | `/build log` |
 | restart-volumn | `/build restart` |
 | restart-eval | `/build eval` |
-| todo | `/team-office todo` |
-| whiteboard | `/team-office board` |
-| md-collab | `/team-office decide` |
-| tech-notes | `/team-office notes` |
-| create-skill | `/setup new` |
-| skill-sync | `/setup sync` |
-| pack | `/setup pack` |
-| sys-info | `/ask query` |
+| todo | `/team todo` |
+| whiteboard | `/team board` |
+| md-collab | `/team decide` |
+| tech-notes | `/team note` |
+| create-skill | `/skill new` |
+| skill-sync | `/skill sync` |
+| pack | `/skill pack` |
+| sys-info | `/ask info` |
 | trace-flow | `/ask trace` |
-| report | `/ask report` |
-| context-guard | `/context-guard`（保持獨立） |
-| memory-portable | `/team-officery-portable`（保持獨立） |
+| report | `/team report` |
+| context-guard | `/clean`（合併至 clean，含 /clear 整合） |
+| memory-portable | `/memo`（保持獨立） |

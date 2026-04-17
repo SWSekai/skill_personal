@@ -51,7 +51,7 @@
 
 ### 多 model 協作執行
 
-當一個 commit 是多個 model 協作的產出（例如先 `/build plan`（Opus）→ `/build impl`（Sonnet）→ `/commit-push`（Sonnet））：
+當一個 commit 是多個 model 協作的產出（例如先 `/build plan`（Opus）→ `/build do`（Sonnet）→ `/commit-push`（Sonnet））：
 
 ```
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
