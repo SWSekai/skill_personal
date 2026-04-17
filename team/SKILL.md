@@ -181,18 +181,51 @@ When finished, reply "OK" or "Done", and I will read and implement.
 
 **`(已確認)` sections are exempt** (2026-04-17 added): before scanning `補充說明` fields, check whether the section header ends with `(已確認)`. If yes, skip that section entirely — no scanning, no in-file response. The user removes the tag if they want Claude to re-examine.
 
-**Superseded rounds collapse to `<details>` toggle** (2026-04-17 added): when writing a NEW Claude 回覆 that supersedes a prior round in the same `補充說明` block (user's question changed / decision flipped / previous answer obsolete), wrap the older round(s) in:
+**Superseded rounds collapse to `<details>` toggle** (2026-04-17 added, revised): when writing a NEW Claude 回覆 that supersedes a prior round in the same `補充說明` block (user's question changed / decision flipped / previous answer obsolete), wrap the older round(s) in `<details>`.
+
+**Critical syntax rules** (violating these will prevent the toggle from rendering in VSCode preview / GitHub / most markdown-it renderers):
+
+1. `<details>`, `<summary>`, `</details>` tags MUST be at document top-level — **no `>` blockquote prefix**
+2. Markdown content inside `<details>` needs a **blank line** (truly empty, no `>` prefix) between `<summary>` and the first content line, and another blank line before `</details>`
+3. Content inside MAY use `>` blockquote for visual styling, but the HTML tag lines themselves must not
+
+Correct form:
 
 ```markdown
-> <details>
-> <summary>⬇ Claude 回覆（YYYY-MM-DD，第 N 輪 — 一句話說明已被什麼取代）</summary>
->
-> (older round content with `>` prefix preserved)
->
-> </details>
+(end of current blockquote — last line may still have > prefix)
+
+<details>
+<summary>⬇ Claude 回覆（YYYY-MM-DD，第 N 輪 — 一句話說明已被什麼取代）</summary>
+
+> (older round content — content lines keep `>` for blockquote styling)
+> (more content)
+
+</details>
+
+---
 ```
 
-Keep the current round visible at the top of the blockquote. Rationale: reduces rendered length and keeps the current answer immediately scannable while preserving history for audit.
+Keep the current round visible before `<details>`. Rationale: reduces rendered length and keeps the current answer immediately scannable while preserving history for audit.
+
+**Completed section wrap** (2026-04-17 added): when an entire section's decisions are finalized **AND** any implementation path is closed (code done or explicitly postponed), wrap the whole section (including the `##` header) in `<details>` to visually compress the document. Summary text should include the section name so clicking still navigates conceptually.
+
+```markdown
+<details>
+<summary>§N SectionName — ✅ 已確認（一行說明，例如 "code A1 已實作"）</summary>
+
+## §N SectionName (已確認)
+
+(full section content — table, 補充說明 blockquote, nested <details> history, etc.)
+
+</details>
+
+---
+```
+
+Rules:
+- Also append `(已確認)` to the `##` header so Claude's Step 3.5 skip-scan still applies
+- **Do not** wrap sections that still have pending actions (e.g., backend coordination, unchecked decisions, action items the user must carry out)
+- Claude proposes which sections qualify when user asks; Claude does **not** auto-wrap — user confirms scope first
 
 When the user writes a question, clarification request, or asks for a recommendation **inside a `補充說明` field** (detected by: `?` / `？` / `請說明` / `請詳細` / `進一步說明` / `請解釋` / `你建議` / `你認為` / references to undefined terms), Claude **must answer by editing that same `補充說明` field in the decision file**, NOT by replying in chat only.
 
