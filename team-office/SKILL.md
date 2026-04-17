@@ -189,31 +189,71 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 2. 逐項實作（修改程式碼/設定）
 3. 完成後回頭比對原始決策表，確保無遺漏
 
-### Step 6：摘要持久化 + 清理決策文件（必須）
+### Step 6：摘要持久化 + 清理決策文件（強制，不可跳過）
+
+> **此步驟為強制執行**。Step 5 實作完成後，**必須在同一回覆中**完成摘要 + 刪除。
+> 禁止：實作後直接回覆使用者而不寫摘要、將摘要留到下一回覆、等使用者提醒才補做。
 
 **先摘要、再刪除**（對齊 CLAUDE.md 第 17 條）：
 
-1. **建立摘要**於 `.local/docs/summary/YYMMDD_<topic>_summary.md`（永久保留）
-   - 原問題摘要
-   - 最終選定選項 + 使用者補充
-   - 執行變更清單（檔案 + commit hash）
-   - 未解決遺留項
-2. **非單一路線決策的候選保留**：
-   - 判斷每組決策選項是否互斥：選 A 就不能選 B 的是**單一路線**（只記最終選）；多個可共存的是**非單一路線**（如功能選用、feature flag、附加強化 → 保留候選）
-   - 非單一路線摘要格式：
-     ```markdown
-     ## §X.Y 決策：<主題>
-     - ✅ 已採納：<選項 A>
-     - ✅ 已採納：<選項 B>
-     - 🔖 保留候選（未採納但可重啟）：
-       - <選項 C> — 未選原因：<為何這次不選>、重啟時機：<什麼情境下會選>
-     ```
-   - 候選清理：超過 6 個月未重啟或被新決策取代 → 標註「已作廢」，**不刪除**（保留歷史）
-   - 新對話遇類似需求時先讀 summary/ 對應區塊，能重啟就重啟，不要重新設計
-3. **主動刪除** `.local/docs/decision/<topic>.md`（原始互動文件）
-4. 決策文件為一次性產物，摘要才是持久紀錄
-5. 需保留互動歷史（而非決策結果）→ 改用 `/team-office board`（`whiteboard/` 類文件不刪除）
-6. 使用者若明示「保留決策紀錄」→ 跳過刪除並於回覆註明
+#### 6.1 建立摘要（必須）
+
+寫入 `.local/docs/summary/YYMMDD_<topic>_summary.md`（永久保留）：
+
+```markdown
+# 摘要 — <主題>
+
+> **建立日期**：YYYY-MM-DD
+> **狀態**：✅ 已執行完成
+> **Commits**：`<hash>`（若有）
+> **原決策文件**：`.local/docs/decision/<filename>`（已刪除）
+
+---
+
+## 背景
+（觸發原因，1~3 句）
+
+## 最終決策
+| § | 選項 | 採納 |
+|---|---|---|
+（每個決策區塊一行）
+
+## 執行變更清單
+| 檔案 | 變更 |
+|---|---|
+
+## 🔖 保留候選（未採納但可重啟）
+（非單一路線決策才需要）
+- **候選 X**：<描述>
+  - 未選原因：...
+  - 重啟時機：...
+
+## 未解決遺留項
+（若無則寫「無」）
+```
+
+#### 6.2 非單一路線判斷（必須）
+
+判斷每組決策選項是否互斥：
+- 選 A 就不能選 B → **單一路線** → 只記最終選擇
+- 多個可共存 → **非單一路線** → 摘要中保留未選項（格式見上方模板）
+- 候選清理：超過 6 個月未重啟或被新決策取代 → 標註「已作廢」，**不刪除**
+- 新對話遇類似需求 → 先讀 summary/ 對應區塊的保留候選，能重啟就重啟
+
+#### 6.3 刪除決策文件（必須）
+
+- **主動刪除** `.local/docs/decision/<topic>.md`
+- 決策文件為一次性產物，摘要才是持久紀錄
+- 使用者若明示「保留決策紀錄」→ 跳過刪除並於回覆註明
+- 需保留互動歷史（非決策結果）→ 改用 `/team-office board`（`whiteboard/` 類文件不刪除）
+
+#### 6.4 自檢（必須）
+
+Step 6 完成後，確認：
+- [ ] `.local/docs/summary/YYMMDD_<topic>_summary.md` 已建立且非空
+- [ ] 摘要包含：背景、決策表、變更清單、保留候選（若適用）、遺留項
+- [ ] `.local/docs/decision/<topic>.md` 已刪除（或使用者明示保留）
+- 任一未完成 → 立即補做，**不得結束回覆**
 
 ### 設計原則
 
@@ -284,17 +324,27 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 ---
 
-## E. `/team-office handoff` — 交接文件（Opus）
+## E. `/team-office handoff` — 交接與環境轉換（Opus）
 
-離開前（下班、休假、轉交專案）產出結構化交接文件，讓同事或未來的自己能快速掌握進度並接手。
+離開前（下班、休假、轉交專案、換環境）產出**兩類文件**：人類交接文件 + AI context bundle。環境**不破壞**（與 `/setup pack` 的差異：pack 會刪除 skill 環境）。
 
 **本子命令屬於「評估 / 摘要 / 風險」屬性，建議透過 Agent 工具呼叫 Opus 子任務**（對齊 CLAUDE.md 第 18 條）。
+
+### `/setup pack` vs `/team-office handoff` 差異
+
+| 面向 | `/setup pack` | `/team-office handoff` |
+|---|---|---|
+| 目的 | Skill 退出歸檔 | 交接 / 環境轉換 |
+| 環境 | **清除** .claude/skills/ + Sekai_workflow/ + CLAUDE.md | **保留**，環境不動 |
+| 產出對象 | 機器（還原用 manifest） | 人（交接文件）+ AI（context bundle） |
+| 產出位置 | `.local/ai-context/` | `.local/docs/handoff/` 或 `docs/handoff/`（`--share`）|
+| 使用時機 | 專案結束、長期封存 | 週末下班、休假、同事接手、換開發機 |
 
 ### 觸發
 
 | 用法 | 行為 |
 |---|---|
-| `/team-office handoff` | 產出交接文件至 `.local/docs/handoff/`（僅本機） |
+| `/team-office handoff` | 產出至 `.local/docs/handoff/`（僅本機） |
 | `/team-office handoff --share` | 產出至 `docs/handoff/`（入版控，同事可 pull） |
 
 ### Step 1：收集專案狀態
@@ -303,19 +353,22 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 
 | 資訊 | 來源 | 用途 |
 |---|---|---|
-| 專案概要 | `CLAUDE.md` / 根目錄 `README.md` | §A 專案概要 |
-| 近期工作 | `.local/modify_log/*.md`（最近 10~20 份）| §B 當前進度 |
-| 待辦事項 | `.local/collab/TODO.md` | §C 預計辦理 |
-| 進行中方案 | `.local/docs/plan/*.md`（未完成步驟）| §C 預計辦理 |
-| 風險紀錄 | `.local/modify_log/` 的「潛在風險」段 | §D 已知風險 |
-| Context 摘要 | `.local/context_summary/` 最新 | §B 補充 |
-| 環境架構 | `docker-compose.yml` / `.env` / config | §E 環境 |
-| Git 狀態 | `git status` / `git log origin..HEAD` / `git branch` | §F 恢復指引 |
+| 專案概要 | `CLAUDE.md` / 根目錄 `README.md` | 人讀 §A / AI bundle |
+| 近期工作 | `.local/modify_log/*.md`（最近 10~20 份）| 人讀 §B |
+| 待辦事項 | `.local/collab/TODO.md` | 人讀 §C |
+| 進行中方案 | `.local/docs/plan/*.md`（未完成步驟）| 人讀 §C |
+| 風險紀錄 | `.local/modify_log/` 的「潛在風險」段 | 人讀 §D |
+| 環境架構 | `docker-compose.yml` / `.env` / config | 人讀 §E / AI bundle |
+| Git 狀態 | `git status` / `git log origin..HEAD` / `git branch` | 人讀 §F |
+| 決策歷史 | `.local/docs/summary/*.md` | AI bundle |
+| Memory | `~/.claude/projects/<proj>/memory/*.md` | AI bundle |
+| 經驗指南 | `.local/docs/guide/*.md` | AI bundle |
+| Context 摘要 | `.local/context_summary/` 最新 | AI bundle |
 
-### Step 2：產生交接文件
+### Step 2：產生人類交接文件（`YYMMDD_handoff.md`）
 
 ```markdown
-# 🔄 專案交接文件
+# 專案交接文件
 
 > 產生日期：YYYY-MM-DD HH:MM
 > 產生者：Claude（/team-office handoff）
@@ -354,13 +407,22 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 | 風險 | 來源 | 影響 | 建議處置 |
 |---|---|---|---|
 
-## E. 環境資訊（精簡版）
+## E. 環境資訊
 
-### 必要服務
-（Docker 服務清單 + 啟動指令）
+### Docker 服務
+| 服務 | Port | 啟動指令 | 備註 |
+|---|---|---|---|
 
 ### 關鍵連線
-（DB / 外部 API / 第三方服務 — **值遮蔽**）
+| 類型 | Key | 來源 | 值 |
+|---|---|---|---|
+| DB | DB_HOST | .env | *** |
+
+（環境變數值一律 `***` 遮蔽，僅列 key + 來源；若專案無 Docker 則省略）
+
+### 第三方整合
+| 服務 | 用途 | 設定來源 |
+|---|---|---|
 
 ## F. 如何恢復工作
 
@@ -370,23 +432,76 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date
 4. **未提交變更**：有/無（若有，列出檔案）
 5. **環境準備**：需設定的 env var / 需跑的 migration
 6. **第一步**：接手後建議先做什麼（具體到檔案 + 行為）
+
+## G. AI Context Bundle
+
+此次交接同時產出 AI 可讀的 context bundle，位於同目錄下 `YYMMDD_ai-context/`。
+新對話開始時可指示 AI 閱讀該目錄以快速恢復專案知識。
 ```
 
-### Step 3：輸出與確認
+### Step 3：產生 AI Context Bundle（`YYMMDD_ai-context/`）
 
-1. 寫入目標路徑：
+在交接文件同目錄下建立子目錄，收集 AI 快速掌握專案所需的全部資料：
+
+```
+YYMMDD_ai-context/
+├── CLAUDE.md                  ← 專案規範快照
+├── project-summary.md         ← AI 專用摘要（下方模板）
+├── memory/                    ← Memory 快照（*.md）
+├── decision-history/          ← .local/docs/summary/*.md 複製
+├── guides/                    ← .local/docs/guide/*.md 複製
+├── recent-modify-logs/        ← .local/modify_log/ 最近 10 份
+├── todo-snapshot.md           ← .local/collab/TODO.md 複製
+└── context-snapshot.md        ← .local/context_summary/ 最新摘要
+```
+
+#### `project-summary.md`（AI 專用，由 Opus 摘要產出）
+
+```markdown
+# AI Quick-Start：專案快速掌握指南
+
+> 本文件供 AI（Claude）在新對話中快速恢復專案知識，非人類閱讀用。
+> 產生日期：YYYY-MM-DD HH:MM
+
+## 專案定位與架構
+（從 CLAUDE.md + README 提煉：專案做什麼、技術棧、服務拓撲）
+
+## 目前狀態
+（WIP / 已完成里程碑 / 下一步）
+
+## 決策歷史摘要
+（從 .local/docs/summary/*.md 提煉每個決策的一行摘要 + 保留候選提示）
+
+| 日期 | 決策 | 採納方案 | 有保留候選？ |
+|---|---|---|---|
+
+## 慣例與偏好
+（從 Memory 提煉：commit 格式、語言偏好、model 分層、回流開關狀態等）
+
+## 已知陷阱
+（從 guides + modify_log 風險段提煉：遇過的坑 + 解法提示）
+
+## 環境快照
+（Docker / DB / env key 清單 — 值遮蔽）
+```
+
+### Step 4：輸出與確認
+
+1. 寫入人類交接文件：
    - 預設：`.local/docs/handoff/YYMMDD_handoff.md`
    - `--share`：`docs/handoff/YYMMDD_handoff.md`
-2. 告知使用者檔案路徑
-3. 若 `--share`：提示可 `git add` + commit 推送給同事
+2. 寫入 AI context bundle 至同目錄下 `YYMMDD_ai-context/`
+3. 告知使用者兩個產出的路徑
+4. 若 `--share`：提示可 `git add docs/handoff/` 推送給同事
+5. 提示：「新對話中可指示 AI 讀取 `YYMMDD_ai-context/` 目錄快速恢復知識」
 
 ### 設計原則
 
-- **同事友善**：假設讀者不熟悉專案，從零開始也能接手
-- **自己友善**：假設休假回來忘了細節，掃一眼就能恢復記憶
-- **不重複造輪**：環境掃描邏輯復用 `/setup pack` AI Step 2 的模式
+- **雙受眾**：人類文件（同事友善）+ AI 文件（新對話恢復知識）
+- **環境不破壞**：與 `/setup pack` 最大差異 — handoff 後使用者可繼續工作
 - **遮蔽敏感值**：環境變數只列 key，不列值
 - **可行動**：每個區段結尾都有「下一步建議」
+- **決策可追溯**：AI bundle 含完整決策歷史，新 AI 可查閱保留候選而非重新設計
 
 ---
 

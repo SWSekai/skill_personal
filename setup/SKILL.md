@@ -245,13 +245,9 @@ bash Sekai_workflow/_bootstrap/sp-pack.sh
 5. **產生 manifest.txt** — 打包時間、檔案清單、還原指引
 6. **清除** — 刪除 `.claude/skills/`、`Sekai_workflow/`、`CLAUDE.md`
 
-### 腳本後 — AI 步驟（必須依序執行）
+### 腳本後 — AI 合併指南（必須執行）
 
-腳本完成後，Claude **必須** 依序執行以下 3 個步驟：
-
-#### AI Step 1：合併指南
-
-對 `.local/ai-context/guides/` 進行智慧合併：
+腳本完成後，**必須** 對 `.local/ai-context/guides/` 進行智慧合併：
 
 1. 讀取所有收集到的指南文件
 2. 識別重複/重疊主題（例如多份 K8s 部署指南）
@@ -263,91 +259,12 @@ bash Sekai_workflow/_bootstrap/sp-pack.sh
 4. 刪除已合併的原始檔案
 5. 無重疊的獨立指南 → 保持原樣，僅重新命名
 
-#### AI Step 2：產生環境金鑰文件（`environment-info.md`）
-
-掃描專案目錄，產生 `.local/ai-context/environment-info.md`：
-
-```markdown
-# 專案環境資訊
-
-> 產生日期：YYYY-MM-DD HH:MM
-> 專案：<PROJECT_NAME>
-
-## Docker 服務
-| 服務 | 映像 | Port | Volume | 依賴 |
-|---|---|---|---|---|
-
-## 環境變數
-（來源：.env / .env.example / docker-compose.yml）
-| Key | 來源 | 說明 | 值 |
-|---|---|---|---|
-| DB_HOST | .env | 資料庫主機 | *** |
-
-## 資料庫
-| 類型 | Host | DB Name | 備註 |
-|---|---|---|---|
-
-## API 端點
-| Method | Path | 所在檔案 | 說明 |
-|---|---|---|---|
-
-## 第三方服務整合
-| 服務 | 用途 | 設定來源 |
-|---|---|---|
-```
-
-**掃描來源**：
-- `docker-compose.yml` / `compose.yml` → 服務、port、volume、依賴
-- `.env` / `.env.example` → 環境變數 key（**值一律以 `***` 遮蔽**）
-- config / settings 檔案 → DB 連線、第三方 URL
-- routes / api / endpoints 目錄 → API 端點
-
-**敏感資訊處理**：
-- 所有環境變數值以 `***` 遮蔽，僅顯示 key 與來源
-- 產生後**告知使用者檔案路徑**，讓使用者透過 tool approval 確認後才繼續
-- 若專案無某類資訊（如無 Docker）→ 該區段顯示「無」
-
-#### AI Step 3：產生進度說明文件（`progress-status.md`）
-
-掃描本地工作紀錄，產生 `.local/ai-context/progress-status.md`：
-
-```markdown
-# 專案進度說明
-
-> 產生日期：YYYY-MM-DD HH:MM
-> 專案：<PROJECT_NAME>
-
-## 近期工作摘要
-（讀取 `.local/modify_log/` 最近 10~20 份，按功能領域分組摘要）
-
-| 功能領域 | 項目數 | 主要變更 |
-|---|---|---|
-
-## TODO 待辦事項
-（讀取 `.local/collab/TODO.md`，列出 Pending + In Progress）
-
-## 進行中方案
-（讀取 `.local/docs/plan/*.md`，列出未完成步驟）
-
-## 未 push 變更
-（`git log origin/HEAD..HEAD`，若有）
-
-## 已知風險與注意事項
-（從 modify_log 的「潛在風險」段提取仍有效的項目）
-```
-
-**資料來源**：
-- `.local/modify_log/*.md` → 工作摘要（取代 raw git log，資訊更豐富）
-- `.local/collab/TODO.md` → 待辦
-- `.local/docs/plan/*.md` → 進行中方案
-- `git log origin/HEAD..HEAD` → 未 push 變更
-
 ### 注意
 
 - 腳本會要求使用者確認（y/N）才執行刪除
 - 結果在 `.local/ai-context/`（已 .gitignore，不入版控）
 - 還原方式見 `manifest.txt`
-- **AI Step 2 的環境文件含遮蔽值**，使用者可自行補充實際值於新環境
+- **環境資訊與進度說明由 `/team-office handoff` 負責產出**（交接場景），pack 僅處理 Skill 退出歸檔
 
 ### 還原流程
 
@@ -356,8 +273,6 @@ bash Sekai_workflow/_bootstrap/sp-pack.sh
 3. 將 `project-skills/` 複製回 `.claude/skills/`
 4. 將 `CLAUDE.md` 複製回根目錄
 5. 將 `memory/` 複製回 `~/.claude/projects/.../memory/`
-6. 閱讀 `environment-info.md` 了解環境架構，對照新環境調整
-7. 閱讀 `progress-status.md` 掌握工作進度，從中斷點繼續
 
 ---
 
