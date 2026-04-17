@@ -95,7 +95,7 @@ sp-init.bat 自動完成：
 | **hello** | `/hello` | sonnet | 對話初始化：拉取更新 + Skill 同步 + context 恢復 + 狀態總覽 |
 | **build** | `/build <all\|plan\|do\|test\|check\|review\|deploy>` | sonnet | 開發全流程：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → review → 部署驗證 |
 | **team** | `/team <todo\|board\|decide\|note\|handoff\|report>` | sonnet | 互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記、交接文件、工作報告 |
-| **skill** | `/skill <new\|sync\|pack>` | sonnet | Skill 環境管理：建立新 Skill、規則評估、專案打包 |
+| **skill** | `/skill <new\|sync\|pack\|update>` | sonnet | Skill 環境管理：建立新 Skill、規則評估、專案打包、使用者確認式改進 |
 | **ask** | `/ask <info\|trace>` | opus | 系統文件追蹤：系統資訊查詢、資料流追蹤 |
 | **clean** | `/clean [check\|force]` | sonnet | Context 清理入口：繼承 context-guard 所有功能，清理舊摘要後執行 /clear，Stop hook 自動提醒 |
 | **memory-portable** | `/memo` | sonnet | Memory 跨專案攜帶 |
@@ -134,13 +134,14 @@ sp-init.bat 自動完成：
 
 ### `/skill` — Skill 環境管理
 
-整合原 `create-skill` + `skill-sync` + `pack`。
+整合原 `create-skill` + `skill-sync` + `pack` + `update`（2026-04-17 新增使用者確認式 Skill 改進捕捉）。
 
 | 子命令 | 用途 |
 |---|---|
 | `/skill new [name] [desc]` | 建立新 Skill |
 | `/skill sync` | `Sekai_workflow/` 遠端同步、規則評估 |
 | `/skill pack` | 專案打包並清除 skill 環境 |
+| `/skill update [hint]` | 使用者確認式 Skill 改進：對話中浮現規則 → 使用者明確觸發 → diff 預覽 → 套用 + 三向同步。**刻意設計為使用者觸發，避免 AI 自判** |
 
 ### `/ask` — 系統文件與資料流追蹤
 

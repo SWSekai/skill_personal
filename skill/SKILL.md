@@ -1,15 +1,15 @@
 ---
 name: skill
-description: "One-stop entry for Skill environment management: create new Skill, remote sync, project packaging. Subcommand routing: new / sync / pack."
+description: "One-stop entry for Skill environment management: create new Skill, remote sync, project packaging, user-confirmed skill improvements. Subcommand routing: new / sync / pack / update."
 model: sonnet
 effort: medium
-argument-hint: "<new|sync|pack> [args...]"
+argument-hint: "<new|sync|pack|update> [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(mkdir *), Bash(date *), Bash(cp *), Bash(bash *), Bash(cat *)
 ---
 
 # /skill — Skill Environment Management Merged Skill
 
-Integrates three responsibilities: create-skill, skill-sync, and pack. The first argument determines the subcommand.
+Integrates four responsibilities: create-skill, skill-sync, pack, and user-confirmed skill update. The first argument determines the subcommand.
 
 ## Subcommand Routing
 
@@ -18,6 +18,7 @@ Integrates three responsibilities: create-skill, skill-sync, and pack. The first
 | `/skill new [name] [desc]` | Create new Skill | create-skill |
 | `/skill sync` | Remote sync + rule evaluation | skill-sync |
 | `/skill pack` | Project packaging (clean up skill environment) | pack |
+| `/skill update [hint]` | User-confirmed skill improvement capture (replaces CLAUDE.md Rule 8 auto-inference for deliberate cases) | — (2026-04-17 added) |
 
 When no argument is provided, ask the user to specify a subcommand.
 
@@ -277,6 +278,110 @@ After the script completes, you **must** perform an intelligent merge on `.local
 3. Copy `project-skills/` back to `.claude/skills/`
 4. Copy `CLAUDE.md` back to the project root
 5. Copy `memory/` back to `~/.claude/projects/.../memory/`
+
+---
+
+## D. `/skill update` — User-Confirmed Skill Improvement
+
+Explicit **user-invoked** entry to codify a skill improvement that emerged from the current conversation.
+
+**Relation to CLAUDE.md Rule 8**: Rule 8 allows Claude to proactively ask when a new rule seems to emerge. `/skill update` is the opposite direction — the user initiates, so the signal is unambiguous and Claude must not guess whether to codify. Use `/skill update` whenever you want the improvement **locked in deterministically**, bypassing AI auto-inference.
+
+### Trigger
+
+Manual invocation only:
+
+| Usage | Behavior |
+|---|---|
+| `/skill update` | Claude asks what to capture (free-form or recent-candidate list) |
+| `/skill update <one-line hint>` | Use the hint directly as the improvement description |
+
+### Step 1: Clarify the Improvement
+
+If `$ARGUMENTS` contains a hint → use it as the starting description.
+Otherwise, use AskUserQuestion with a free-form option and (if detectable from recent turns) 1–3 candidate improvements extracted from the conversation.
+
+Confirm one-sentence summary of the improvement before proceeding. If ambiguous, ask follow-up.
+
+### Step 2: Identify Target Skill
+
+Match the improvement to the most-relevant skill folder under `.claude/skills/`:
+
+- Behavior about decision tables, whiteboards, TODOs → `team`
+- Commit / log / push / deploy rules → `commit-push` or `build`
+- Skill-creation conventions → `skill` (this skill itself)
+- Context cleanup / summary → `clean`
+- System info or trace rules → `ask`
+- Conversation start / environment pull → `hello`
+
+Ambiguous → AskUserQuestion listing 2–3 candidate skills, first option marked `(Recommended)`.
+
+### Step 3: Draft the Change
+
+1. Read `.claude/skills/<skill>/SKILL.md` (+ README.md if structural change)
+2. Propose: insertion location (file + section) + **exact diff** (old_string / new_string preview)
+3. Evaluate side-effects:
+   - frontmatter `description` / `argument-hint` update needed?
+   - Subcommand Routing table change needed?
+   - New section numbering collision?
+4. Present the full diff to the user
+
+AskUserQuestion:
+- `接受並套用 (Recommended)`
+- `我要調整措辭` → user provides edits → redraft
+- `取消`
+
+### Step 4: Apply to `.claude/skills/<skill>/`
+
+Edit SKILL.md + README.md as drafted. Do **not** also update `.sekai-workflow/` yet — reserve that for Step 5 so the diff is reviewable isolated.
+
+### Step 5: Mirror to `.sekai-workflow/<skill>/` (general skills only)
+
+1. Apply the same diff to `.sekai-workflow/<skill>/SKILL.md` (+ README.md)
+2. `diff -q .claude/skills/<skill>/SKILL.md .sekai-workflow/<skill>/SKILL.md` → expect no output
+3. Project-specific skill (only in `.claude/skills/`, not in `.sekai-workflow/`) → skip, note it in summary
+
+### Step 6: Evaluate CLAUDE.md Impact
+
+Update root `CLAUDE.md` **only if** the change:
+- Adds a new subcommand to an existing skill → update the `## 可用 Skills` line for that skill
+- Adds a new top-level command line option or flag
+- Introduces a cross-project rule that belongs in the numbered core-rules list
+
+Otherwise leave CLAUDE.md unchanged and state "CLAUDE.md: no change needed" in the summary.
+
+### Step 7: Commit and Push `.sekai-workflow/`
+
+```bash
+cd .sekai-workflow
+git add <skill>/
+# README.md / manifest.json if touched
+git commit -m "feat(skill): <skill> — <one-line improvement summary>"
+git push
+```
+
+If push fails (conflict) → pull --rebase, resolve, retry. Do **not** force-push.
+
+### Step 8: Output Summary
+
+```
+✓ Skill updated
+
+Skill: <skill>
+Change: <one-line summary>
+Files modified:
+  - .claude/skills/<skill>/SKILL.md (+ README.md if applicable)
+  - .sekai-workflow/<skill>/SKILL.md (+ README.md if applicable)
+CLAUDE.md: updated / no change
+.sekai-workflow commit: <hash>
+```
+
+### Design Principles
+
+- **User-initiated, never AI-inferred**: running only on explicit invocation eliminates the risk of Claude silently codifying misunderstandings.
+- **Explicit diff preview before writing**: Step 3 always surfaces the exact change for approval.
+- **Three-way sync automatic**: Rule 9 (`.claude/skills/` ↔ `.sekai-workflow/` ↔ CLAUDE.md) enforced without extra prompting.
+- **Single improvement per invocation**: keeps the commit focused and reviewable; for batched updates, invoke repeatedly.
 
 ---
 

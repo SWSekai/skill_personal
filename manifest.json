@@ -39,8 +39,8 @@
     {
       "name": "skill",
       "command": "/skill",
-      "description": "Skill 環境管理一站式入口：建立新 Skill、遠端同步、專案打包",
-      "subcommands": ["new", "sync", "pack"],
+      "description": "Skill 環境管理一站式入口：建立新 Skill、遠端同步、專案打包、使用者確認式 Skill 改進捕捉",
+      "subcommands": ["new", "sync", "pack", "update"],
       "model": "sonnet",
       "trigger": "手動呼叫 / sync 對話開始自動",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(mkdir *)", "Bash(date *)", "Bash(cp *)", "Bash(bash *)", "Bash(cat *)"],

@@ -171,6 +171,31 @@ Pre-filled values are recommended configurations based on current state; adjust 
 When finished, reply "OK" or "Done", and I will read and implement.
 ```
 
+### Step 3.5: 補充說明 Round-Trip (In-File Q&A) — Mandatory
+
+When the user writes a question, clarification request, or asks for a recommendation **inside a `補充說明` field** (detected by: `?` / `？` / `請說明` / `請詳細` / `進一步說明` / `請解釋` / `你建議` / `你認為` / references to undefined terms), Claude **must answer by editing that same `補充說明` field in the decision file**, NOT by replying in chat only.
+
+**Rationale**: the decision table is the single source of truth for this interaction. Chat messages are ephemeral and scroll away; in-file answers stay attached to the exact decision block they concern, preserve reviewability, and match the spirit of an interactive document.
+
+**Response format** (append inside the existing `補充說明` blockquote; do NOT overwrite the user's original note):
+
+```markdown
+> **補充說明**
+> > _(使用者原文保留)_
+>
+> **Claude 回覆（YYYY-MM-DD）**
+>
+> (content: markdown tables / file:line refs / recommendations, written inside the blockquote)
+```
+
+**When Claude has a recommendation for an un-checked decision row** (e.g., `[ ] [ ] [ ]`):
+
+- Write the recommendation and reasoning **into the 相關 `補充說明`** (prose or table form)
+- **Do NOT pre-check `[x]` on behalf of the user** — the checkbox represents the user's authorization, not Claude's judgment
+- End with a call-to-action: `"請勾選後回覆 OK，我再開始實作"`
+
+**Chat reply on this turn**: one short pointer only — e.g., `"已寫入 §1/§3/§5 補充說明，請查閱決策表"`. Do NOT duplicate the content in chat.
+
 ### Step 4: Read the Decisions
 
 1. Re-Read the file

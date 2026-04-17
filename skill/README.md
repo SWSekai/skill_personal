@@ -4,12 +4,12 @@
 
 ## 功能說明
 
-整合建立新 Skill、遠端同步與規則評估、專案打包三項職能。
+整合建立新 Skill、遠端同步與規則評估、專案打包、**使用者確認式 Skill 改進捕捉**四項職能。
 
 ## 使用方式
 
 ```
-/skill <new|sync|pack> [args...]
+/skill <new|sync|pack|update> [args...]
 ```
 
 ## Model
@@ -23,6 +23,7 @@
 - `new`：手動呼叫
 - `sync`：對話開始自動 / 手動
 - `pack`：手動呼叫
+- `update`：**僅手動呼叫**（刻意避免 AI 自判，由使用者明確觸發，2026-04-17 新增）
 
 ## 執行流程
 
@@ -31,6 +32,7 @@
 | `new [name] [desc]` | 建立新 Skill（互動式定義 → 檔案生成 → 索引更新 → 同步） |
 | `sync` | Sekai_workflow 遠端同步、規則評估與三向連動 |
 | `pack` | 專案打包並清除 skill 環境 |
+| `update [hint]` | 使用者確認式 Skill 改進：對話中浮現的規則 → 使用者下 `/skill update` → 明確 diff 預覽 → 套用 + 三向同步 |
 
 ## 目錄結構
 
