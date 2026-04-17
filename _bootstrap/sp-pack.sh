@@ -110,7 +110,7 @@ fi
 
 # --- Step 4b: 回寫 portable memory 到 Sekai_workflow ---
 echo "[Step 3b] 回寫 portable memory..."
-MEM_PORTABLE="$SP_DIR/memory-portable"
+MEM_PORTABLE="$SP_DIR/memo"
 if [ -n "$MEMORY_DIR" ] && [ -d "$MEMORY_DIR" ] && [ -d "$MEM_PORTABLE" ]; then
     WRITEBACK_COUNT=0
     for mem_file in "$MEMORY_DIR"/feedback_*.md "$MEMORY_DIR"/user_*.md; do
@@ -132,11 +132,11 @@ if [ -n "$MEMORY_DIR" ] && [ -d "$MEMORY_DIR" ] && [ -d "$MEM_PORTABLE" ]; then
     if [ "$WRITEBACK_COUNT" -eq 0 ]; then
         echo "  [INFO] portable memory 已是最新"
     else
-        echo "  [OK] 回寫 $WRITEBACK_COUNT 個 memory 到 Sekai_workflow/memory-portable/"
+        echo "  [OK] 回寫 $WRITEBACK_COUNT 個 memory 到 Sekai_workflow/memo/"
         # Auto commit & push within Sekai_workflow
         # 必須 push：Step 9 會刪除整個 $SP_DIR（含 .git），未 push 的 commit 將永久遺失
         cd "$SP_DIR"
-        git add memory-portable/ 2>/dev/null
+        git add memo/ 2>/dev/null
         if git commit -m "sync: 回寫 portable memory from $(basename "$PROJECT_DIR")
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>" 2>/dev/null; then
@@ -145,7 +145,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>" 2>/dev/null; then
                 echo "  [OK] 已 commit 並 push 到 Sekai_workflow 遠端 ($CURRENT_BRANCH)"
             else
                 echo "  [WARN] commit 成功但 push 失敗（網路/權限問題），請手動 push 以避免 Step 9 刪除後遺失"
-                echo "  [WARN] 若繼續 Step 9，memory-portable 更新將永久遺失！"
+                echo "  [WARN] 若繼續 Step 9，memo 更新將永久遺失！"
                 read -p "  是否中止打包以便手動處理？(Y/n) " abort_confirm
                 if [[ ! "$abort_confirm" =~ ^[nN]$ ]]; then
                     echo "[ABORT] 使用者選擇中止，請進入 $SP_DIR 手動 push 後重新執行"
@@ -155,7 +155,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>" 2>/dev/null; then
         fi
     fi
 else
-    echo "  [SKIP] Memory 或 memory-portable/ 不存在"
+    echo "  [SKIP] Memory 或 memo/ 不存在"
 fi
 
 # --- Step 5: 收集全部 skills 快照 ---

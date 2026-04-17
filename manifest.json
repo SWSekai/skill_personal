@@ -1,15 +1,15 @@
 {
-  "version": "2.1",
+  "version": "2.3",
   "description": "Sekai_workflow 結構索引 — Claude 讀取此檔即可掌握全貌，無需逐一掃描目錄",
-  "updated": "2026-04-15",
+  "updated": "2026-04-17",
   "model_routing": "references/model-routing.md",
-  "note": "v2.1: /commit-push 提升為主要 commit 入口；/build 移除 commit/log/restart/eval 子命令，新增 review，restart+eval 合併為 deploy。模型三層分層（Opus/Sonnet/Haiku）原則納入 CLAUDE.md 第 18 條。",
+  "note": "v2.3: Skill 命名口語化 — /team-office → /team、/setup → /skill、/memory-portable → /memo；/build 子命令 flow→all / impl→do / quality→check；/team notes → note；/ask query → info；/ask report 搬移至 /team report。",
   "skills": [
     {
       "name": "build",
       "command": "/build",
       "description": "開發全流程一站式入口：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → review → deploy。Commit 推送走獨立 /commit-push。",
-      "subcommands": ["flow", "plan", "impl", "test", "quality", "review", "deploy"],
+      "subcommands": ["all", "plan", "do", "test", "check", "review", "deploy"],
       "model": "sonnet",
       "trigger": "手動呼叫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash(git *)", "Bash(docker *)", "Bash(ls *)", "Bash(date *)", "Bash(sleep *)", "Bash(mkdir *)", "Bash(npm *)", "Bash(npx *)", "Bash(pytest *)", "Bash(python *)"],
@@ -17,64 +17,65 @@
       "merged_from": ["quality-check", "restart-volumn", "restart-eval"],
       "subcommand_models": {
         "plan": "opus",
-        "quality": "opus",
-        "flow": "sonnet",
-        "impl": "sonnet",
+        "check": "opus",
+        "all": "sonnet",
+        "do": "sonnet",
         "test": "sonnet",
         "review": "sonnet",
         "deploy": "sonnet"
       }
     },
     {
-      "name": "team-office",
-      "command": "/team-office",
-      "description": "互動協作一站式入口：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記整理",
-      "subcommands": ["todo", "board", "decide", "notes"],
+      "name": "team",
+      "command": "/team",
+      "description": "互動協作一站式入口：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記、交接文件、工作報告",
+      "subcommands": ["todo", "board", "decide", "note", "handoff", "report"],
       "model": "sonnet",
       "trigger": "手動呼叫 / board 自動觸發",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(mkdir *)"],
-      "files": ["team-office/SKILL.md", "team-office/README.md", "team-office/references/interaction-modes.md", "team-office/assets/collab-template.md", "team-office/assets/whiteboard-template.md"],
-      "merged_from": ["todo", "whiteboard", "md-collab", "tech-notes"]
+      "files": ["team/SKILL.md", "team/README.md", "team/references/interaction-modes.md", "team/assets/collab-template.md", "team/assets/whiteboard-template.md"],
+      "merged_from": ["todo", "whiteboard", "md-collab", "tech-notes", "handoff", "report"]
     },
     {
-      "name": "setup",
-      "command": "/setup",
+      "name": "skill",
+      "command": "/skill",
       "description": "Skill 環境管理一站式入口：建立新 Skill、遠端同步、專案打包",
       "subcommands": ["new", "sync", "pack"],
       "model": "sonnet",
       "trigger": "手動呼叫 / sync 對話開始自動",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(mkdir *)", "Bash(date *)", "Bash(cp *)", "Bash(bash *)", "Bash(cat *)"],
-      "files": ["setup/SKILL.md", "setup/README.md", "setup/references/model-selection-guide.md", "setup/references/evaluation-decision-tree.md", "setup/references/version-control-boundaries.md", "setup/assets/SKILL.md.template", "setup/assets/README.md.template"],
+      "files": ["skill/SKILL.md", "skill/README.md", "skill/references/model-selection-guide.md", "skill/references/evaluation-decision-tree.md", "skill/references/version-control-boundaries.md", "skill/assets/SKILL.md.template", "skill/assets/README.md.template"],
       "merged_from": ["create-skill", "skill-sync", "pack"]
     },
     {
       "name": "ask",
       "command": "/ask",
-      "description": "系統文件與報告一站式入口：系統資訊查詢、資料流追蹤、工作報告生成",
-      "subcommands": ["query", "trace", "report"],
+      "description": "系統文件與資料流追蹤：系統資訊查詢、資料流追蹤（原 report 子命令已搬至 /team report）",
+      "subcommands": ["info", "trace"],
       "model": "opus",
-      "trigger": "query 自動 / 其餘手動",
+      "trigger": "info 自動 / 其餘手動",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash(ls *)", "Bash(find *)", "Bash(git log*)", "Bash(git diff*)", "Bash(date *)"],
       "files": ["ask/SKILL.md", "ask/README.md"],
-      "merged_from": ["sys-info", "trace-flow", "report"]
+      "merged_from": ["sys-info", "trace-flow"]
     },
     {
-      "name": "context-guard",
-      "command": "/context-guard",
-      "description": "Context window 管理：壓縮通知時自動摘要，手動呼叫整理，對話開始恢復",
+      "name": "clean",
+      "command": "/clean",
+      "description": "Context 清理入口：繼承 context-guard 所有功能，清理舊摘要後執行 /clear，Stop hook 偵測舊摘要自動提醒",
       "model": "sonnet",
-      "trigger": "系統壓縮通知 / 手動 / 對話開始",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(wc *)", "Bash(git status*)", "Bash(git log*)", "Bash(date *)"],
-      "files": ["context-guard/SKILL.md", "context-guard/README.md"]
+      "trigger": "系統壓縮通知 / 手動 / 對話開始 / Stop hook 提醒",
+      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(rm *)", "Bash(mkdir *)", "Bash(git status*)", "Bash(git log*)", "Bash(date *)"],
+      "files": ["clean/SKILL.md", "clean/README.md"],
+      "merged_from": ["context-guard"]
     },
     {
-      "name": "memory-portable",
-      "command": "/memory-portable",
+      "name": "memo",
+      "command": "/memo",
       "description": "Memory 跨專案攜帶：feedback/user memory 隨 Sekai_workflow git 攜帶",
       "model": "sonnet",
       "trigger": "手動 / sp-init.bat 還原 / sp-pack.sh 回寫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(cp *)", "Bash(git *)"],
-      "files": ["memory-portable/SKILL.md", "memory-portable/README.md"]
+      "files": ["memo/SKILL.md", "memo/README.md"]
     },
     {
       "name": "commit-push",
@@ -136,19 +137,21 @@
   ],
   "merge_map": {
     "commit-push": "commit-push (主要入口，已恢復獨立)",
-    "quality-check": "commit-push Step 1 (內嵌 Opus) + build quality (獨立呼叫)",
+    "quality-check": "commit-push Step 1 (內嵌 Opus) + /build check (獨立呼叫)",
     "modify-log": "commit-push Step 5 (內嵌 Haiku)",
     "restart-volumn": "build deploy --run",
     "restart-eval": "build deploy --plan",
-    "todo": "team-office todo",
-    "whiteboard": "team-office board",
-    "md-collab": "team-office decide",
-    "tech-notes": "team-office notes",
-    "create-skill": "setup new",
-    "skill-sync": "setup sync",
-    "pack": "setup pack",
-    "sys-info": "ask query",
+    "todo": "team todo",
+    "whiteboard": "team board",
+    "md-collab": "team decide",
+    "tech-notes": "team note",
+    "handoff": "team handoff",
+    "report": "team report (2026-04-17 從 /ask 搬至 /team)",
+    "create-skill": "skill new",
+    "skill-sync": "skill sync",
+    "pack": "skill pack",
+    "sys-info": "ask info",
     "trace-flow": "ask trace",
-    "report": "ask report"
+    "context-guard": "clean (合併至 clean，含 /clear 整合與 Stop hook)"
   }
 }

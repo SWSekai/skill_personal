@@ -1,120 +1,120 @@
 ---
 name: commit-push
-description: "Commit & Push 獨立入口 — 品質檢查（Opus）→ 修改日誌（Haiku）→ README 同步 → commit → push → 重啟評估 → Context 清理。內建完整提交流程，所有日誌僅存本地不入版控。"
+description: "Commit & Push standalone entry — quality check (Opus) → modify log (Haiku) → README sync → commit → push → restart evaluation → Context cleanup. Built-in complete commit flow, all logs kept local only, not under version control."
 model: sonnet
 effort: medium
-argument-hint: "[commit 訊息覆蓋]"
+argument-hint: "[commit message override]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(ls *), Bash(date *), Bash(docker *)
 ---
 
-# /commit-push — 完整提交推送流程
+# /commit-push — Complete Commit and Push Flow
 
-依序執行以下步驟，**不可跳步**。本 Skill 為**主要 commit 入口**，與 `/build` 其他子命令（flow / plan / impl / test / quality / log / review / deploy）互補。
+Execute the following steps in order. **Do not skip steps**. This Skill is the **primary commit entry point**, complementing other `/build` subcommands (flow / plan / impl / test / quality / log / review / deploy).
 
-**Model 分工（對應 CLAUDE.md 第 18 條）**：
-- 本流程主體由 **Sonnet** 執行（標準開發任務、檔案讀寫、git 操作）
-- Step 1「品質檢查」內嵌 **Opus** 深度分析（評估、規劃屬性）
-- Step 5「修改日誌」內嵌 **Haiku** 結構化產出（純文字撰寫屬性）
+**Model Division of Labor (aligned with CLAUDE.md Rule 18)**:
+- The main flow is executed by **Sonnet** (standard development tasks, file read/write, git operations)
+- Step 1 "Quality Check" embeds **Opus** for deep analysis (evaluation, planning attributes)
+- Step 5 "Modify Log" embeds **Haiku** for structured output (plain text writing attributes)
 
 ---
 
-## Step 1：品質檢查（內嵌 Opus 深度分析）
+## Step 1: Quality Check (embedded Opus deep analysis)
 
-對暫存／工作區內所有改動執行完整品質審計。此步驟建議透過 Agent 工具呼叫 Opus 子任務以取得深度分析能力。
+Perform a complete quality audit on all changes in the staging area / working tree. This step is recommended to be invoked via the Agent tool as an Opus subtask for deep analysis capability.
 
-### 1.1 掃描項目
+### 1.1 Scan Items
 
-對每個改動檔檢查：
+For each changed file, check:
 
-- **死碼**：未用 import、不可達分支、註解掉的程式碼
-- **冗餘**：跨檔重複邏輯、應抽象的 copy-paste
-- **硬編碼**：應放 config / constants 的魔術值
-- **錯誤處理**：系統邊界（API、外部呼叫、檔案 IO）的 try/catch
-- **型別一致性**：跨層資料型別不符
-- **序列化風險**：JSON / protobuf / form 過程可能遺失的欄位
-- **安全性**：SQL injection、XSS、命令注入、敏感資訊外洩、OWASP Top 10
+- **Dead code**: unused imports, unreachable branches, commented-out code
+- **Redundancy**: cross-file duplicate logic, copy-paste that should be abstracted
+- **Hard-coding**: magic values that should live in config / constants
+- **Error handling**: try/catch at system boundaries (APIs, external calls, file IO)
+- **Type consistency**: mismatched data types across layers
+- **Serialization risk**: fields that may be lost during JSON / protobuf / form processing
+- **Security**: SQL injection, XSS, command injection, sensitive info leakage, OWASP Top 10
 
-### 1.2 架構一致性
+### 1.2 Architectural Consistency
 
-讀取同目錄 3–5 個既有檔案理解慣例（命名、錯誤處理、log 風格、回應格式），條列偏離項並附既有範例。
+Read 3–5 existing files in the same directory to understand conventions (naming, error handling, log style, response format), then list deviations with existing examples attached.
 
-### 1.3 影響評估（Upstream / Downstream 矩陣）
+### 1.3 Impact Assessment (Upstream / Downstream Matrix)
 
-| 維度 | 問題 |
+| Dimension | Question |
 |---|---|
-| Upstream | 誰呼叫這個 function / endpoint？會壞嗎？ |
-| Downstream | 此函式呼叫誰？契約還有效嗎？ |
-| State | 是否動到 DB schema、cache key、檔案路徑、env var？ |
-| Concurrency | 多 user / multi-worker 下會有 race condition 嗎？ |
-| Backward compat | 既有 DB 紀錄、saved config、cache value 還能用嗎？ |
-| API contract | request / response shape 變了，所有 client 都更新了嗎？ |
+| Upstream | Who calls this function / endpoint? Will it break? |
+| Downstream | Who does this function call? Is the contract still valid? |
+| State | Does it touch DB schema, cache key, file path, env var? |
+| Concurrency | Race conditions under multi-user / multi-worker? |
+| Backward compat | Are existing DB records, saved configs, cache values still usable? |
+| API contract | If request / response shape changed, have all clients been updated? |
 
-### 1.4 風險報告
+### 1.4 Risk Report
 
 | Severity | File | Description | Mitigation |
 |---|---|---|---|
 | High / Med / Low | ... | ... | ... |
 
-- **High**：可能造成資料遺失、crash、安全漏洞 → **停止 commit**，先修復
-- **Medium**：可能造成行為錯誤或效能退化 → 告知使用者，請其決定是否阻斷
-- **Low**：code smell 或小不一致 → 僅回報，不阻斷
+- **High**: may cause data loss, crash, security vulnerability → **stop commit**, fix first
+- **Medium**: may cause behavioral error or performance regression → notify user, let them decide whether to block
+- **Low**: code smell or minor inconsistency → report only, do not block
 
-無風險時明確輸出：「品質檢查通過，無風險」
+When no risk exists, explicitly output: "Quality check passed, no risks"
 
-### 1.5 Skill 更新提示（新模式偵測）
+### 1.5 Skill Update Hint (new pattern detection)
 
-若本次改動引入**新的慣例、模式或工作流程需求**：
+If this change introduces **new conventions, patterns, or workflow requirements**:
 
-- 直接執行對應的 SKILL.md Edit，由 Tool Confirmation UI 處理 approve / deny（對齊 CLAUDE.md 第 15 條）
-- **禁止**使用文字詢問「是否要更新 Skill 定義？」
+- Directly execute the corresponding SKILL.md Edit; let the Tool Confirmation UI handle approve / deny (aligned with CLAUDE.md Rule 15)
+- **Do not** use text-based prompts like "Do you want to update the Skill definition?"
 
-### 1.6 Skill 完整性檢查（若改動 Skill 檔案）
+### 1.6 Skill Integrity Check (if Skill files were changed)
 
-若本次變更動到任何 SKILL.md / README.md / 新建 Skill 資料夾，逐項驗證：
+If this change touches any SKILL.md / README.md / new Skill directory, verify item by item:
 
-1. **每個 skill 資料夾**同時含 `SKILL.md` 與 `README.md`
-2. **Skills README 三段同步**：
-   - `.claude/skills/README.md` 的命令總覽表已更新
-   - 詳細描述段落已更新
-   - 目錄結構樹已更新
-3. **通用 vs 專案專屬判斷樹**：
-   - 通用改進（不綁專案細節）→ 同步至 `sekai-workflow/`，**剝除所有專案特化硬編碼值**
-   - 專案專屬修正 → 僅存 `.claude/skills/`，**不同步**
-4. **通用 skills README** (`sekai-workflow/README.md`) 已更新
-5. **CLAUDE.md 的「可用 Skills」列表**已更新
-6. **明示聲明**：Skill 變更走 `sekai-workflow` 獨立遠端倉庫（`https://github.com/SWSekai/sekai-workflow.git`），**不進專案 git**
+1. **Each skill directory** contains both `SKILL.md` and `README.md`
+2. **Three-part sync of Skills README**:
+   - `.claude/skills/README.md` command overview table is updated
+   - Detailed description sections are updated
+   - Directory structure tree is updated
+3. **Generic vs project-specific decision tree**:
+   - Generic improvements (not bound to project details) → sync to `sekai-workflow/`, **stripping all project-specific hard-coded values**
+   - Project-specific fixes → keep in `.claude/skills/` only, **do not sync**
+4. **Generic skills README** (`sekai-workflow/README.md`) is updated
+5. **"Available Skills" list in CLAUDE.md** is updated
+6. **Explicit declaration**: Skill changes go through the `sekai-workflow` standalone remote repo (`https://github.com/SWSekai/sekai-workflow.git`), **not** the project git
 
-任一項未符合 → 停止 commit，要求使用者補齊。
+If any item fails → stop commit and ask the user to complete it.
 
-### 1.7 實作後資料流重讀
+### 1.7 Post-Implementation Data Flow Re-read
 
-實作完畢、commit 前**重新讀取**修改過的程式碼，逐層走一次：
+After implementation and before commit, **re-read** the modified code and walk through it layer by layer:
 
-| 檢查項 | 結果 | 備註 |
+| Check Item | Result | Notes |
 |---|:---:|---|
-| 資料流完整性 | ✓/✗ | |
-| 跨層型別一致 | ✓/✗ | |
-| 邊界情境處理 | ✓/✗ | |
-| 未動邏輯不受影響 | ✓/✗ | |
+| Data flow completeness | ✓/✗ | |
+| Cross-layer type consistency | ✓/✗ | |
+| Edge case handling | ✓/✗ | |
+| Unchanged logic unaffected | ✓/✗ | |
 
-任一 ✗ 必須先修，才能進入 commit 流程。
-
----
-
-## Step 2：自動更新 README.md
-
-掃描變更檔所屬目錄，若該目錄含 `README.md` 且結構 / 功能受影響，同步更新。
-
-**新增功能性目錄** → 建立 README，包含：
-- 目錄用途
-- 檔案 / 子目錄結構
-- 關鍵功能概述
+Any ✗ must be fixed before entering the commit flow.
 
 ---
 
-## Step 3：狀態總覽與 staging
+## Step 2: Auto-update README.md
 
-### 3.1 顯示完整待處理狀態
+Scan the directories containing changed files. If that directory contains `README.md` and its structure / functionality is affected, update it in sync.
+
+**New functional directories** → create README containing:
+- Directory purpose
+- File / subdirectory structure
+- Overview of key functionality
+
+---
+
+## Step 3: Status Overview and Staging
+
+### 3.1 Display Full Pending Status
 
 ```bash
 git status
@@ -122,61 +122,61 @@ git diff --stat
 git log --oneline origin/$(git rev-parse --abbrev-ref HEAD)..HEAD
 ```
 
-向使用者列出：
+List to the user:
 
-- **未暫存修改**：每檔附一句話摘要
-- **已暫存未 commit**：同上
-- **已 commit 未 push**：列出 commit hash + message
-- 若完全沒有待處理 → 告知使用者並停止
+- **Unstaged modifications**: one-line summary per file
+- **Staged but not committed**: same as above
+- **Committed but not pushed**: list commit hash + message
+- If there is nothing pending → notify the user and stop
 
-### 3.2 讀取 `.gitignore` 確認安全
+### 3.2 Read `.gitignore` to Confirm Safety
 
-讀取 `.gitignore`，確認即將 stage 的檔案不在忽略清單中。完整規則見 `references/gitignore-safety.md`。
+Read `.gitignore` and confirm files about to be staged are not in the ignore list. Full rules in `references/gitignore-safety.md`.
 
-**禁止指令**：
-- `git add -f`（force 加入被忽略檔案）
-- `git add -A` / `git add .`（可能意外加入敏感檔或二進位）
+**Forbidden commands**:
+- `git add -f` (force add ignored files)
+- `git add -A` / `git add .` (may accidentally include sensitive or binary files)
 
-### 3.3 Stage 檔案
+### 3.3 Stage Files
 
-- 使用 `git add <file>` 具體檔名
-- 含任何更新過的 README.md
+- Use `git add <file>` with specific filenames
+- Include any updated README.md
 
-### 3.4 直接進入 staging + commit（不額外發確認訊息）
+### 3.4 Proceed Directly to staging + commit (no extra confirmation message)
 
-列出摘要後**直接**執行 `git add` + `git commit`。使用者透過 Tool Confirmation UI 判斷 approve / deny（對齊 CLAUDE.md 第 15 條）。**禁止**發出「是否繼續？」「要我執行嗎？」等文字確認。
+After listing the summary, **directly** execute `git add` + `git commit`. The user decides approve / deny through the Tool Confirmation UI (aligned with CLAUDE.md Rule 15). **Do not** emit text-based confirmations like "Continue?" or "Shall I execute?"
 
 ---
 
-## Step 4：Commit
+## Step 4: Commit
 
-採 **Conventional Commits** 格式 + HEREDOC 模板。完整規範見 `references/commit-conventions.md`。
+Use **Conventional Commits** format + HEREDOC template. Full spec in `references/commit-conventions.md`.
 
-### 4.1 Prefix 集合（11 個）
+### 4.1 Prefix Set (11 items)
 
 `feat / fix / ui / docs / refactor / test / chore / perf / build / ci / revert`
 
-詳見 `references/commit-conventions.md` 的類型對照表。
+See the type mapping table in `references/commit-conventions.md` for details.
 
-### 4.2 動態 Co-Author 規則
+### 4.2 Dynamic Co-Author Rules
 
-根據**實際執行此 commit 的 Skill model** 填入 Co-Author 字串：
+Fill in the Co-Author string based on the **actual Skill model executing this commit**:
 
-| 執行情境 | Co-Author |
+| Execution Context | Co-Author |
 |---|---|
-| 本 Skill（`/commit-push`）直接執行 | `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` |
-| 前置階段由 `/build plan` / `/ask` 等 Opus Skill 產出主要決策 | 附加 `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>` 為第二行 |
-| 若改動主要為文字 / 日誌 / 文件類（本 Skill 內 Step 5 的 modify log） | log 區塊由 Haiku 產出，但 commit 本身仍以 Sonnet 為主 Co-Author |
+| This Skill (`/commit-push`) executes directly | `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` |
+| Pre-stage produced main decisions from an Opus Skill such as `/build plan` / `/ask` | Append `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>` as a second line |
+| If the change is mainly text / log / docs (the modify log from Step 5 of this Skill) | The log block is produced by Haiku, but the commit itself still uses Sonnet as the primary Co-Author |
 
-### 4.3 格式規則
+### 4.3 Format Rules
 
-- 第一行：短摘要，72 字元以內
-- 空行
-- Body：要點列表（bullet points）
-- 空行
-- Co-Authored-By 行
+- First line: short summary, within 72 characters
+- Blank line
+- Body: bullet points
+- Blank line
+- Co-Authored-By line
 
-範例：
+Example:
 
 ```bash
 git commit -m "$(cat <<'EOF'
@@ -193,120 +193,120 @@ EOF
 
 ---
 
-## Step 5：建立修改日誌（內嵌 Haiku 結構化產出）
+## Step 5: Create Modify Log (embedded Haiku structured output)
 
-建議透過 Agent 工具呼叫 Haiku 子任務產生日誌（結構化文字撰寫屬性）。
+Recommended to invoke a Haiku subtask via the Agent tool to generate the log (structured text writing attribute).
 
-**所有日誌僅存本地，永不入版控。**
+**All logs are kept local only and must never enter version control.**
 
-### 5.1 檔名規則
+### 5.1 Filename Rule
 
-`.local/modify_log/YYMMDD_主題描述.md`（6 位日期 + 具描述性主題名）
+`.local/modify_log/YYMMDD_topic_description.md` (6-digit date + descriptive topic name)
 
-範例：`260313_video_h264_reencode.md`
+Example: `260313_video_h264_reencode.md`
 
-- **同日同主題** → 更新該檔
-- **不同主題** → 另建新檔
+- **Same day + same topic** → update that file
+- **Different topic** → create a new file
 
-### 5.2 取得變更資訊
+### 5.2 Collect Change Info
 
 ```bash
-git log --oneline -1                    # 取得 commit hash
-git diff --stat HEAD~1                  # 變更統計
-git diff --name-only HEAD~1             # 變更檔案清單
-git diff --numstat HEAD~1               # 每檔新增 / 刪除行數
+git log --oneline -1                    # get commit hash
+git diff --stat HEAD~1                  # change stats
+git diff --name-only HEAD~1             # list of changed files
+git diff --numstat HEAD~1               # added / deleted lines per file
 ```
 
-### 5.3 日誌格式（對齊使用者原版標準模板）
+### 5.3 Log Format (aligned with user's original standard template)
 
 ```markdown
-# [標題 — 一句描述本次變更]
+# [Title — one-line description of this change]
 
 ## 基本資訊
 - **日期時間**：YYYY-MM-DD HH:MM
-- **Git 版本**：`<short-hash>`（例如 `9fe154c`）
-- **更動原因**：[動機 / 問題描述 / 需求來源]
+- **Git 版本**：`<short-hash>` (e.g. `9fe154c`)
+- **更動原因**：[motivation / problem description / requirement source]
 
 ## 影響檔案
 | 檔案 | 變更行數 | 說明 |
 |------|---------|------|
-| `path/to/file.py` | +12 -5 | 做了什麼、為什麼 |
-| `path/to/file.js` | +30 -8 | 做了什麼、為什麼 |
+| `path/to/file.py` | +12 -5 | what was done, why |
+| `path/to/file.js` | +30 -8 | what was done, why |
 
 ## 影響範圍
-- 受影響模組 / 功能
-- 容器重啟需求（若有）
-- DB migration 需求（若有）
+- Affected modules / features
+- Container restart requirement (if any)
+- DB migration requirement (if any)
 
 ## 技術說明
-（非顯而易見的變更才寫：資料流、邏輯說明、架構決策）
+(Write only for non-obvious changes: data flow, logic explanation, architectural decisions)
 
 ## 潛在風險
-- 邊界情境或相容性議題
-- 若無：「無已知風險」
+- Edge cases or compatibility issues
+- If none: "無已知風險"
 ```
 
-**關鍵格式特徵**：
-- 行數格式 `+N -M`（空格分隔，**不是** `+N/-M`）
-- 章節順序：**影響範圍在技術說明之前**
-- 欄位名稱：**Git 版本**（非「版本」）
+**Key Format Characteristics**:
+- Line count format `+N -M` (space-separated, **not** `+N/-M`)
+- Section order: **Impact Scope comes before Technical Notes**
+- Field name: **Git 版本** (not just "版本")
 
 ### 5.4 Rules
 
-- 語言對齊專案慣例（本專案為台灣繁體中文）
-- **非顯而易見的變更**附 code snippet
-- **before / after 比較**用表格
-- **資料流 / 決策邏輯**用 ASCII 圖（特別適合 sys-info 類交接 / 說明文件）
-- 同日同主題 → 更新該檔而非新建
-- **僅存本地，永不入版控**
+- Language aligned with project convention (this project uses Traditional Chinese, Taiwan)
+- **Non-obvious changes** include a code snippet
+- **Before / after comparisons** use tables
+- **Data flow / decision logic** use ASCII diagrams (especially suitable for sys-info handoff / explanation docs)
+- Same day + same topic → update that file instead of creating a new one
+- **Local only, never enters version control**
 
 ---
 
-## Step 6：Push
+## Step 6: Push
 
 ```bash
 git push
 ```
 
-Push 失敗時（auth / hook / remote error）報告錯誤與建議，**不嘗試 `--force`**，不嘗試 `--no-verify`。
+If push fails (auth / hook / remote error), report the error with suggestions. **Do not attempt `--force`**, do not attempt `--no-verify`.
 
 ---
 
-## Step 7：同步 `sekai-workflow/` 至遠端（**依開關決定**）
+## Step 7: Sync `sekai-workflow/` to Remote (**Depends on Switch**)
 
-### 7.0 檢查回流開關（必須）
+### 7.0 Check Flowback Switch (Mandatory)
 
-Read `.claude/settings.local.json` 的 `sekai_workflow.flowback.push`：
+Read `sekai_workflow.flowback.push` from `.claude/settings.local.json`:
 
-| 狀態 | 行為 |
+| State | Behavior |
 |---|---|
-| `true` | 進入 7.1 執行完整流程 |
-| `false` | 僅本地 skip（不 commit、不 push）；告知使用者「回流開關關閉，本次改動僅留本地」 |
-| 未設定 | 視為 `false`（隱私優先，預設不 push） |
+| `true` | Enter 7.1 to execute the full flow |
+| `false` | Skip locally only (no commit, no push); notify the user "Flowback switch is off, this change remains local only" |
+| Unset | Treat as `false` (privacy first, default is no push) |
 
-**關閉時的使用者提示**：
+**User prompt when disabled**:
 ```
-⚠️ sekai-workflow 回流關閉（settings.local.json: sekai_workflow.flowback.push=false）
-本次改動僅留在本地 sekai-workflow/，未推送至遠端。
-如需啟用，編輯 .claude/settings.local.json 將 flowback.push 改為 true。
+⚠️ sekai-workflow flowback disabled (settings.local.json: sekai_workflow.flowback.push=false)
+This change remains in local sekai-workflow/ only; not pushed to remote.
+To enable, edit .claude/settings.local.json and set flowback.push to true.
 ```
 
-### 7.1 隱私掃描（push=true 時執行）
+### 7.1 Privacy Scan (runs when push=true)
 
-**雙清單掃描**（完整邏輯見 `references/privacy-check.md`）：
+**Dual-list scan** (full logic in `references/privacy-check.md`):
 
-- `sekai-workflow/_bootstrap/publish-blocklist.txt` — 通用樣式（私鑰、憑證前綴），隨 sekai-workflow 攜帶
-- `~/.claude/publish-blocklist.txt` — 個人識別（姓名、公司、專案名），user-global 跨專案共用
+- `sekai-workflow/_bootstrap/publish-blocklist.txt` — generic patterns (private keys, credential prefixes), carried with sekai-workflow
+- `~/.claude/publish-blocklist.txt` — personal identifiers (name, company, project name), user-global shared across projects
 
-對每個待 commit 檔案，用兩份清單做 `grep -iF` 比對，過濾註解與空行。
+For every file to be committed, use both lists with `grep -iF` matching; filter out comments and blank lines.
 
-- **命中任何 pattern** → 停止 push，列出命中檔案與行號，要求使用者處理
-- **無命中** → 進入 7.2
-- **跳過自身**：`publish-blocklist*.txt` 本身屬於清單檔，不掃描
+- **Any pattern hit** → stop push, list hit files and line numbers, ask user to handle it
+- **No hit** → proceed to 7.2
+- **Skip self**: `publish-blocklist*.txt` are list files themselves and are not scanned
 
-### 7.2 執行 commit & push
+### 7.2 Execute commit & push
 
-若本次有變更 `sekai-workflow/` 內容：
+If this run contains changes under `sekai-workflow/`:
 
 ```bash
 cd sekai-workflow
@@ -315,83 +315,83 @@ git commit -m "<mirrored message>"
 git push
 ```
 
-Push 失敗 → 告知使用者，不阻塞主流程。
+If push fails → notify the user; do not block the main flow.
 
-**若改動到 SKILL.md / README.md**，同步自動更新：
-- `sekai-workflow/manifest.json` — 對應 skill 條目
-- `sekai-workflow/README.md` — 命令表與描述
+**If SKILL.md / README.md were changed**, auto-update in sync:
+- `sekai-workflow/manifest.json` — corresponding skill entry
+- `sekai-workflow/README.md` — command table and descriptions
 
-### 7.3 切換開關方式
+### 7.3 How to Toggle the Switch
 
-使用者可透過以下方式切換：
-- **指令**：`/update-config` → 編輯 `sekai_workflow.flowback.push`
-- **直接編輯**：`.claude/settings.local.json` 將 `sekai_workflow.flowback.push` 改為 `true` 或 `false`
+The user can toggle via:
+- **Command**: `/update-config` → edit `sekai_workflow.flowback.push`
+- **Direct edit**: `.claude/settings.local.json`, set `sekai_workflow.flowback.push` to `true` or `false`
 
 ---
 
-## Step 8：服務重啟評估（呼叫 `/build deploy --plan`）
+## Step 8: Service Restart Evaluation (invoke `/build deploy --plan`)
 
-進入 `/build deploy` 的評估模式，輸出指令清單：
+Enter the evaluation mode of `/build deploy` and output a command list:
 
 ```bash
-# 偽指令，實際由 /build deploy --plan 處理
+# Pseudo-command, actual work handled by /build deploy --plan
 git diff --name-only HEAD~1
 docker compose config
 ```
 
-輸出：變更檔 → 服務 → 動作對照表 + 去重指令清單 + 副作用警告。
+Output: changed file → service → action mapping table + deduplicated command list + side-effect warnings.
 
-若有需執行 → 提示可直接 `/build deploy --run` 執行。若無容器化 → 跳過。
-
----
-
-## Step 9：Context 清理與摘要（自動執行）
-
-完成 commit-push 流程後（含 modify log），主動管理 context：
-
-### 9.1 執行 context-guard 摘要
-
-遵循 `context-guard` Skill Step 2~3 邏輯：
-
-1. 檢查 `.local/context_summary/` 是否已有**同日同主題**摘要：
-   - 有 → 合併（附加新 commit 資訊到既有摘要）
-   - 無 → 新建 `YYMMDD_HHMM_主題描述.md`
-2. 更新 `current_topic.md` 紀錄當前工作主題
-3. 摘要內容：進行中工作、已完成工作、未提交變更、待辦項、關鍵決策、容器重啟需求
-
-### 9.2 建立 README.md（供使用者快速查找）
-
-在 context summary 目錄建立或**覆寫** README.md：
-- 目錄用途
-- 既有摘要檔案清單（掃描目錄）
-- 每份摘要的主題與日期
-- 使用說明（如何還原 context、如何清理過期摘要）
-
-### 9.3 提示使用者執行 `/clear` ✗ 無法自動化
-
-`/clear` 為內建 CLI 指令，無法由 Claude 程式化觸發。摘要存檔後，提示使用者：「摘要已存，建議執行 `/clear` 釋放 context window」。
+If anything needs executing → prompt that the user can run `/build deploy --run` directly. If there is no containerization → skip.
 
 ---
 
-## Step 10：經驗回流至 guide
+## Step 9: Context Cleanup and Summary (Automatic)
 
-若本次改動含**非顯而易見的根因、繞道方法、設定差異**：
+After completing the commit-push flow (including modify log), proactively manage context:
 
-1. **判斷標準**：
-   - 問題花了可觀時間診斷？
-   - 根因非顯而易見（例如 auth hang、環境差異）？
-   - 設定與文件 / 預設不同？
-   - 工具 / 平台限制的 workaround？
+### 9.1 Run context-guard Summary
 
-2. **若是**，更新對應的 `.local/docs/guide/<topic>.md`：
-   - 加入對應的 troubleshooting / FAQ 區塊
-   - 格式：**症狀** → **原因** → **解決方式** → **注意事項**
-   - 無對應 guide → 於 `.local/docs/guide/` 新建
+Follow the Step 2–3 logic of the `context-guard` Skill:
 
-3. **告知使用者**：「已將此經驗寫入 `.local/docs/guide/<topic>.md`，`/setup pack` 時會一併帶走。」
+1. Check whether `.local/context_summary/` already has a **same-day + same-topic** summary:
+   - Yes → merge (append the new commit info to the existing summary)
+   - No → create `YYMMDD_HHMM_topic_description.md`
+2. Update `current_topic.md` to record the current working topic
+3. Summary contents: in-progress work, completed work, uncommitted changes, todos, key decisions, container restart requirements
 
-確保運維知識沉澱於可攜帶文件，而非丟在對話歷史中。
+### 9.2 Create README.md (for quick user lookup)
+
+Create or **overwrite** README.md in the context summary directory:
+- Directory purpose
+- List of existing summary files (scan the directory)
+- Topic and date of each summary
+- Usage notes (how to restore context, how to clean expired summaries)
+
+### 9.3 Prompt User to Run `/clear` ✗ Cannot Be Automated
+
+`/clear` is a built-in CLI command and cannot be programmatically triggered by Claude. After saving the summary, prompt the user: "Summary saved; suggest running `/clear` to free the context window."
 
 ---
 
-Arguments: $ARGUMENTS （可選的 commit 訊息覆蓋）
+## Step 10: Experience Sync-back to Guide
+
+If this change contains **non-obvious root causes, workarounds, or config differences**:
+
+1. **Criteria for judgment**:
+   - Did the issue take a noticeable amount of time to diagnose?
+   - Is the root cause non-obvious (e.g. auth hang, environment differences)?
+   - Does the config differ from docs / defaults?
+   - Is it a workaround for a tool / platform limitation?
+
+2. **If yes**, update the corresponding `.local/docs/guide/<topic>.md`:
+   - Add a troubleshooting / FAQ section
+   - Format: **Symptom** → **Cause** → **Resolution** → **Notes**
+   - If no matching guide exists → create one under `.local/docs/guide/`
+
+3. **Inform the user**: "This experience has been written into `.local/docs/guide/<topic>.md` and will be carried along when `/skill pack` runs."
+
+This ensures operational knowledge is deposited in portable documentation rather than left in conversation history.
+
+---
+
+Arguments: $ARGUMENTS (optional commit message override)

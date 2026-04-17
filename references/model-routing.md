@@ -56,20 +56,20 @@
 | 原 Skill → 子命令 | 原 Model | 原 Effort |
 |---|---|---|
 | commit-push → `/build commit` | sonnet | medium |
-| quality-check → `/build quality` | opus | high |
+| quality-check → `/build check` | opus | high |
 | modify-log → `/build log` | haiku | low |
 | restart-volumn → `/build restart` | haiku | low |
 | restart-eval → `/build eval` | haiku | low |
-| todo → `/team-office todo` | sonnet | medium |
-| whiteboard → `/team-office board` | sonnet | medium |
-| md-collab → `/team-office decide` | sonnet | medium |
-| tech-notes → `/team-office notes` | sonnet | medium |
-| create-skill → `/setup new` | sonnet | medium |
-| skill-sync → `/setup sync` | sonnet | medium |
-| pack → `/setup pack` | sonnet | low |
-| sys-info → `/ask query` | opus | medium |
+| todo → `/team todo` | sonnet | medium |
+| whiteboard → `/team board` | sonnet | medium |
+| md-collab → `/team decide` | sonnet | medium |
+| tech-notes → `/team note` | sonnet | medium |
+| create-skill → `/skill new` | sonnet | medium |
+| skill-sync → `/skill sync` | sonnet | medium |
+| pack → `/skill pack` | sonnet | low |
+| sys-info → `/ask info` | opus | medium |
 | trace-flow → `/ask trace` | opus | high |
-| report → `/ask report` | haiku | low |
+| report → `/team report` | haiku | low |
 
 ---
 

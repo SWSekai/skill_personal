@@ -1,154 +1,154 @@
 ---
 name: hello
-description: "對話初始化入口 — 自動拉取專案 + Skill 更新、恢復 context、顯示狀態摘要。取代舊有的對話開始自動同步機制。"
+description: "Conversation initialization entry point — automatically pulls project + Skill updates, restores context, and displays status overview. Replaces the legacy auto-sync-on-conversation-start mechanism."
 model: sonnet
 effort: low
 argument-hint: ""
 allowed-tools: Read, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(docker *)
 ---
 
-# /hello — 對話初始化
+# /hello — Conversation Initialization
 
-每次新對話開始時呼叫，一站式完成：拉取更新 → 同步 Skill → 恢復 context → 狀態總覽。
+Call at the start of every new conversation to complete in one stop: pull updates → sync Skills → restore context → status overview.
 
-**取代 CLAUDE.md Rule 12 舊有的「對話開始自動同步」機制** — 改為使用者主動呼叫，更可控。
+**Replaces the legacy "auto-sync on conversation start" mechanism in CLAUDE.md Rule 12** — now triggered explicitly by the user for better control.
 
 ---
 
-## Step 1：拉取專案更新
+## Step 1: Pull Project Updates
 
 ```bash
-# 專案本身
+# Project itself
 git fetch origin
 git status
 ```
 
-- 若有 upstream 更新 → 顯示 `origin/HEAD` 領先幾個 commit，**不自動 merge**（避免衝突）
-- 告知使用者：「遠端有 N 個新 commit，需要時可 `git pull`」
-- 若已是最新 → 顯示「專案已是最新」
+- If upstream has updates → show how many commits `origin/HEAD` is ahead; **do not auto-merge** (avoids conflicts)
+- Notify user: "Remote has N new commits; run `git pull` when needed"
+- If already up to date → show "Project is up to date"
 
 ---
 
-## Step 2：同步 Skill 更新（合併原 `/setup sync` 流程一）
+## Step 2: Sync Skill Updates (merges legacy `/skill sync` flow one)
 
-> 本步驟整合原 `/setup sync` 的「流程一：遠端同步」邏輯。
-> `/setup sync` 仍保留「流程二：規則評估與三向連動」供 Memory 寫入時使用。
+> This step integrates the "Flow One: Remote Sync" logic from the legacy `/skill sync`.
+> `/skill sync` still retains "Flow Two: Rule Evaluation & Three-Way Linkage" for use when writing to Memory.
 
-### 2.1 檢查 flowback.pull 設定
+### 2.1 Check flowback.pull Setting
 
-Read `.claude/settings.local.json` 的 `sekai_workflow.flowback.pull`：
+Read `sekai_workflow.flowback.pull` from `.claude/settings.local.json`:
 
-| 狀態 | 行為 |
+| State | Behavior |
 |---|---|
-| `true`（預設） | 進入 2.2 |
-| `false` | 跳過遠端 pull，僅做本地同步（2.3） |
+| `true` (default) | Proceed to 2.2 |
+| `false` | Skip remote pull, only do local sync (2.3) |
 
-### 2.2 執行 sp-sync.sh（遠端同步）
+### 2.2 Execute sp-sync.sh (Remote Sync)
 
 ```bash
 bash Sekai_workflow/_bootstrap/sp-sync.sh
 ```
 
-腳本行為（與原 `/setup sync` 流程一相同）：
-1. `git fetch origin` 取得遠端更新
-2. 比較本地與遠端 commit
-3. 若有更新 → `git pull --rebase origin main`
-4. 逐一比對 `Sekai_workflow/` 與 `.claude/skills/` 各 skill 的 SKILL.md / README.md
-5. 自動複製新增或差異 skill 到 `.claude/skills/`
-6. 輸出 Added / Updated / No change 摘要
+Script behavior (same as legacy `/skill sync` flow one):
+1. `git fetch origin` to get remote updates
+2. Compare local and remote commits
+3. If updates exist → `git pull --rebase origin main`
+4. Compare each skill's SKILL.md / README.md between `Sekai_workflow/` and `.claude/skills/`
+5. Automatically copy new or differing skills to `.claude/skills/`
+6. Output Added / Updated / No change summary
 
-**腳本無法處理**：
-- Pull 衝突 → 中止，告知使用者手動 resolve
-- 新增 skill → 腳本只複製檔案，需手動更新 CLAUDE.md 可用 Skills
+**Cases the script cannot handle**:
+- Pull conflicts → abort and notify user to resolve manually
+- New skills → script only copies files; CLAUDE.md's available Skills list must be updated manually
 
-### 2.3 補充同步（腳本未覆蓋的項目）
+### 2.3 Supplementary Sync (items not covered by the script)
 
-腳本完成後，Claude 補充檢查：
-- `sekai-workflow/manifest.json` 是否有新 skill 不在 `.claude/skills/` → 補複製
-- `.claude/skills/README.md` 是否需更新 → 提示使用者
+After the script finishes, Claude performs additional checks:
+- Whether `sekai-workflow/manifest.json` contains new skills missing from `.claude/skills/` → copy them over
+- Whether `.claude/skills/README.md` needs updating → prompt the user
 
-輸出同步摘要：
+Output sync summary:
 
 ```
-Skill 同步：
-  更新：commit-push, team-office（2 個）
-  新增：hello（1 個）
-  跳過：build（本地較新）
-  無變更：ask, context-guard, setup, memory-portable
+Skill sync:
+  Updated: commit-push, team-office (2)
+  Added: hello (1)
+  Skipped: build (local is newer)
+  No change: ask, context-guard, setup, memory-portable
 ```
 
 ---
 
-## Step 3：恢復 Context
+## Step 3: Restore Context
 
-### 3.1 讀取最新 context_summary
+### 3.1 Read Latest context_summary
 
-掃描 `.local/context_summary/*.md`（不含 `current_topic.md`），按檔名日期排序，讀取最新 1~2 份：
+Scan `.local/context_summary/*.md` (excluding `current_topic.md`), sort by filename date, read the latest 1~2 files:
 
-- 有摘要 → 顯示「上次工作摘要」精簡版（3~5 行）
-- 無摘要 → 跳過
+- If summaries exist → display a condensed "last work summary" (3~5 lines)
+- If none → skip
 
-### 3.2 讀取 current_topic
+### 3.2 Read current_topic
 
-讀��� `.local/context_summary/current_topic.md`：
+Read `.local/context_summary/current_topic.md`:
 
-- 有 → 顯示「當前主題：<topic>」
-- 無 → 跳過
+- If exists → display "Current topic: <topic>"
+- If not → skip
 
-### 3.3 讀取待辦
+### 3.3 Read TODOs
 
-讀取 `.local/collab/TODO.md`：
+Read `.local/collab/TODO.md`:
 
-- 有 Pending / In Progress 項目 → 摘要顯示前 3~5 項
-- 無 → 跳過
+- If Pending / In Progress items exist → summarize the top 3~5
+- If none → skip
 
 ---
 
-## Step 4：狀態總覽
+## Step 4: Status Overview
 
-輸出精簡的專案狀態（一屏內可讀完）：
+Output a condensed project status (readable within one screen):
 
 ```
 ━━━ /hello ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-專案：<PROJECT_NAME>
-分支：<branch> (↑N ↓M vs origin)
-上次 commit：<hash> <message> (<time ago>)
+Project: <PROJECT_NAME>
+Branch: <branch> (↑N ↓M vs origin)
+Last commit: <hash> <message> (<time ago>)
 
-Skill 同步：✓ 已同步（N 個更新）
-Context：<上次主題>
-待辦：N 項 pending
+Skill sync: ✓ Synced (N updates)
+Context: <last topic>
+TODO: N pending
 
-未提交變更：N 個檔案
-未 push commit：N 個
+Uncommitted changes: N files
+Unpushed commits: N
 
-━━━━━━━━��━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-## Step 5：環境健康檢查（可選，有 Docker 才執行）
+## Step 5: Environment Health Check (optional, only runs if Docker is present)
 
-若專案有 `docker-compose.yml`：
+If the project has `docker-compose.yml`:
 
 ```bash
 docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Service}}" 2>/dev/null
 ```
 
-- 有服務 → 摘要列出 running / stopped / unhealthy 數量
-- 無 Docker / Docker 未啟動 → 跳過（不報錯）
+- If services exist → summarize the count of running / stopped / unhealthy
+- If no Docker / Docker not running → skip (no error)
 
 ---
 
-## 與其他 Skill 的關係
+## Relationship with Other Skills
 
-| Skill | 關係 |
+| Skill | Relationship |
 |---|---|
-| `/setup sync` | `/hello` Step 2 復用 sync 邏輯；sync 仍可獨立呼叫做完整同步（含衝突解決）|
-| `/context-guard` | `/hello` Step 3 讀取 context-guard 產出的摘要 |
-| `/team-office todo` | `/hello` Step 3 讀取 TODO 狀態 |
-| `/setup pack` | 互斥：pack 後環境已清除，/hello 無法執行 |
-| `/team-office handoff` | 互補：handoff 產出的 AI bundle 可在新對話 `/hello` 後手動指示 AI 讀取 |
+| `/skill sync` | `/hello` Step 2 reuses sync logic; sync can still be invoked standalone for full sync (including conflict resolution) |
+| `/context-guard` | `/hello` Step 3 reads summaries produced by context-guard |
+| `/team todo` | `/hello` Step 3 reads TODO status |
+| `/skill pack` | Mutually exclusive: after pack the environment is cleared, so /hello cannot run |
+| `/team handoff` | Complementary: the AI bundle produced by handoff can be manually loaded by the AI after `/hello` in a new conversation |
 
 ---
 

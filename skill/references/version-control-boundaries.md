@@ -20,7 +20,7 @@
 |------|---------|------|
 | 新專案初始化 | `Sekai_workflow/_bootstrap/sp-init.bat` | 建立 `.claude/skills/`、`Sekai_workflow/`、`CLAUDE.md`、`.gitignore`、pre-commit hook |
 | 驗證環境完整性 | `Sekai_workflow/_bootstrap/sp-verify.bat` | 檢查所有保護層是否就位 |
-| 遠端同步 | `/setup sync`（本 Skill） | Fetch/pull/merge/push Sekai_workflow 遠端 |
-| 規則歸類評估 | `/setup sync`（本 Skill） | 評估新規則應放入 Skill / CLAUDE.md / Memory |
+| 遠端同步 | `/skill sync`（本 Skill） | Fetch/pull/merge/push Sekai_workflow 遠端 |
+| 規則歸類評估 | `/skill sync`（本 Skill） | 評估新規則應放入 Skill / CLAUDE.md / Memory |
 
-> **不要用 `/setup sync` 做初始化。** 若環境未就緒，請執行 `Sekai_workflow/_bootstrap/sp-init.bat`。
+> **不要用 `/skill sync` 做初始化。** 若環境未就緒，請執行 `Sekai_workflow/_bootstrap/sp-init.bat`。

@@ -1,502 +1,502 @@
 ---
 name: build
-description: "開發全流程一站式入口：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → review → deploy。Commit 推送走獨立 `/commit-push`。子命令路由 flow / plan / impl / test / quality / review / deploy。"
+description: "One-stop entry for the full development flow: requirement analysis → solution design → implementation → testing → quality check → review → deploy. Commit & push is handled by the standalone `/commit-push`. Subcommand routing: flow / plan / impl / test / quality / review / deploy."
 model: sonnet
 effort: medium
 argument-hint: "<flow|plan|impl|test|quality|review|deploy> [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *), Bash(ls *), Bash(date *), Bash(sleep *), Bash(mkdir *), Bash(npm *), Bash(npx *), Bash(pytest *), Bash(python *)
 ---
 
-# /build — 開發全流程 Skill
+# /build — Full Development Flow Skill
 
-涵蓋從需求分析到部署驗證的完整開發生命週期。透過第一個參數決定子命令。
+Covers the complete development lifecycle from requirement analysis to deployment verification. The first argument selects the subcommand.
 
-**架構說明**：commit 流程已獨立為 `/commit-push`（主要入口）。`/build` 負責 commit **前**的開發工作與 commit **後**的部署驗證。
+**Architecture note**: The commit flow has been split out into `/commit-push` (the primary entry point). `/build` handles development work **before** commit and deployment verification **after** commit.
 
-## 子命令路由
+## Subcommand Routing
 
-### 開發前期（需求 → 實作 → 驗證）
+### Early development (requirement → implementation → verification)
 
-| 子命令 | 用途 | Model |
+| Subcommand | Purpose | Model |
 |---|---|---|
-| `/build flow <feature>` | **全流程串接**：plan → impl → test → review → `/commit-push` → deploy | sonnet |
-| `/build plan <feature>` | 需求分析 + 方案設計 + 步驟拆解，產出方案文件 | **opus** |
-| `/build impl [plan-ref]` | 按方案逐步實作，自動勾對進度、偵測偏離 | sonnet |
-| `/build test [scope]` | 測試驗證：自動跑測試 + 手動 checklist + 邊界情境 | sonnet |
+| `/build all <feature>` | **Full flow chain**: plan → impl → test → review → `/commit-push` → deploy | sonnet |
+| `/build plan <feature>` | Requirement analysis + solution design + step breakdown, produces a plan document | **opus** |
+| `/build do [plan-ref]` | Implement step-by-step according to the plan, auto-check progress, detect deviations | sonnet |
+| `/build test [scope]` | Test verification: auto-run tests + manual checklist + edge cases | sonnet |
 
-### 提交前後（品質 → review → deploy）
+### Pre/post commit (quality → review → deploy)
 
-| 子命令 | 用途 | Model |
+| Subcommand | Purpose | Model |
 |---|---|---|
-| `/build quality [files...]` | 獨立品質審計（可獨立呼叫，`/commit-push` Step 1 亦會內嵌） | **opus** |
-| `/build review` | Commit 前最後人工確認 checklist（大改動時強烈建議） | sonnet |
-| `/build deploy [--plan\|--run] [services...]` | 合併重啟評估 + 執行。預設先列計畫再執行 | sonnet |
+| `/build check [files...]` | Standalone quality audit (callable independently; also embedded in `/commit-push` Step 1) | **opus** |
+| `/build review` | Final manual confirmation checklist before commit (strongly recommended for large changes) | sonnet |
+| `/build deploy [--plan\|--run] [services...]` | Merged restart assessment + execution. By default lists the plan first, then executes | sonnet |
 
-無參數時 → 要求使用者指定子命令。
+Without arguments → ask the user to specify a subcommand.
 
-**Commit 推送**：使用 `/commit-push`（獨立 Skill，內含品質檢查 / 修改日誌 / README / commit / push / deploy --plan / context 清理）。
+**Commit & push**: use `/commit-push` (a standalone Skill that includes quality check / change log / README / commit / push / deploy --plan / context cleanup).
 
 ---
 
-## F. `/build flow` — 全流程串接
+## F. `/build all` — Full Flow Chain
 
-**自動銜接** plan → impl → test → review → `/commit-push` → deploy 六個階段，中間不需手動呼叫下一步。
+**Automatically chains** the six stages plan → impl → test → review → `/commit-push` → deploy, without needing to manually invoke the next step in between.
 
-### 流程
+### Flow
 
 ```
-/build flow <feature description>
+/build all <feature description>
     │
-    ├─ Step 1: /build plan（Opus 方案設計）
-    │   └─ 使用者透過 AskUserQuestion 確認方案
-    │       ├─ 確認 → 進入 impl
-    │       └─ 修改 → 調整方案後重新確認
+    ├─ Step 1: /build plan (Opus solution design)
+    │   └─ User confirms the plan via AskUserQuestion
+    │       ├─ Confirm → enter impl
+    │       └─ Modify → adjust the plan and re-confirm
     │
-    ├─ Step 2: /build impl（Sonnet 逐步實作）
-    │   └─ 所有步驟完成
+    ├─ Step 2: /build do (Sonnet step-by-step implementation)
+    │   └─ All steps completed
     │
-    ├─ Step 3: /build test（測試驗證）
-    │   └─ 全部通過
-    │       ├─ 是 → 進入 review
-    │       └─ 否 → 列出失敗項，回到 impl 修復
+    ├─ Step 3: /build test (test verification)
+    │   └─ All passing?
+    │       ├─ Yes → enter review
+    │       └─ No → list failures, go back to impl to fix
     │
-    ├─ Step 4: /build review（人工最後確認 checklist）
-    │   └─ 使用者勾選完成 → 進入 commit-push
+    ├─ Step 4: /build review (final manual checklist confirmation)
+    │   └─ User checks off items → enter commit-push
     │
-    ├─ Step 5: /commit-push（品質 → 日誌 → commit → push）
-    │   └─ 完成
+    ├─ Step 5: /commit-push (quality → log → commit → push)
+    │   └─ Done
     │
-    └─ Step 6: /build deploy（重啟評估 + 執行）
-        └─ 完成
+    └─ Step 6: /build deploy (restart assessment + execution)
+        └─ Done
 ```
 
-### 中斷與恢復
+### Interruption and resumption
 
-- 任何階段中斷後，方案文件保留在 `.local/docs/plan/`
-- 恢復方式：`/build impl <plan-file>` 從上次進度繼續
-- 方案文件中的 checkbox 記錄完成狀態，中斷後可識別未完成步驟
+- If interrupted at any stage, the plan document is preserved at `.local/docs/plan/`
+- Resume with: `/build do <plan-file>` to continue from the last progress
+- Checkboxes in the plan document record completion state, so unfinished steps can be identified after interruption
 
 ---
 
-## G. `/build plan` — 需求分析與方案設計（Opus）
+## G. `/build plan` — Requirement Analysis and Solution Design (Opus)
 
-收到功能訴求時，**先設計完整方案，確認後才實作**（對齊 CLAUDE.md 核心規則）。
+When receiving a feature request, **design the complete solution first and implement only after confirmation** (aligned with CLAUDE.md core rules).
 
-本子命令屬於「評估 / 規劃 / 架構決策」屬性，建議透過 Agent 工具呼叫 Opus 子任務（對齊 CLAUDE.md 第 18 條）。
+This subcommand falls under "assessment / planning / architectural decision" attributes; it is recommended to invoke an Opus subtask via the Agent tool (aligned with CLAUDE.md rule 18).
 
-### Step 1：需求理解
+### Step 1: Requirement understanding
 
-1. **解析使用者描述**：提取核心功能訴求、驗收標準、約束條件
-2. **釐清模糊點**：使用 AskUserQuestion 追問不明確的需求
-   - 只問真正影響方案方向的問題
-   - 可由程式碼推導的細節不問，直接在方案中說明假設
+1. **Parse the user description**: extract core feature requirements, acceptance criteria, constraints
+2. **Clarify ambiguities**: use AskUserQuestion to follow up on unclear requirements
+   - Only ask questions that truly affect the solution direction
+   - Do not ask about details that can be derived from the code; state the assumption directly in the plan
 
-### Step 2：現況掃描
+### Step 2: Current state scan
 
-1. **相關程式碼**：Grep / Glob 找出與需求相關的現有實作
-2. **架構認識**：讀 compose、package.json、目錄結構，理解系統分層
-3. **DB schema**：若涉及資料面，掃描 models / migrations / collection 定義
-4. **相關 API**：找出會被影響的 endpoint、前端呼叫點
+1. **Related code**: use Grep / Glob to find existing implementations related to the requirement
+2. **Architecture awareness**: read compose, package.json, directory structure to understand the system layering
+3. **DB schema**: if data is involved, scan models / migrations / collection definitions
+4. **Related APIs**: find the endpoints and frontend call sites that will be affected
 
-### Step 3：影響範圍評估
+### Step 3: Impact scope assessment
 
-| 維度 | 檢查內容 |
+| Dimension | Items to check |
 |---|---|
-| 檔案影響 | 列出所有需新增 / 修改的檔案 |
-| 服務影響 | 哪些 container / service 會被動到 |
-| DB 影響 | 是否需要新增 collection / table / column / index |
-| API 影響 | 新增或修改哪些 endpoint、request / response 結構 |
-| 前端影響 | 哪些頁面 / 元件需要調整 |
-| 向下相容 | 既有功能是否會受影響 |
+| File impact | List all files to be added / modified |
+| Service impact | Which containers / services will be touched |
+| DB impact | Whether to add collection / table / column / index |
+| API impact | Which endpoints are added or modified; request / response structure |
+| Frontend impact | Which pages / components need adjustment |
+| Backward compatibility | Whether existing features will be affected |
 
-### Step 4：方案設計
+### Step 4: Solution design
 
-**若存在多種做法**：列出替代方案與優缺點比較表
+**If multiple approaches exist**: list alternative solutions with a pros/cons comparison table
 
 ```markdown
-| 方案 | 說明 | 優點 | 缺點 |
+| Solution | Description | Pros | Cons |
 |---|---|---|---|
 | A | ... | ... | ... |
 | B | ... | ... | ... |
 ```
 
-**最終方案**需包含：
-- 技術選型與理由
-- 資料流設計（若涉及跨服務）
-- 錯誤處理策略
-- 效能考量（若涉及大量資料）
+The **final solution** must include:
+- Technology choices and rationale
+- Data flow design (if cross-service is involved)
+- Error handling strategy
+- Performance considerations (if large data volumes are involved)
 
-### Step 5：步驟拆解
+### Step 5: Step breakdown
 
-將方案拆成**可逐步執行的實作清單**，每步對應具體的程式碼變更：
+Decompose the solution into a **step-by-step implementable list**, each step mapped to a concrete code change:
 
 ```markdown
-## 實作步驟
+## Implementation steps
 
-- [ ] §1 建立 DB model / schema
-  - 檔案：`backend/models/xxx.py`
-  - 新增：XxxModel class，欄位定義
+- [ ] §1 Create DB model / schema
+  - File: `backend/models/xxx.py`
+  - Add: XxxModel class, field definitions
 
-- [ ] §2 建立 API endpoint
-  - 檔案：`backend/routers/xxx.py`
-  - 新增：GET /api/xxx, POST /api/xxx
-  - 依賴：§1
+- [ ] §2 Create API endpoint
+  - File: `backend/routers/xxx.py`
+  - Add: GET /api/xxx, POST /api/xxx
+  - Depends on: §1
 
-- [ ] §3 前端頁面
-  - 檔案：`frontend/src/pages/xxx.vue`
-  - 新增：列表頁 + 表單
-  - 依賴：§2
+- [ ] §3 Frontend page
+  - File: `frontend/src/pages/xxx.vue`
+  - Add: list page + form
+  - Depends on: §2
 ```
 
-每步須標明：
-- 目標檔案與行為（新增 / 修改）
-- 依賴關係（§ 編號互引）
-- 預估影響行數（粗略即可）
+Each step must specify:
+- Target file and behavior (add / modify)
+- Dependencies (cross-reference by § number)
+- Estimated impact line count (rough is fine)
 
-### Step 6：方案確認
+### Step 6: Plan confirmation
 
-使用 **AskUserQuestion** 向使用者呈現方案：
-- 第一選項：`開始執行 (Recommended)`
-- 第二選項：`我要調整`（進入修改流程）
-- 第三選項：`換方案`（若有替代方案）
+Use **AskUserQuestion** to present the plan to the user:
+- First option: `Start execution (Recommended)`
+- Second option: `I want to adjust` (enters the modification flow)
+- Third option: `Switch solution` (if an alternative exists)
 
-確認後：
-1. 將方案寫入 `.local/docs/plan/YYMMDD_<feature>.md`
-2. 若在 `/build flow` 中 → 自動進入 `/build impl`
-3. 若獨立呼叫 → 告知使用者「方案已存，可用 `/build impl` 開始實作」
+After confirmation:
+1. Write the plan to `.local/docs/plan/YYMMDD_<feature>.md`
+2. If inside `/build all` → automatically proceed to `/build do`
+3. If called standalone → tell the user "Plan saved; you can start implementation with `/build do`"
 
 ---
 
-## H. `/build impl` — 按方案實作（Sonnet）
+## H. `/build do` — Implement According to the Plan (Sonnet)
 
-### 使用方式
+### Usage
 
-| 用法 | 行為 |
+| Usage | Behavior |
 |---|---|
-| `/build impl` | 讀取最近的方案文件，從未完成步驟繼續 |
-| `/build impl <plan-file>` | 指定方案文件 |
-| 由 `/build flow` 串接進入 | 自動帶入剛確認的方案 |
+| `/build do` | Read the most recent plan document, continue from the unfinished steps |
+| `/build do <plan-file>` | Specify a plan document |
+| Chained from `/build all` | Automatically carries in the just-confirmed plan |
 
-### Step 1：載入方案
+### Step 1: Load the plan
 
-1. 讀取方案文件（`.local/docs/plan/YYMMDD_<feature>.md`）
-2. 解析實作步驟清單與 checkbox 狀態
-3. 找到第一個未勾選（`- [ ]`）的步驟作為起始點
-4. 若全部已勾 → 告知實作已完成，提示 `/build test`
+1. Read the plan document (`.local/docs/plan/YYMMDD_<feature>.md`)
+2. Parse the implementation step list and checkbox states
+3. Find the first unchecked (`- [ ]`) step as the starting point
+4. If all are checked → report that implementation is complete and suggest `/build test`
 
-### Step 2：逐步執行
+### Step 2: Execute step by step
 
-對每個步驟：
+For each step:
 
-1. **宣告正在執行的步驟**（一句話告知使用者）
-2. **讀取相關檔案**：先理解現有程式碼
-3. **執行實作**：按方案描述新增或修改程式碼
-4. **偏離偵測**：
-   - 若實作過程發現方案有誤或遺漏 → 暫停，向使用者說明偏離原因
-   - 使用者確認調整方向後，**更新方案文件**再繼續
-5. **勾對完成**：在方案文件中將 `- [ ]` 改為 `- [x]`，附 timestamp
+1. **Announce the step being executed** (one sentence to inform the user)
+2. **Read related files**: understand existing code first
+3. **Perform the implementation**: add or modify code per the plan description
+4. **Deviation detection**:
+   - If the implementation reveals that the plan is wrong or incomplete → pause and explain the reason for deviation to the user
+   - After the user confirms the adjustment direction, **update the plan document** before continuing
+5. **Check off completion**: change `- [ ]` to `- [x]` in the plan document and append a timestamp
 
 ```markdown
-- [x] §1 建立 DB model / schema ✓ 2026-04-10 14:30
+- [x] §1 Create DB model / schema ✓ 2026-04-10 14:30
 ```
 
-6. **衍生任務**：若實作過程發現額外需要做的事：
-   - 屬於本功能範圍 → 在方案文件末尾新增步驟
-   - 不屬於本功能 → 加入 `.local/collab/TODO.md`（標 `derived from: <feature>`）
+6. **Derived tasks**: if additional work is discovered during implementation:
+   - Within the scope of this feature → add a new step at the end of the plan document
+   - Out of scope → add to `.local/collab/TODO.md` (tagged `derived from: <feature>`)
 
-### Step 3：實作完成
+### Step 3: Implementation complete
 
-所有步驟勾對後：
+After all steps are checked off:
 
-1. 更新方案文件狀態為 `## 狀態：實作完成`
-2. 列出實作摘要（修改了哪些檔案、新增了什麼）
-3. 若在 `/build flow` 中 → 自動進入 `/build test`
-4. 若獨立呼叫 → 提示「實作完成，建議 `/build test` 驗證」
+1. Update the plan document status to `## Status: Implementation complete`
+2. List the implementation summary (which files were modified, what was added)
+3. If inside `/build all` → automatically proceed to `/build test`
+4. If called standalone → suggest "Implementation complete; `/build test` is recommended for verification"
 
 ---
 
-## I. `/build test` — 測試驗證（Sonnet）
+## I. `/build test` — Test Verification (Sonnet)
 
-### 使用方式
+### Usage
 
-| 用法 | 行為 |
+| Usage | Behavior |
 |---|---|
-| `/build test` | 自動偵測專案測試框架，跑全部 + 手動 checklist |
-| `/build test <scope>` | 只跑指定範圍的測試 |
-| 由 `/build flow` 串接進入 | 自動執行 |
+| `/build test` | Auto-detect the project's test framework, run all + manual checklist |
+| `/build test <scope>` | Run only tests within the specified scope |
+| Chained from `/build all` | Executed automatically |
 
-### Step 1：偵測測試框架
+### Step 1: Detect the test framework
 
-掃描專案結構判斷可用的測試工具：
+Scan the project structure to determine available test tooling:
 
-| 偵測條件 | 測試框架 | 執行指令 |
+| Detection condition | Test framework | Run command |
 |---|---|---|
 | `pytest.ini` / `pyproject.toml[tool.pytest]` / `tests/` | pytest | `pytest --tb=short` |
 | `jest.config.*` / `package.json[jest]` | Jest | `npx jest` |
 | `vitest.config.*` | Vitest | `npx vitest run` |
-| `cypress/` / `playwright/` | E2E | 列出但不自動執行 |
-| 無測試框架 | — | 跳至 Step 3 手動 checklist |
+| `cypress/` / `playwright/` | E2E | List but do not auto-run |
+| No test framework | — | Skip to Step 3 manual checklist |
 
-### Step 2：執行自動化測試
+### Step 2: Run automated tests
 
 ```bash
-# 依偵測結果選擇
+# Choose based on detection result
 pytest --tb=short -q 2>&1 | tail -20
-# 或
+# or
 npx jest --ci 2>&1 | tail -30
 ```
 
-**結果處理**：
-- 全通過 → 進 Step 3
-- 有失敗 → 列出失敗的 test case 與錯誤訊息，分析原因：
-  - **實作 bug** → 標記需修復的檔案和行號
-  - **測試本身過時** → 說明需要更新測試
-  - **環境問題** → 說明需要的環境配置
+**Result handling**:
+- All pass → proceed to Step 3
+- Any failure → list failing test cases and error messages, and analyze the cause:
+  - **Implementation bug** → mark files and line numbers that need fixing
+  - **Test itself is outdated** → explain the test needs updating
+  - **Environment issue** → explain required environment configuration
 
-### Step 3：手動驗證 Checklist
+### Step 3: Manual verification checklist
 
-根據方案文件（若存在）或本次改動，生成需人工驗證的清單：
+Based on the plan document (if it exists) or the current change, generate a checklist of items that need manual verification:
 
 ```markdown
-## 手動驗證 Checklist
+## Manual verification checklist
 
-### 功能驗證
-- [ ] 核心功能正常運作（描述具體操作步驟）
-- [ ] 相關聯功能未受影響
+### Feature verification
+- [ ] Core functionality works correctly (describe concrete steps)
+- [ ] Related features are not affected
 
-### 邊界情境
-- [ ] 空值 / null 輸入
-- [ ] 超長字串 / 超大數值
-- [ ] 並行操作（多使用者同時觸發）
-- [ ] 網路中斷 / 外部服務不可用
+### Edge cases
+- [ ] Empty / null input
+- [ ] Overlong strings / very large numbers
+- [ ] Concurrent operations (multiple users triggering simultaneously)
+- [ ] Network outage / external service unavailable
 
-### UI 驗證（若有前端變更）
-- [ ] 不同解析度 / 瀏覽器
-- [ ] Loading 狀態與錯誤提示
+### UI verification (if frontend changes exist)
+- [ ] Different resolutions / browsers
+- [ ] Loading state and error notifications
 
-### 安全性
-- [ ] 權限控制（未授權使用者不可存取）
-- [ ] 輸入驗證（無 injection 風險）
+### Security
+- [ ] Access control (unauthorized users cannot access)
+- [ ] Input validation (no injection risk)
 ```
 
-**僅列出與本次改動相關的項目**，不列無關的 boilerplate。
+**Only list items relevant to this change**; do not list unrelated boilerplate.
 
-### Step 4：測試報告
+### Step 4: Test report
 
 ```markdown
-## 測試結果
+## Test results
 
-| 類別 | 結果 | 備註 |
+| Category | Result | Note |
 |---|:---:|---|
-| 自動化測試 | ✓ 32 passed | pytest |
-| 手動 checklist | ◯ 待驗證 | 5 項需人工確認 |
-| 邊界情境 | ✓ 已確認 | 無風險 |
+| Automated tests | ✓ 32 passed | pytest |
+| Manual checklist | ◯ pending | 5 items need manual confirmation |
+| Edge cases | ✓ confirmed | No risk |
 ```
 
-**流程決策**：
-- 自動化全通過 + 無 High 風險 → 可進入 review
-- 有失敗 → 若在 `/build flow` 中：回到 impl 修復 → 重測
-- 有手動 checklist 待驗證 → 提示使用者完成後再進 review
+**Flow decision**:
+- All automated tests passing + no High risk → may enter review
+- Any failure → if inside `/build all`: go back to impl to fix → retest
+- Manual checklist items pending → prompt the user to complete them before entering review
 
 ---
 
-## B. `/build quality` — 品質審計（Opus）
+## B. `/build check` — Quality Audit (Opus)
 
-獨立的深度品質審計入口。**建議透過 Agent 工具呼叫 Opus** 子任務（對齊 CLAUDE.md 第 18 條，品質分析屬於評估 / 思考屬性）。
+Standalone entry point for in-depth quality audit. **Recommended to invoke an Opus subtask via the Agent tool** (aligned with CLAUDE.md rule 18; quality analysis is an assessment / thinking attribute).
 
-`/commit-push` Step 1 會內嵌呼叫類似邏輯；此處提供獨立入口供「不想跑完整 commit 流程，只想做品質掃描」的情境。
+`/commit-push` Step 1 embeds similar logic; this standalone entry serves the scenario "I don't want to run the full commit flow, just a quality scan."
 
-### 1. 掃描項目
+### 1. Scan items
 
-對每個改動檔檢查：
-- **死碼**：未用 import、不可達分支、註解掉的程式碼
-- **冗餘**：跨檔重複邏輯、應抽象的 copy-paste
-- **硬編碼**：應放 config/constants 的魔術值
-- **錯誤處理**：系統邊界（API、外部呼叫、檔案 IO）的 try/catch
-- **型別一致性**：跨層資料型別不符
-- **序列化風險**：JSON/protobuf/form 過程可能遺失的欄位
-- **安全性**：SQL injection、XSS、命令注入、敏感資訊外洩、OWASP Top 10
+For each changed file, check:
+- **Dead code**: unused imports, unreachable branches, commented-out code
+- **Redundancy**: duplicated logic across files, copy-paste that should be abstracted
+- **Hard-coding**: magic values that should live in config/constants
+- **Error handling**: try/catch at system boundaries (API, external calls, file IO)
+- **Type consistency**: type mismatches across layers
+- **Serialization risks**: fields that may be lost during JSON/protobuf/form processing
+- **Security**: SQL injection, XSS, command injection, sensitive information leakage, OWASP Top 10
 
-### 2. 架構一致性
+### 2. Architecture consistency
 
-讀取同目錄 3-5 個既有檔案理解慣例（命名、錯誤處理、log 風格、回應格式），條列偏離項並附既有範例。
+Read 3–5 existing files from the same directory to understand conventions (naming, error handling, log style, response format); list deviations with existing examples.
 
-### 3. 影響評估
+### 3. Impact assessment
 
-| 維度 | 問題 |
+| Dimension | Question |
 |---|---|
-| Upstream | 誰呼叫這個 function/endpoint？會壞嗎？ |
-| Downstream | 此函式呼叫誰？契約還有效嗎？ |
-| State | 是否動到 DB schema、cache key、檔案路徑、env var？ |
-| Concurrency | 多 user/multi-worker 下會有 race condition 嗎？ |
-| Backward compat | 既有 DB 紀錄、saved config、cache value 還能用嗎？ |
-| API contract | request/response shape 變了，所有 client 都更新了嗎？ |
+| Upstream | Who calls this function/endpoint? Will it break? |
+| Downstream | Who does this function call? Is the contract still valid? |
+| State | Does it touch DB schema, cache key, file path, or env var? |
+| Concurrency | Could race conditions occur under multi-user / multi-worker scenarios? |
+| Backward compat | Are existing DB records, saved configs, cached values still usable? |
+| API contract | If request/response shape changed, are all clients updated? |
 
-### 4. 風險報告
+### 4. Risk report
 
 | Severity | File | Description | Mitigation |
 |---|---|---|---|
 | High / Med / Low | ... | ... | ... |
 
-- **High**：可能造成資料遺失、crash、安全漏洞
-- **Medium**：可能造成行為錯誤或效能退化
-- **Low**：code smell 或小不一致
+- **High**: may cause data loss, crashes, or security vulnerabilities
+- **Medium**: may cause incorrect behavior or performance degradation
+- **Low**: code smell or minor inconsistency
 
-無風險時明確輸出：「品質檢查通過，無風險」
+When there is no risk, output explicitly: "Quality check passed, no risks"
 
-### 5. Skill 更新偵測
+### 5. Skill update detection
 
-若本次改動引入新的慣例、模式或工作流程需求：
-- **直接執行對應 SKILL.md 的 Edit**，由 Tool Confirmation UI 處理 approve / deny（對齊 CLAUDE.md 第 15 條）
-- **禁止**文字詢問「是否要更新 Skill 定義？」
+If this change introduces new conventions, patterns, or workflow requirements:
+- **Directly execute the Edit on the corresponding SKILL.md**, letting the Tool Confirmation UI handle approve / deny (aligned with CLAUDE.md rule 15)
+- **Do not** ask in text "Should I update the Skill definition?"
 
-### 5b. Skill 完整性檢查（若改動 Skill 檔案）
+### 5b. Skill integrity check (if Skill files are modified)
 
-若本次變更動到任何 SKILL.md / README.md / 新建 Skill 資料夾，逐項驗證：
+If this change touches any SKILL.md / README.md / newly created Skill folders, verify each item:
 
-1. **每個 skill 資料夾**同時含 `SKILL.md` 與 `README.md`
-2. **Skills README 三段同步**：
-   - `.claude/skills/README.md` 的命令總覽表已更新
-   - 詳細描述段落已更新
-   - 目錄結構樹已更新
-3. **通用 vs 專案專屬判斷樹**：
-   - 通用改進（不綁專案細節）→ 同步至 `sekai-workflow/`，**剝除所有專案特化硬編碼值**
-   - 專案專屬修正 → 僅存 `.claude/skills/`，**不同步**
-4. **通用 skills README** 已更新
-5. **CLAUDE.md 的「可用 Skills」列表**已更新
-6. **明示聲明**：Skill 變更走 `sekai-workflow` 獨立遠端倉庫，**不進專案 git**
+1. **Every skill folder** contains both `SKILL.md` and `README.md`
+2. **Three-section sync in Skills README**:
+   - The command overview table in `.claude/skills/README.md` is updated
+   - The detailed description sections are updated
+   - The directory structure tree is updated
+3. **Universal vs. project-specific decision tree**:
+   - Universal improvement (not tied to project details) → sync to `sekai-workflow/`, **strip all project-specific hard-coded values**
+   - Project-specific fix → keep only in `.claude/skills/`, **do not sync**
+4. **Universal skills README** is updated
+5. The **"Available Skills" list in CLAUDE.md** is updated
+6. **Explicit declaration**: Skill changes flow through the `sekai-workflow` standalone remote repository; they **do not enter the project's git**
 
-任一項未符合 → 停止流程，要求使用者補齊。
+Any item that fails → halt the flow and ask the user to complete it.
 
-### 5c. 實作後資料流重讀
+### 5c. Post-implementation data flow re-read
 
-實作完畢、commit 前**重新讀取**修改過的程式碼，逐層走一次：
+After implementation is complete and before commit, **re-read** the modified code and walk through it layer by layer:
 
-| 檢查項 | 結果 | 備註 |
+| Check item | Result | Note |
 |---|:---:|---|
-| 資料流完整性 | ✓/✗ | |
-| 跨層型別一致 | ✓/✗ | |
-| 邊界情境處理 | ✓/✗ | |
-| 未動邏輯不受影響 | ✓/✗ | |
+| Data flow integrity | ✓/✗ | |
+| Cross-layer type consistency | ✓/✗ | |
+| Edge case handling | ✓/✗ | |
+| Untouched logic is unaffected | ✓/✗ | |
 
-任一 ✗ 必須先修，才能進入 commit 流程。
+Any ✗ must be fixed first before entering the commit flow.
 
 ---
 
-## R. `/build review` — Commit 前最後人工確認（Sonnet）
+## R. `/build review` — Final Manual Confirmation Before Commit (Sonnet)
 
-用於 **大改動前的最後 checklist 關卡**。與 `/build quality` 的差異：
+Used as a **final checklist gate before a large change**. Difference from `/build check`:
 
-| 差異點 | `/build quality` | `/build review` |
+| Aspect | `/build check` | `/build review` |
 |---|---|---|
-| 目的 | 深度程式碼品質掃描 | 架構 / 規則層人工確認 |
+| Purpose | In-depth code quality scan | Architecture / rule-layer manual confirmation |
 | Model | Opus | Sonnet |
-| 輸出 | 風險報告 | 待確認 checklist |
-| 是否阻斷 | High 風險會阻斷 | 僅列清單不阻斷 |
-| 使用時機 | 每次 commit 都應跑 | 改到 CLAUDE.md / SKILL.md / 架構檔時 |
+| Output | Risk report | Checklist to confirm |
+| Blocking? | High risks block | Only lists items, does not block |
+| When to use | Should run on every commit | When modifying CLAUDE.md / SKILL.md / architecture files |
 
-### Step 1：掃描變更檔
+### Step 1: Scan changed files
 
 ```bash
 git status --short
 git diff --stat
 ```
 
-辨識**架構層變更**：
-- `CLAUDE.md` — 專案規則
-- `*/SKILL.md`、`*/README.md` — Skill 定義
-- 根目錄 config（`docker-compose.yml`、`package.json`、`pyproject.toml`）
+Identify **architecture-layer changes**:
+- `CLAUDE.md` — project rules
+- `*/SKILL.md`, `*/README.md` — Skill definitions
+- Root-level config (`docker-compose.yml`, `package.json`, `pyproject.toml`)
 - Database schema / migrations
 
-### Step 2：生成人工確認 Checklist
+### Step 2: Generate a manual confirmation checklist
 
-針對掃描結果，列出**本次改動可能需要同步更新但尚未處理**的項目：
+Based on the scan results, list **items that may need syncing for this change but have not been handled yet**:
 
 ```markdown
-## Commit 前人工確認 Checklist
+## Pre-commit manual confirmation checklist
 
-### 規則層同步（改到 CLAUDE.md / SKILL.md 時）
-- [ ] 新規則是否已寫入 Memory（對齊 CLAUDE.md 第 9 條三向連動）
-- [ ] 對應 SKILL.md 是否同步更新
-- [ ] `.claude/skills/` 與 `sekai-workflow/` 是否雙向同步
-- [ ] manifest.json 是否更新
-- [ ] 可用 Skills 列表（CLAUDE.md 第 18 條後）是否更新
+### Rule-layer sync (when modifying CLAUDE.md / SKILL.md)
+- [ ] New rules have been written to Memory (aligned with CLAUDE.md rule 9 three-way sync)
+- [ ] The corresponding SKILL.md is updated in sync
+- [ ] `.claude/skills/` and `sekai-workflow/` are synced bidirectionally
+- [ ] manifest.json is updated
+- [ ] The Available Skills list (after CLAUDE.md rule 18) is updated
 
-### 架構層同步（改到 config / schema 時）
-- [ ] docker-compose 變更是否需更新部署文件
-- [ ] DB schema 變更是否有對應 migration
-- [ ] 環境變數新增是否有 .env.example 對應項
+### Architecture-layer sync (when modifying config / schema)
+- [ ] docker-compose changes require updating deployment docs
+- [ ] DB schema changes have corresponding migrations
+- [ ] New environment variables have matching entries in .env.example
 
-### 文件層同步
-- [ ] 受影響目錄的 README.md 是否更新
-- [ ] 若為新功能 → 是否有對應的 .local/docs/guide/<topic>.md
+### Documentation-layer sync
+- [ ] READMEs for affected directories are updated
+- [ ] For new features → there is a corresponding .local/docs/guide/<topic>.md
 ```
 
-### Step 3：互動確認
+### Step 3: Interactive confirmation
 
-逐項詢問使用者（使用 AskUserQuestion 或直接列清單等回覆），未完成項目 → 回到對應 Skill 補齊後再進 commit-push。
+Ask the user about each item (via AskUserQuestion or by listing items for reply). For unfinished items → go back to the corresponding Skill to complete them before entering commit-push.
 
-**本子命令不阻斷 commit** — 只負責提醒。使用者可選擇「全部確認」直接跳過。
+**This subcommand does not block commit** — it only serves as a reminder. The user may choose "Confirm all" to skip directly.
 
 ---
 
-## D. `/build deploy` — 部署評估與執行（合併原 restart + eval）
+## D. `/build deploy` — Deployment Assessment and Execution (merges legacy restart + eval)
 
-**統一入口**，根據 flag 決定行為：
+**Unified entry**, behavior determined by flag:
 
-| 呼叫方式 | 行為 |
+| Invocation | Behavior |
 |---|---|
-| `/build deploy` | **預設**：先 eval 列出計畫 → 等待確認 → 執行 restart |
-| `/build deploy --plan` | 僅 eval 不執行（等同舊 `/build eval`） |
-| `/build deploy --run` | 跳過 eval 直接執行（等同舊 `/build restart`） |
-| `/build deploy svc1 svc2` | 指定服務 |
-| `/build deploy --run all` | 全部容器 |
+| `/build deploy` | **Default**: eval first to list the plan → wait for confirmation → execute restart |
+| `/build deploy --plan` | Eval only, no execution (equivalent to the legacy `/build eval`) |
+| `/build deploy --run` | Skip eval and execute directly (equivalent to the legacy `/build restart`) |
+| `/build deploy svc1 svc2` | Specify services |
+| `/build deploy --run all` | All containers |
 
-### Step 1：找出變更檔
+### Step 1: Find changed files
 
 ```bash
-git diff --name-only HEAD~1     # 預設
-git diff --name-only $RANGE      # 若 $ARGUMENTS 是 commit range
+git diff --name-only HEAD~1     # default
+git diff --name-only $RANGE      # if $ARGUMENTS is a commit range
 ```
 
-### Step 2：讀 compose 拓撲
+### Step 2: Read compose topology
 
 ```bash
 cat docker-compose.yml 2>/dev/null || cat compose.yml 2>/dev/null
 ```
 
-對每個 service 判斷：volume mount paths / baked-in paths / auto-reload 能力 / 靜態檔案。
+For each service, determine: volume mount paths / baked-in paths / auto-reload capability / static files.
 
-### Step 3：分類（Eval 階段）
+### Step 3: Classification (Eval stage)
 
 | Mount type | Auto-reload | Action |
 |---|---|---|
-| Volume mount | yes (`--reload`) | 不需動作 |
+| Volume mount | yes (`--reload`) | No action needed |
 | Volume mount | no | `docker compose restart <svc>` |
 | Baked image | N/A | `build + up -d` |
-| 靜態檔（web server） | N/A | 瀏覽器重整 |
-| DB init script | N/A | 手動 migration |
+| Static files (web server) | N/A | Browser refresh |
+| DB init script | N/A | Manual migration |
 | Dockerfile | N/A | rebuild |
-| compose 檔本身 | N/A | `docker compose up -d` |
+| compose file itself | N/A | `docker compose up -d` |
 
-### Step 4：輸出計畫
+### Step 4: Output the plan
 
-1. 變更檔 → 服務 → 動作 對照表
-2. 去重後的指令清單，按執行順序
-3. 副作用警告（停機、連線中斷、job 中斷）
-4. 若 DB init script 改動且 DB 已存在 → 列出需手動跑的 migration
+1. Mapping table: changed files → services → actions
+2. Deduplicated command list in execution order
+3. Side-effect warnings (downtime, connection drops, job interruption)
+4. If DB init scripts changed and the DB already exists → list migrations that must be run manually
 
-### Step 5：Pre-flight（Run 階段）
+### Step 5: Pre-flight (Run stage)
 
 ```bash
 docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Service}}"
 ```
 
-- **背景任務檢查**（worker / queue 服務）：偵測 Celery / Sidekiq / Bull 等的 active task，有任務就警告
-- **串流服務檢查**（WebSocket / RTSP / SSE）：警告連線會中斷
-- **掛載類型判斷**：volume mount → restart；image baked → build + up
+- **Background task check** (worker / queue services): detect active tasks in Celery / Sidekiq / Bull, etc.; warn if any exist
+- **Streaming service check** (WebSocket / RTSP / SSE): warn that connections will be interrupted
+- **Mount type determination**: volume mount → restart; image baked → build + up
 
-### Step 6：執行
+### Step 6: Execute
 
 ```bash
 # Volume mount
@@ -507,18 +507,18 @@ docker compose build <svc1> <svc2>
 docker compose up -d <svc1> <svc2>
 ```
 
-列出目標後**直接執行**，不發確認訊息（讓 tool permission UI 處理，對齊 CLAUDE.md 第 15 條）。
+After listing the targets, **execute directly** without sending a confirmation message (let the tool permission UI handle it, aligned with CLAUDE.md rule 15).
 
-### Step 7：健康檢查
+### Step 7: Health check
 
 ```bash
 sleep 8
 docker compose ps | grep -E "<services>"
 ```
 
-期望 `Up X seconds (healthy)`；若 `Restarting` / `Exited` → 進 Step 8。
+Expect `Up X seconds (healthy)`; if `Restarting` / `Exited` → proceed to Step 8.
 
-### Step 8：日誌掃描
+### Step 8: Log scan
 
 ```bash
 docker compose logs --tail=30 <service>
@@ -532,51 +532,51 @@ docker compose logs --tail=30 <service>
 | `WARNING` | LOW |
 | `Application startup complete` / `Listening on` / `ready` | OK |
 
-### Step 9：自動修復
+### Step 9: Auto-repair
 
-| 症狀 | 自動修復 | Fallback |
+| Symptom | Auto-repair | Fallback |
 |---|---|---|
-| ImportError / Module not found | `docker compose build --no-cache <svc>` | 釘版本 |
-| ConnectionRefused | `docker compose up -d --wait <dep>` → restart | 查 dep log |
-| Port 衝突 | `docker compose down <svc>` → `up -d` | 找 PID kill |
-| DB migration error | 報告需要的 DDL | 手動執行 |
-| 無法自動修復 | 完整 log 摘要 + 根因 + 手動修復步驟 | — |
+| ImportError / Module not found | `docker compose build --no-cache <svc>` | Pin version |
+| ConnectionRefused | `docker compose up -d --wait <dep>` → restart | Check dep log |
+| Port conflict | `docker compose down <svc>` → `up -d` | Find PID and kill |
+| DB migration error | Report required DDL | Execute manually |
+| Cannot auto-repair | Full log summary + root cause + manual repair steps | — |
 
-### Step 10：最終驗證
+### Step 10: Final verification
 
-- API 健康：`curl http://localhost:<port>/health` 或 `/docs`
-- Worker 連線：`celery -A <app> inspect ping`
+- API health: `curl http://localhost:<port>/health` or `/docs`
+- Worker connectivity: `celery -A <app> inspect ping`
 
-輸出：
+Output:
 
 ```
 | Service | Action | Status | Duration |
 |---|---|---|---|
 ```
 
-### 非容器化專案
+### Non-containerized projects
 
-偵測 PM2 / systemd / supervisor / nodemon / watchdog / air，給對應重啟指令。
+Detect PM2 / systemd / supervisor / nodemon / watchdog / air, and provide the corresponding restart command.
 
 ---
 
-## 各子命令的 Model 使用建議（對齊 CLAUDE.md 第 18 條）
+## Model Usage Recommendations per Subcommand (aligned with CLAUDE.md rule 18)
 
-| 子命令 | 建議 model | 原因 |
+| Subcommand | Recommended model | Reason |
 |---|---|---|
-| flow | sonnet | 串接元命令，主體為 Sonnet 執行 |
-| **plan** | **opus** | 需求分析 / 方案設計 / 架構決策（thinking 屬性） |
-| impl | sonnet | 逐步執行（execution 屬性） |
-| test | sonnet | 多步驟執行 + 檢查 |
-| **quality** | **opus** | 深度品質審計 / 架構評估（thinking 屬性） |
-| review | sonnet | 列 checklist / 互動確認 |
-| deploy | sonnet | 容器操作執行 |
+| flow | sonnet | Chain meta-command, main body is Sonnet execution |
+| **plan** | **opus** | Requirement analysis / solution design / architectural decision (thinking attribute) |
+| impl | sonnet | Step-by-step execution (execution attribute) |
+| test | sonnet | Multi-step execution + checks |
+| **quality** | **opus** | In-depth quality audit / architecture assessment (thinking attribute) |
+| review | sonnet | Listing checklists / interactive confirmation |
+| deploy | sonnet | Container operation execution |
 
-Skill 本體 `model: sonnet`。需要 Opus 深度分析的子命令（plan / quality）建議透過 **Agent 工具**呼叫 Opus 子任務，不改變 Skill 本體 model 設定。
+The Skill body uses `model: sonnet`. Subcommands that need Opus in-depth analysis (plan / quality) are recommended to invoke Opus subtasks via the **Agent tool**, without changing the Skill body's model setting.
 
-**三層分層原則**（CLAUDE.md 第 18 條）：
-- **Opus**：評估、規劃、架構決策、深度品質分析
-- **Sonnet**：多步驟執行、檔案讀寫、中低複雜度任務
-- **Haiku**：結構化文字撰寫、模板填充、日誌產生
+**Three-tier separation principle** (CLAUDE.md rule 18):
+- **Opus**: assessment, planning, architectural decisions, in-depth quality analysis
+- **Sonnet**: multi-step execution, file read/write, medium-low complexity tasks
+- **Haiku**: structured text writing, template filling, log generation
 
-Arguments: $ARGUMENTS （第一個 token 為子命令，其餘為該子命令參數）
+Arguments: $ARGUMENTS (the first token is the subcommand; the rest are arguments for that subcommand)

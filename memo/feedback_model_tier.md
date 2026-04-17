@@ -17,6 +17,6 @@ originSessionId: dddfa0de-6667-4adc-83a2-bc6db4a98bad
 - 單一 Skill 若需跨層能力（例如 `/commit-push` 主體 Sonnet、Step 1 品質檢查需 Opus、Step 5 日誌需 Haiku），透過 Agent 工具呼叫對應 model 的子任務，不改變 Skill 本體 model
 - Commit 的 Co-Author 字串依**實際執行的 model** 動態填入（`Claude Sonnet 4.6` / `Claude Opus 4.6` / `Claude Haiku 4.5`），禁止使用無版本的 `Claude <noreply@anthropic.com>`
 - 多 model 協作時最多列兩行 Co-Author（主執行者 + 次要貢獻者）
-- 新建 Skill 時，`/setup new` 必須引導使用者選擇正確 model 層級
+- 新建 Skill 時，`/skill new` 必須引導使用者選擇正確 model 層級
 
 此規則已寫入 `CLAUDE.md` 第 18 條（強制層級），並於 `sekai-workflow/build/SKILL.md` 與 `sekai-workflow/commit-push/SKILL.md` 的 model 分層表中實作。

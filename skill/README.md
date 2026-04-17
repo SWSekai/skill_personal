@@ -1,4 +1,6 @@
-# setup — Skill 環境管理
+# skill — Skill 環境管理
+
+> **2026-04-17 改名**：`/setup` → `/skill`（更準確對應「只管 Skill 環境」的職能）。舊名 `setup` 已全面停用，不保留 alias。
 
 ## 功能說明
 
@@ -7,7 +9,7 @@
 ## 使用方式
 
 ```
-/setup <new|sync|pack> [args...]
+/skill <new|sync|pack> [args...]
 ```
 
 ## Model
@@ -33,7 +35,7 @@
 ## 目錄結構
 
 ```
-setup/
+skill/
 ├── SKILL.md
 ├── README.md
 ├── references/

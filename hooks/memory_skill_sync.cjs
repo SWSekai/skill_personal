@@ -3,7 +3,7 @@
 //
 // 精準偵測邏輯：
 // - Memory 寫入：必須匹配 `.claude/projects/<proj>/memory/<file>.md` 完整路徑
-//   （避免把 `sekai-workflow/memory-portable/` 這類 Skill 目錄誤判為 memory 寫入）
+//   （避免把 `sekai-workflow/memo/` 這類 Skill 目錄誤判為 memory 寫入）
 // - Skill 寫入：路徑任一處含 `skills` 或 `sekai-workflow/<name>/SKILL.md|README.md`
 //   （兩者都算同步點，寫入任一即清旗）
 

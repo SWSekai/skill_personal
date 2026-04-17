@@ -82,14 +82,14 @@
 
 ### 11. 新專案自動初始化 Skill
 - 進入新專案時，自動偵測並初始化 Skill 環境
-- 觸發 `/setup sync` 執行完整初始化流程
+- 觸發 `/skill sync` 執行完整初始化流程
 
 ### 12. Sekai_workflow 遠端同步與衝突處理
 - 每次對話開始時自動同步
-- 觸發 `/setup sync` 執行遠端同步流程
+- 觸發 `/skill sync` 執行遠端同步流程
 
 ### 13. 資訊查詢時主動建立文件
-- 被詢問系統架構、功能、資料流等問題時，自動觸發 `/ask query`
+- 被詢問系統架構、功能、資料流等問題時，自動觸發 `/ask info`
 
 ### 15. Y/N 確認一律由 Tool Confirmation UI 處理（最高優先級）
 - 所有只需 Y/N 回答的操作，**直接執行對應 tool call**，讓使用者透過 tool 權限介面（approve/deny）決定
@@ -116,8 +116,8 @@
 合併版（17 → 6），透過子命令路由至原 Skill 對應職能。
 
 - `/build <flow|plan|impl|test|commit|quality|log|restart|eval>` — 開發全流程：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → commit → push → 重啟評估
-- `/team-office <todo|board|decide|notes>` — 互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記
-- `/setup <new|sync|pack>` — Skill 環境管理：建立新 Skill、遠端同步、專案打包
+- `/team <todo|board|decide|notes>` — 互動協作：AI TODO、即時白板、Markdown 決策表、技術筆記
+- `/skill <new|sync|pack>` — Skill 環境管理：建立新 Skill、遠端同步、專案打包
 - `/ask <query|trace|report>` — 系統文件與報告：系統資訊、資料流追蹤、工作報告
 - `/context-guard` — Context Window 管理（系統壓縮、手動、對話開始）
-- `/memory-portable` — Memory 跨專案攜帶
+- `/memo` — Memory 跨專案攜帶
