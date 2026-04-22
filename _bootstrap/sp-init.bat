@@ -232,40 +232,51 @@ REM ============================
 echo [7/9] Setting up Claude Code environment...
 
 set "CLAUDE_HOME=%USERPROFILE%\.claude"
-set "SL_SRC=%SCRIPT_DIR%\templates\statusline.sh"
-set "SL_DST=%CLAUDE_HOME%\statusline.sh"
+set "SL_SRC=%SCRIPT_DIR%\templates\statusline.cjs"
+set "SL_DST=%CLAUDE_HOME%\statusline.cjs"
+set "SL_OLD_SH=%CLAUDE_HOME%\statusline.sh"
 set "USER_SETTINGS=%CLAUDE_HOME%\settings.json"
 set "HOOKS_SRC=%SCRIPT_DIR%\templates\hooks.json"
 set "LOCAL_SETTINGS=%PROJECT_DIR%\.claude\settings.local.json"
+set "SL_CMD=node \"%CLAUDE_HOME:\=/%/statusline.cjs\""
 
 if not exist "%CLAUDE_HOME%" mkdir "%CLAUDE_HOME%" 2>nul
 
-REM --- 7a: Statusline ---
+REM --- 7a: Statusline (Node.js, no jq dependency) ---
 echo       [7a] Statusline...
 if not exist "!SL_SRC!" (
-    echo            WARN: templates/statusline.sh not found - skipped
+    echo            WARN: templates/statusline.cjs not found - skipped
 ) else if exist "!SL_DST!" (
     fc /B "!SL_SRC!" "!SL_DST!" >nul 2>&1
     if errorlevel 1 (
         copy /Y "!SL_SRC!" "!SL_DST!" >nul 2>&1
-        echo            Updated statusline.sh
+        echo            Updated statusline.cjs
     ) else (
         echo            Already up-to-date
     )
 ) else (
     copy /Y "!SL_SRC!" "!SL_DST!" >nul 2>&1
-    echo            Installed statusline.sh
+    echo            Installed statusline.cjs
 )
 
-REM Ensure statusLine in user settings.json
+REM Clean up legacy bash version if present (replaced by Node .cjs)
+if exist "!SL_OLD_SH!" (
+    del /F /Q "!SL_OLD_SH!" >nul 2>&1
+    echo            Removed legacy statusline.sh
+)
+
+REM Ensure statusLine in user settings.json points to .cjs via node
 if exist "!USER_SETTINGS!" (
     findstr /C:"statusLine" "!USER_SETTINGS!" >nul 2>&1
     if errorlevel 1 (
-        powershell -NoProfile -Command "$j = Get-Content '!USER_SETTINGS!' -Raw | ConvertFrom-Json; $j | Add-Member -NotePropertyName 'statusLine' -NotePropertyValue ([PSCustomObject]@{type='command';command='bash ~/.claude/statusline.sh'}) -Force; $j | ConvertTo-Json -Depth 10 | Set-Content '!USER_SETTINGS!' -Encoding UTF8"
+        powershell -NoProfile -Command "$j = Get-Content '!USER_SETTINGS!' -Raw | ConvertFrom-Json; $j | Add-Member -NotePropertyName 'statusLine' -NotePropertyValue ([PSCustomObject]@{type='command';command='!SL_CMD!'}) -Force; $j | ConvertTo-Json -Depth 10 | Set-Content '!USER_SETTINGS!' -Encoding UTF8"
         echo            Added statusLine to settings.json
+    ) else (
+        REM Update existing statusLine command in case it points to legacy .sh
+        powershell -NoProfile -Command "$j = Get-Content '!USER_SETTINGS!' -Raw | ConvertFrom-Json; if ($j.statusLine.command -notlike '*statusline.cjs*') { $j.statusLine.command = '!SL_CMD!'; $j | ConvertTo-Json -Depth 10 | Set-Content '!USER_SETTINGS!' -Encoding UTF8; Write-Host '            Migrated statusLine command to .cjs' }"
     )
 ) else (
-    powershell -NoProfile -Command "@{statusLine=@{type='command';command='bash ~/.claude/statusline.sh'}} | ConvertTo-Json -Depth 10 | Set-Content '!USER_SETTINGS!' -Encoding UTF8"
+    powershell -NoProfile -Command "@{statusLine=@{type='command';command='!SL_CMD!'}} | ConvertTo-Json -Depth 10 | Set-Content '!USER_SETTINGS!' -Encoding UTF8"
     echo            Created settings.json with statusLine
 )
 
@@ -453,7 +464,7 @@ echo     - .sekai-workflow/    - Skill template for sync (renamed from source)
 echo     - .gitignore          - auto-added exclusion entries
 echo     - pre-commit hook     - blocks skill files from project git
 echo     - CLAUDE.md           - project rules, customize as needed
-echo     - statusline.sh       - Claude Code status bar script
+echo     - statusline.cjs      - Claude Code status bar script (Node.js, no jq dep)
 echo     - hooks               - auto-trigger for skill/memory sync (local only)
 echo     - portable memory     - restored user preferences and habits
 echo     - skill-sync          - synced with remote
