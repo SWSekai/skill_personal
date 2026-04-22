@@ -10,6 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PROJECT_DIR="$(cd "$SP_DIR/.." && pwd)"
 SKILLS_DIR="$PROJECT_DIR/.claude/skills"
+HOOKS_DIR="$PROJECT_DIR/.claude/hooks"
 
 echo ""
 echo "========================================"
@@ -18,6 +19,7 @@ echo "========================================"
 echo ""
 echo "[INFO] Sekai_workflow : $SP_DIR"
 echo "[INFO] Project skills : $SKILLS_DIR"
+echo "[INFO] Project hooks  : $HOOKS_DIR"
 echo ""
 
 # --- Step 1: Git fetch + pull ---
@@ -109,19 +111,58 @@ for skill_dir in "$SP_DIR"/*/; do
     fi
 done
 
-# --- Step 3: Summary ---
+# --- Step 3: Sync hooks ---
+echo ""
+echo "[Step 3] Comparing hooks..."
+echo ""
+
+HOOK_ADDED=0
+HOOK_UPDATED=0
+HOOK_UNCHANGED=0
+
+if [ -d "$SP_DIR/hooks" ]; then
+    mkdir -p "$HOOKS_DIR"
+
+    for hook_file in "$SP_DIR/hooks"/*.cjs "$SP_DIR/hooks"/*.sh; do
+        [ ! -f "$hook_file" ] && continue
+
+        HOOK_NAME=$(basename "$hook_file")
+        TARGET="$HOOKS_DIR/$HOOK_NAME"
+
+        if [ ! -f "$TARGET" ]; then
+            echo "  [ADD]    $HOOK_NAME"
+            cp "$hook_file" "$TARGET"
+            HOOK_ADDED=$((HOOK_ADDED + 1))
+        elif ! diff -q "$hook_file" "$TARGET" >/dev/null 2>&1; then
+            echo "  [UPDATE] $HOOK_NAME"
+            cp "$hook_file" "$TARGET"
+            HOOK_UPDATED=$((HOOK_UPDATED + 1))
+        else
+            echo "  [OK]     $HOOK_NAME"
+            HOOK_UNCHANGED=$((HOOK_UNCHANGED + 1))
+        fi
+    done
+else
+    echo "  [SKIP] No hooks directory in $SP_DIR"
+fi
+
+# --- Step 4: Summary ---
 echo ""
 echo "========================================"
 echo " Sync Summary"
 echo "========================================"
-echo "  Added    : $ADDED"
-echo "  Updated  : $UPDATED"
-echo "  No change: $UNCHANGED"
+echo "  Skills  — Added: $ADDED / Updated: $UPDATED / No change: $UNCHANGED"
+echo "  Hooks   — Added: $HOOK_ADDED / Updated: $HOOK_UPDATED / No change: $HOOK_UNCHANGED"
 echo "========================================"
 echo ""
 
 if [ "$ADDED" -gt 0 ]; then
     echo "[REMINDER] New skills added. Update CLAUDE.md \"Available Skills\" section."
+fi
+
+if [ "$HOOK_ADDED" -gt 0 ]; then
+    echo "[REMINDER] New hooks added. Verify .claude/settings.local.json has matching"
+    echo "           matcher/command bindings (reference: _bootstrap/templates/hooks.json)."
 fi
 
 if [ "$AHEAD" != "0" ]; then

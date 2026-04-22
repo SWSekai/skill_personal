@@ -187,13 +187,14 @@ The script performs:
 1. `git fetch origin` to retrieve remote updates
 2. Compare local and remote commits
 3. If updated → `git pull --rebase origin main`
-4. Compare each skill's SKILL.md / README.md between `Sekai_workflow/` and `.claude/skills/` one by one
-5. Automatically copy new or differing skills to `.claude/skills/`
-6. Output an Added / Updated / No change summary
+4. **Skills sync** — Compare each skill's SKILL.md / README.md between `Sekai_workflow/` and `.claude/skills/`; copy new or differing skills
+5. **Hooks sync** — Compare each `*.cjs` / `*.sh` between `Sekai_workflow/hooks/` and `.claude/hooks/`; copy new or differing hook scripts
+6. Output Added / Updated / No change summary for both skills and hooks
 
 **Cannot be handled by script (manual required)**:
 - Pull conflict → abort; resolve manually then rerun
 - New skill → the script only copies files; you must manually update available Skills in `CLAUDE.md`
+- **New hook → the script copies the file but `.claude/settings.local.json` binding is not auto-modified** (per-project risk). Reference `_bootstrap/templates/hooks.json` for the expected matcher/command shape; manually add the `PreToolUse` / `PostToolUse` / `Stop` entry.
 - Push local changes → the script does not auto-push; you must `cd Sekai_workflow && git push origin main`
 
 ### Flow 2: Rule Evaluation and Three-Way Linkage (Mandatory)

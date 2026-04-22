@@ -137,7 +137,7 @@
     {
       "name": "sp-sync",
       "path": "_bootstrap/sp-sync.sh",
-      "description": "一鍵同步腳本：pull 遠端 → 比對差異 → 更新 .claude/skills/"
+      "description": "一鍵同步腳本：pull 遠端 → 比對差異 → 更新 .claude/skills/ + .claude/hooks/（新 hook 需手動在 settings.local.json 加 binding）"
     },
     {
       "name": "sp-pack",
