@@ -3,8 +3,8 @@ name: team
 description: "One-stop entry for interactive collaboration: AI TODO handling, live whiteboard, Markdown interactive decision tables, tech notes, handoff documents, work reports, and living document maintenance. Subcommand routing: todo / board / decide / note / handoff / report / living."
 model: sonnet
 effort: medium
-argument-hint: "<todo|board|decide|note|handoff|report|living> [args...]"
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(mkdir *), Bash(mv *)
+argument-hint: "<todo|board|decide|note|handoff|report|living|follow-up> [args...]"
+allowed-tools: Read, Write, Edit, Glob, Grep, AskUserQuestion, Bash(git *), Bash(ls *), Bash(date *), Bash(mkdir *), Bash(mv *)
 ---
 
 # /team — Interactive Collaboration Merged Skill
@@ -22,8 +22,32 @@ Integrates seven collaboration modes that interact with the user. The first argu
 | `/team handoff` | Handoff document generation | handoff |
 | `/team report [scope]` | Generate work reports from modify logs | report (moved from `/ask`) |
 | `/team living [view\|regen]` | Living document — accumulates outcomes from all board/decide closures | living (new) |
+| `/team follow-up <file>` | Resume processing of an existing whiteboard / decision file | follow-up (new) |
 
 When no argument is provided, ask the user to specify a subcommand.
+
+---
+
+## Common Rules (Apply to All Subcommands)
+
+### Time Sampling (Mandatory)
+
+**Before generating any file with a date stamp (whiteboard / decision / summary / handoff / modify_log), first call:**
+```bash
+date '+%Y-%m-%d %H:%M'
+```
+Use the Bash output as the authoritative date, not the context `currentDate` field (which may be stale across day boundaries).
+
+### Filename Conventions
+
+All interactive output files follow the pattern `YYMMDD_<topic>_<type>.md` where `<type>` indicates the file kind. See `references/naming.md` for the full table and rules.
+
+### Closure Markers
+
+- **File-level**: prepend `CLOSED_` to filename (e.g. `CLOSED_260422_topic_decision.md`)
+- **Block-level**: append `✅` to block heading **or** embed `<!-- closed -->` in block body
+- Parsers treat both markers as "skip this block"; Claude auto-adds `✅` if only `<!-- closed -->` is present (visual consistency)
+- Details in `references/naming.md` §3
 
 ---
 
@@ -93,7 +117,8 @@ For consultation, planning, and troubleshooting conversations, create a continuo
 
 ### Step 1: Create the Whiteboard
 
-- Path: `.local/docs/whiteboard/YYMMDD_topic-description.md`
+- **First**: call `date '+%Y-%m-%d %H:%M'` to get authoritative time (see Common Rules)
+- Path: `.local/docs/whiteboard/YYMMDD_<topic>_board.md` (snake_case topic; `_board` suffix is mandatory)
 - Same topic on the same day → update the existing file, do not create another
 - Structural principles:
   - **Pending**: pure checkbox list, see at a glance what remains
@@ -124,71 +149,58 @@ Each time the user asks a follow-up or continues discussion:
 
 1. Update the document header status to **Completed** or **Paused**
 2. Rename the file by prepending `CLOSED_` to the filename:
-   - Before: `.local/docs/whiteboard/YYMMDD_topic.md`
-   - After: `.local/docs/whiteboard/CLOSED_YYMMDD_topic.md`
-   - Use: `mv .local/docs/whiteboard/YYMMDD_topic.md .local/docs/whiteboard/CLOSED_YYMMDD_topic.md`
+   - Before: `.local/docs/whiteboard/YYMMDD_<topic>_board.md`
+   - After: `.local/docs/whiteboard/CLOSED_YYMMDD_<topic>_board.md`
+   - Use: `mv .local/docs/whiteboard/YYMMDD_<topic>_board.md .local/docs/whiteboard/CLOSED_YYMMDD_<topic>_board.md`
 
-#### 3.2 Append Closure Summary to File (Mandatory)
+#### 3.2 Append Inline Closure Summary (Mandatory, Unified Template)
 
-Append a `## Closure Summary` section at the bottom of the renamed file:
-
-```markdown
-## Closure Summary
-
-> Closed: YYYY-MM-DD HH:MM
-> Status: ✅ Completed / ⏸ Paused
-
-### Key Outcomes
-(2–4 bullet points of the core conclusions reached)
-
-### Key Decisions Made
-| Decision | Result |
-|---|---|
-
-### Unresolved Items
-(Write "None" if none; or list items deferred to TODO or a follow-up session)
-```
-
-#### 3.3 Write Complete Summary Entry into PROJECT_JOURNAL.md (Mandatory)
-
-After writing the whiteboard's Closure Summary (3.2) and renaming the file (3.1), immediately append a complete `###` entry into `.local/docs/living/PROJECT_JOURNAL.md` under the appropriate functional `##` section.
-
-**Entry format** (same five-element template as decide Step 6.1):
+Append the closure summary block at the bottom of the renamed file using the **unified template** in `references/naming.md` §5.2 (same format as `/team decide` Step 6.1):
 
 ```markdown
-### YYYY-MM-DD — <Topic>
+---
 
-**背景**：(1–3 sentences — what the discussion set out to explore)
+# 結案摘要（Closure Summary）
 
-**最終決策**：(rows from the whiteboard's decision log; or "無（純探索）" if exploratory)
-| § | 選項 | 採用 |
+> **結案時間**：YYYY-MM-DD HH:MM
+> **狀態**：✅ Completed / ⏸ Paused
+
+## 背景
+(Trigger reason, 1-3 sentences)
+
+## 最終決策（whiteboard 重點決策逐項）
+| 項目 | 結果 | 備註 |
 |---|---|---|
 
-**變更清單**：(files touched as a result of the discussion, or "無（僅討論）")
+## 變更清單
 | 檔案 | 變更 |
 |---|---|
 
-**🔖 保留候選**：(options raised but not taken; write "無" if none)
-- **候選 X**：...
-  - 未採納原因：...
-  - 重啟時機：...
+## 🔖 保留候選（僅非單一路線適用）
+(Write "無" if not applicable)
 
-**遺留項**：(from Closure Summary's Unresolved Items; "無" if none)
-
-**來源**：[`CLOSED_YYMMDD_<topic>.md`](../whiteboard/CLOSED_YYMMDD_<topic>.md)
+## 未解決遺留項
+(None or list)
 ```
 
-**Integrity requirement**: entry must be self-contained — the reader understands the full outcome without opening `CLOSED_*.md`. Separate `summary/*.md` files are **not produced** (flow aligned with decide Step 6).
+Whiteboard's key-outcomes / decisions-made / unresolved items map to the unified template as follows:
+- **Key Outcomes** → append as 背景 + 變更清單
+- **Decisions Made** → 最終決策 table
+- **Unresolved Items** → 未解決遺留項
 
-Update `> 最後更新：` timestamp in PROJECT_JOURNAL.md header.
+#### 3.3 Update Living Document (Mandatory)
+
+After writing the closure summary, immediately update the project living document (`.local/docs/living/PROJECT_JOURNAL.md`):
+- If the file does not exist, initialize it first (see Section G Step 1)
+- Append a new row to the "討論成果" table: date, topic, 1–2 sentence outcome summary, link to renamed file
+- If the whiteboard's decision log contains entries → also append to the "決策紀錄" table
 
 #### 3.4 Self-Check
 
 - [ ] File renamed with `CLOSED_` prefix
 - [ ] "最後更新" date in the document updated
-- [ ] Closure summary section appended to the renamed file
-- [ ] PROJECT_JOURNAL.md contains a new `###` entry with all five required elements (背景／決策／變更／保留候選／遺留項), placed under the correct functional `##` section
-- [ ] Entry back-references `CLOSED_*.md` via relative link
+- [ ] Closure summary section appended
+- [ ] Living document (`.local/docs/living/PROJECT_JOURNAL.md`) updated
 - [ ] Contains reusable experience → evaluate writing it into a guide (same as `/build commit` Step 9)
 - Any not done → complete immediately; must not end the reply
 
@@ -214,7 +226,8 @@ Generate structured markdown for the user to check options, which Claude then re
 
 ### Step 2: Generate Interactive Markdown
 
-Default location `.local/docs/decision/<topic>.md`; user can specify another.
+- **First**: call `date '+%Y-%m-%d %H:%M'` to get authoritative time (see Common Rules)
+- Default location: `.local/docs/decision/YYMMDD_<topic>_decision.md` (snake_case topic; `_decision` suffix is mandatory; user can specify another path but the pattern is enforced)
 
 Format specification:
 - Checkboxes `[ ]` / `[x]`
@@ -225,19 +238,13 @@ Format specification:
 - Header semantics must be clear (not just A/B/C)
 - **Each decision block must append a `supplementary note` field** (blockquote or empty `> _(please fill in)_`), allowing the user to freely write context, rationale, or counter-examples beyond the options; when reading decisions, the content of this field must also be parsed
 - **[Mandatory] Branching questions must be broken into checkable options**: any question with conditional branches (e.g., "Can the data be sent externally?" with A/B/C as three possible answers) must be listed as multiple mutually-exclusive `[ ]` sub-items for the user to check; it is **forbidden** to write `[ ] condition description` followed by a blank for the user to type a string (e.g., `[not externally sendable]`). Free-form input format is limited to pure numeric / string input questions (e.g., "How many per day?")
-- **[Mandatory] Multi-select questions must include an "all" option** (2026-04-22 added): for multi-select questions (non-mutually-exclusive, can check multiple items), if there is no resource conflict or implementation cost trade-off between options, Claude **must** append `★ 全部都做` as the final checkbox (equivalent to selecting all). Rationale: "do them all" is a common final intent; pre-providing it reduces user cognitive load. **Exempt**: single-select, mutually-exclusive groups, or questions where options have significant resource/time trade-offs that require individual weighing.
+- **[Mandatory] Free-form input questions must use unified syntax** `**答案**: ____________` (underscores as placeholder). When follow-up parses the file, empty underscore pattern is treated as unfilled; any other string is treated as the user's answer. See `references/followup.md` §6.
 
 Supports four interaction modes:
 - **Single-select matrix**: each row is an item, each column an option, one checkmark per row
 - **Multi-select list**: each item can check multiple feature flags
 - **Free-form input**: user types a string/number
 - **Hybrid mode**: mix single-select and input fields within a table
-
-**`(已確認)` section-header convention** (2026-04-17 added):
-- User appends `(已確認)` to a finalized section header (e.g., `## §1 後端確認策略 (已確認)`)
-- Signals to Claude: "this block is settled; skip re-analysis and Q&A scanning"
-- User removes the tag if they update the section and want Claude to re-examine it
-- Token-saving mechanism: avoids re-processing stabilized content on every reload
 
 ### Step 3: Guide the User to Edit
 
@@ -249,83 +256,9 @@ Pre-filled values are recommended configurations based on current state; adjust 
 When finished, reply "OK" or "Done", and I will read and implement.
 ```
 
-### Step 3.5: 補充說明 Round-Trip (In-File Q&A) — Mandatory
-
-**`(已確認)` sections are exempt** (2026-04-17 added): before scanning `補充說明` fields, check whether the section header ends with `(已確認)`. If yes, skip that section entirely — no scanning, no in-file response. The user removes the tag if they want Claude to re-examine.
-
-**Superseded rounds collapse to `<details>` toggle** (2026-04-17 added, revised): when writing a NEW Claude 回覆 that supersedes a prior round in the same `補充說明` block (user's question changed / decision flipped / previous answer obsolete), wrap the older round(s) in `<details>`.
-
-**Critical syntax rules** (violating these will prevent the toggle from rendering in VSCode preview / GitHub / most markdown-it renderers):
-
-1. `<details>`, `<summary>`, `</details>` tags MUST be at document top-level — **no `>` blockquote prefix**
-2. Markdown content inside `<details>` needs a **blank line** (truly empty, no `>` prefix) between `<summary>` and the first content line, and another blank line before `</details>`
-3. Content inside MAY use `>` blockquote for visual styling, but the HTML tag lines themselves must not
-
-Correct form:
-
-```markdown
-(end of current blockquote — last line may still have > prefix)
-
-<details>
-<summary>⬇ Claude 回覆（YYYY-MM-DD，第 N 輪 — 一句話說明已被什麼取代）</summary>
-
-> (older round content — content lines keep `>` for blockquote styling)
-> (more content)
-
-</details>
-
----
-```
-
-Keep the current round visible before `<details>`. Rationale: reduces rendered length and keeps the current answer immediately scannable while preserving history for audit.
-
-**Completed section wrap** (2026-04-17 added): when an entire section's decisions are finalized **AND** any implementation path is closed (code done or explicitly postponed), wrap the whole section (including the `##` header) in `<details>` to visually compress the document. Summary text should include the section name so clicking still navigates conceptually.
-
-```markdown
-<details>
-<summary>§N SectionName — ✅ 已確認（一行說明，例如 "code A1 已實作"）</summary>
-
-## §N SectionName (已確認)
-
-(full section content — table, 補充說明 blockquote, nested <details> history, etc.)
-
-</details>
-
----
-```
-
-Rules:
-- Also append `(已確認)` to the `##` header so Claude's Step 3.5 skip-scan still applies
-- **Do not** wrap sections that still have pending actions (e.g., backend coordination, unchecked decisions, action items the user must carry out)
-- Claude proposes which sections qualify when user asks; Claude does **not** auto-wrap — user confirms scope first
-
-When the user writes a question, clarification request, or asks for a recommendation **inside a `補充說明` field** (detected by: `?` / `？` / `請說明` / `請詳細` / `進一步說明` / `請解釋` / `你建議` / `你認為` / references to undefined terms), Claude **must answer by editing that same `補充說明` field in the decision file**, NOT by replying in chat only.
-
-**Rationale**: the decision table is the single source of truth for this interaction. Chat messages are ephemeral and scroll away; in-file answers stay attached to the exact decision block they concern, preserve reviewability, and match the spirit of an interactive document.
-
-**Response format** (append inside the existing `補充說明` blockquote; do NOT overwrite the user's original note):
-
-```markdown
-> **補充說明**
-> > _(使用者原文保留)_
->
-> **Claude 回覆（YYYY-MM-DD）**
->
-> (content: markdown tables / file:line refs / recommendations, written inside the blockquote)
-```
-
-**When Claude has a recommendation for an un-checked decision row** (e.g., `[ ] [ ] [ ]`):
-
-- Write the recommendation and reasoning **into the 相關 `補充說明`** (prose or table form)
-- **Do NOT pre-check `[x]` on behalf of the user** — the checkbox represents the user's authorization, not Claude's judgment
-- End with a call-to-action: `"請勾選後回覆 OK，我再開始實作"`
-
-**Chat reply on this turn**: one short pointer only — e.g., `"已寫入 §1/§3/§5 補充說明，請查閱決策表"`. Do NOT duplicate the content in chat.
-
 ### Step 4: Read the Decisions
 
 1. Re-Read the file
-   - Sections marked `(已確認)` → parse checkbox results only; do not re-read or re-evaluate supplementary notes (2026-04-17 added)
 2. Parse the check results
 3. Compare differences against current state
 4. Generate a change summary table:
@@ -343,78 +276,78 @@ When the user writes a question, clarification request, or asks for a recommenda
 2. Implement item by item (modify code/config)
 3. After completion, compare against the original decision table to ensure nothing is missed
 
-### Step 6: Integrate Summary into PROJECT_JOURNAL.md + Rename Decision File (Mandatory, Cannot Be Skipped)
+### Step 6: Inline Closure Summary + Decision File Cleanup (Mandatory, Cannot Be Skipped)
 
-> **This step is mandatory**. After Step 5 implementation completes, all sub-steps **must be completed in the same reply**.
-> Forbidden: replying to the user directly after implementation without updating PROJECT_JOURNAL.md, leaving the integration to the next reply, waiting for the user to remind before doing it.
+> **2026-04-22 revised**: replaces old "write to `.local/docs/summary/` + rename" flow with **inline closure summary** — append summary block to the end of the decision file itself, then rename `CLOSED_`.
+> **This step is mandatory**. After Step 5 implementation completes, the inline summary + rename + living doc update **must be completed in the same reply**.
+> Forbidden: replying to the user after implementation without appending the inline summary, leaving any sub-step to the next reply, waiting for the user to remind.
 
-**New flow (2026-04-22 revised)**: summary content is written **directly into `PROJECT_JOURNAL.md`** as a complete entry within the appropriate functional section. Separate `summary/*.md` files are **no longer produced** — they were a level of indirection; integrating full summaries into the journal makes it self-contained as the project overview.
+**Append first, rename second, update living third** (aligned with CLAUDE.md Rule 17):
 
-#### 6.1 Write Complete Summary Entry into PROJECT_JOURNAL.md (Mandatory)
+#### 6.1 Append Inline Closure Summary (Mandatory)
 
-Target file: `.local/docs/living/PROJECT_JOURNAL.md` (if not exists, initialize per Section G Step 1).
-
-**Decide where to append**: identify the functional section (`## <Functional Area>`, e.g., `## OCR Pipeline`, `## Skill 規則`, `## Setup`) that this decision belongs to. If no matching section exists, create a new one and add it to the table of contents.
-
-**Append one complete `###` entry** at the top of that section (newest first):
+Append the closure summary block to the **end of the existing decision file** (preserving all original §1-§n decision content, checkmarks, supplementary notes, and any Claude response blocks). Format per `references/naming.md` §5.2:
 
 ```markdown
-### YYYY-MM-DD — <Topic>
+---
 
-**背景**：
-(Reason for trigger, 1–3 sentences — what prompted this decision, what problem it addresses)
+# 結案摘要（Closure Summary）
 
-**最終決策**：
-| § | 選項 | 採用 |
+> **結案時間**：YYYY-MM-DD HH:MM
+> **狀態**：✅ 已執行
+> **Commits**：`<hash>` (pending if not yet committed)
+
+## 背景
+(1-3 sentences on trigger reason)
+
+## 最終決策（逐項目 §n.m）
+| 項目 | 採納選項 | 備註 |
 |---|---|---|
-(One row per decision block, fully listing adopted options)
 
-**變更清單**：
+## 變更清單
 | 檔案 | 變更 |
 |---|---|
 
-**🔖 保留候選**（未採納但可重啟）：
-(Required only for non-single-path decisions — see 6.2; write "無" if single-path)
-- **候選 X**：<description>
-  - 未採納原因：...
-  - 重啟時機：...
+## 🔖 保留候選（僅非單一路線決策適用）
+(If all blocks are single-path → write "無")
 
-**遺留項**：
-(Write "無" if none; or list items deferred to TODO or a follow-up session)
-
-**來源**：[`CLOSED_<topic>.md`](../decision/CLOSED_<topic>.md)
+## 未解決遺留項
+(None or list)
 ```
 
-**Integrity requirement**: all five elements (背景／決策／變更／保留候選／遺留項) must be present — readers should not need to jump to `CLOSED_*.md` to understand what was decided. `CLOSED_*.md` is for drill-down into interaction history (checkbox trails, 補充說明 rounds), not for the decision itself.
+#### 6.2 Non-Single-Path Judgment (Mandatory, aligned with Rule 17)
 
-#### 6.2 Non-Single-Path Judgment (Mandatory)
-
-Determine whether each set of decision options is mutually exclusive:
-- Picking A precludes B → **single-path** → only record the final choice in the entry's 最終決策 table
-- Multiple can coexist → **non-single-path** → retain unselected options in the entry's 🔖 保留候選 block
-- Candidate cleanup: unvisited for over 6 months or superseded by a new decision → mark as `(deprecated)`, **do not delete** from PROJECT_JOURNAL.md
-- When a new conversation has a similar need → first grep PROJECT_JOURNAL.md 🔖 blocks; restart if possible
+For each decision block:
+- **Single-path** (mutually exclusive, "選 A preclude B") → record only the adopted option; **do not** list unselected items
+- **Non-single-path** (multi-select / "可複選") → list unselected options in the "🔖 保留候選" section of the inline summary, with:
+  - Reason not selected
+  - Restart timing
+- Candidate cleanup: unvisited > 6 months or superseded → mark "已作廢", **do not delete** (historical record)
+- New conversation with similar need → first read living doc's "🔖 保留候選" table; restart if applicable
 
 #### 6.3 Rename the Decision File (Mandatory)
 
-- **Proactively rename** `.local/docs/decision/<topic>.md` → `.local/docs/decision/CLOSED_<topic>.md`
-  - Use: `mv .local/docs/decision/<topic>.md .local/docs/decision/CLOSED_<topic>.md`
-- `CLOSED_*.md` retains the **full interactive history** (checkboxes, 補充說明 rounds, Claude replies) — for readers who need to drill into "why this path, what was considered"
-- PROJECT_JOURNAL.md provides the **converged summary** — for readers who need "what was done"
+- **Proactively rename** `.local/docs/decision/YYMMDD_<topic>_decision.md` → `.local/docs/decision/CLOSED_YYMMDD_<topic>_decision.md`
+  - Use: `mv .local/docs/decision/YYMMDD_<topic>_decision.md .local/docs/decision/CLOSED_YYMMDD_<topic>_decision.md`
+- The `CLOSED_` prefix indicates the decision process is complete; the inline summary (appended in 6.1) is the authoritative record
 - If the user explicitly says "delete the decision record" → delete instead and note it in the reply
 
-#### 6.4 Update "最後更新" Timestamp (Mandatory)
+#### 6.4 Update Living Document (Mandatory, Cannot Be Skipped)
 
-Update the header line `> 最後更新：YYYY-MM-DD HH:MM` in PROJECT_JOURNAL.md.
+After renaming, immediately update `.local/docs/living/PROJECT_JOURNAL.md`:
+- If the file does not exist, initialize it first (see Section G Step 1)
+- Append new row to "決策紀錄" table: date, topic, adopted options summary (1 line), link to `CLOSED_YYMMDD_<topic>_decision.md` (the **only** source file now — no separate summary file exists)
+- If the inline summary contains "🔖 保留候選" → append each to living doc's "🔖 保留候選" table
+- Update "最後更新" timestamp
 
 #### 6.5 Self-Check (Mandatory)
 
 After Step 6 completes, confirm:
-- [ ] PROJECT_JOURNAL.md contains a new `###` entry with all five required elements (背景／決策／變更／保留候選／遺留項)
-- [ ] Entry is placed under the correct functional `##` section (create new section if none exists; add to TOC)
-- [ ] Entry back-references `CLOSED_<topic>.md` via relative link
-- [ ] `.local/docs/decision/<topic>.md` has been renamed to `CLOSED_<topic>.md`
-- [ ] PROJECT_JOURNAL.md "最後更新" timestamp has been refreshed
+- [ ] Inline closure summary has been appended to the end of `YYMMDD_<topic>_decision.md` (before rename)
+- [ ] Inline summary includes: background, decision table (per §n.m item), change list, preserved candidates (if any non-single-path), leftover items
+- [ ] `.local/docs/decision/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`
+- [ ] `.local/docs/living/PROJECT_JOURNAL.md` has been updated with this decision's entries (link → `CLOSED_*_decision.md`)
+- [ ] **No** `.local/docs/summary/` file has been created (directory was removed 2026-04-22; writing there is a violation)
 - Any not done → complete immediately; **must not end the reply**
 
 ### Design Principles
@@ -769,57 +702,145 @@ One file per project; entries are append-only (never overwrite existing rows).
 
 ### Step 1: Initialize (First-Time Only)
 
-If `.local/docs/living/PROJECT_JOURNAL.md` does not exist, create the directory and initialize the file using the functional-section layout (2026-04-22 revised):
+If `.local/docs/living/PROJECT_JOURNAL.md` does not exist, create the directory and initialize the file:
 
 ```markdown
 # 專案活文件（Project Journal）
 
-> 建立：YYYY-MM-DD　最後更新：YYYY-MM-DD HH:MM　專案：<project-name>
-
-## 目錄
-
-(A linked TOC mirroring the `##` sections below; sections added on demand as new functional areas appear — e.g., OCR Pipeline, Skill 規則, Setup, 部署)
+> 建立：YYYY-MM-DD
+> 最後更新：YYYY-MM-DD HH:MM
+> 專案：<project-name>（from directory name or CLAUDE.md）
 
 ---
 
-<!--
-Populate this file by appending full `###` entries under a matching `##` functional section.
-Each `###` entry must contain all five elements: 背景／最終決策／變更清單／🔖 保留候選／遺留項, ending with a link back to CLOSED_*.md. See decide Step 6.1 / board Step 3.3 for the template.
+## 決策紀錄
 
-Ordering inside each `##` section: newest entry on top (descending date).
--->
+| 日期 | 主題 | 最終決策摘要 | 來源文件 |
+|------|------|------------|---------|
+
+---
+
+## 討論成果
+
+| 日期 | 主題 | 關鍵成果 | 來源文件 |
+|------|------|---------|---------|
+
+---
+
+## 🔖 保留候選（未採納但可重啟）
+
+| 來源主題 | 選項說明 | 未採納原因 | 重啟時機 |
+|---------|---------|----------|---------|
 ```
-
-Functional-section layout replaces the earlier table-based design (決策紀錄 / 討論成果 / 保留候選 tables) because decide Step 6.1 and board Step 3.3 now write **complete summaries** directly into the journal, not one-line pointers. Reading by functional area surfaces related decisions next to each other.
 
 ### Step 2: Append from Board Closure
 
-Called internally after `/team board` Step 3.2+3.3. Input: the renamed whiteboard file path.
+Called internally after `/team board` Step 3.2. Input: the renamed whiteboard file path.
 
-Actual write is performed by board Step 3.3 itself (write a full `###` entry into the matching `##` functional section, five elements required, back-link to `CLOSED_*`). `/team living` here only validates that the entry was added and refreshes the 最後更新 timestamp.
+1. Read the closure summary section from `CLOSED_YYMMDD_topic.md`
+2. Append one row to the "討論成果" table:
+   - Date (from file or closure summary)
+   - Topic (from filename or whiteboard title)
+   - Key outcomes (1–2 sentences condensed from "Key Outcomes" bullet points)
+   - Link: `[CLOSED_YYMMDD_topic.md](.local/docs/whiteboard/CLOSED_YYMMDD_topic.md)`
+3. If the whiteboard's "決策紀錄" table has entries → also append each to "決策紀錄" table
+4. Update "最後更新" timestamp
 
 ### Step 3: Append from Decide Closure
 
-Called internally after `/team decide` Step 6.1+6.3. Actual write is performed by decide Step 6.1 itself (full `###` entry with five elements). `/team living` here only validates and refreshes timestamp.
+Called internally after `/team decide` Step 6.4. Input: the renamed decision file path (no separate summary file exists — summary is inline at file end).
+
+1. Read the **inline closure summary block** at the bottom of `CLOSED_YYMMDD_<topic>_decision.md`
+2. Append rows to the "決策紀錄" table — one row per major decision block:
+   - Date, topic, adopted option summary (1 line), link **only** to `CLOSED_YYMMDD_<topic>_decision.md` (the inline summary inside is the authoritative record)
+3. If the inline summary contains "🔖 保留候選" section → append each candidate to living doc's "🔖 保留候選" table
+4. Update "最後更新" timestamp
 
 ### Step 4: Regen Flow
 
-For `/team living regen` (災後復原 / 大量重整):
-1. Back up the current file to `PROJECT_JOURNAL.md.bak`
-2. Reset body to the Step 1 initialization template (keep header, clear `##` sections)
-3. Scan all `CLOSED_*` files in `.local/docs/whiteboard/` and `.local/docs/decision/`
-4. For each, re-derive a five-element `###` entry (background from 背景／context, decisions from checkboxes + 補充說明, changes from git log around the closure commit, preserved candidates from unchecked non-mutex options, leftover from pending notes)
-5. Group entries under appropriate `##` functional sections (heuristic: filename prefix, topic keywords)
-6. Report: "Rebuilt from N whiteboard sessions, M decisions; backup at PROJECT_JOURNAL.md.bak"
+For `/team living regen`:
+1. Clear the rows from all three tables (keep headers and template structure)
+2. Scan all `CLOSED_*` files in `.local/docs/whiteboard/` and `.local/docs/decision/`
+3. For each CLOSED file, parse the **inline closure summary block** at its end
+4. Rebuild the three tables chronologically by date
+5. Report: "Rebuilt from N whiteboard sessions, M decisions"
+
+Note: `.local/docs/summary/` directory no longer exists (removed 2026-04-22). Do not scan it.
 
 ### Design Principles
 
-- **Completeness over brevity**: each `###` entry is self-contained (五要素齊全) — reading the journal alone answers "what was decided and why"
-- **Functional sections over chronology**: readers ask "what do we know about OCR pipeline?", not "what happened on 2026-04-22"
-- **Append-only**: entries are added, never deleted (permanent historical record); superseded candidates marked `(deprecated)` not removed
+- **Append-only**: entries are added, never deleted (permanent historical record)
 - **One file per project**: complete picture of all outcomes in one place
-- **Auto-updated on closure**: no manual maintenance needed — board and decide write directly; `/team living` only verifies
-- **Linked to source**: every entry back-links to `CLOSED_*` for drill-down into full interactive history
+- **Auto-updated on closure**: no manual maintenance needed — board and decide call it automatically
+- **Preserved candidates visible**: the 🔖 section surfaces prior unselected options before redesigning
+- **Linked to source**: every entry links back to the renamed `CLOSED_*` file for drill-down
+
+---
+
+## H. `/team follow-up` — Resume Board / Decision File Processing
+
+Re-enter the processing flow of an existing whiteboard or decision file without retyping context. The user supplies only a filename (or prefix); Claude locates the file, parses it, and continues.
+
+### Usage
+
+| Usage | Behavior |
+|---|---|
+| `/team follow-up <file>` | Resume processing of the specified file |
+| `/team follow-up` | No argument → list recent 5 non-closed files, let user select |
+
+Filename accepts: full name, no-extension form, or prefix (e.g. `260422_team` matches one of the day's files). Full matching rules and multi-candidate UI are in `references/followup.md` §2.
+
+### Step 1: Parse argument + locate file
+
+1. Apply matching strategy (see `references/followup.md` §2)
+2. Search scope: `.local/docs/whiteboard/` + `.local/docs/decision/`
+3. **Filter out `CLOSED_*` files silently** at candidate listing stage
+4. Exact-typed `CLOSED_xxx` → special-case message "file is closed, see summary at …"
+5. Zero matches → list nearest 3 candidates via AskUserQuestion
+6. Multiple matches → list all candidates via AskUserQuestion (type suffix > directory > mtime)
+
+### Step 2: Dispatch by file type
+
+Detected via filename suffix (`_board` vs `_decision`) with directory as fallback:
+
+| Type | Handler | Reference |
+|---|---|---|
+| `_board.md` in `.local/docs/whiteboard/` | whiteboard follow-up handler | `references/followup.md` §4 |
+| `_decision.md` in `.local/docs/decision/` | decision follow-up handler | `references/followup.md` §3 |
+
+### Step 3: Parse (skip closed blocks)
+
+For each `##` / `###` block:
+- Heading contains `✅` **or** body contains `<!-- closed -->` → skip (and auto-add `✅` if only `<!-- closed -->` is present, for visual consistency)
+- Otherwise → parse checkboxes, supplementary notes, and free-form input (`**答案**: ____`)
+
+### Step 4: Handler-specific actions
+
+**Decision file**:
+1. Detect mutually-exclusive double-check violations → pause and list conflicts
+2. Detect unchecked single-path blocks → pause and mark block IDs
+3. Scan supplementary notes for new requirements (imperative verbs like 請/要/need/must) → list as "new requirements" in change summary
+4. Free-form input unfilled (`**答案**: ____`) → AskUserQuestion to collect, Edit file with answer
+5. Generate change summary → proceed to implementation
+6. On completion → run `/team decide` Step 6 closure flow (summary + rename + living doc)
+
+**Whiteboard file**:
+1. Collect all non-closed Pending items
+2. AskUserQuestion: which item to advance? (include "just load context" option)
+3. Item chosen → do the work, mark item completed in whiteboard
+4. "Just load context" chosen → load file into context, no further action
+
+### Step 5: Error boundaries
+
+See `references/followup.md` §9 for: directory-as-argument, path traversal, malformed files, duplicate section IDs, "Other" in AskUserQuestion.
+
+### Design Principles
+
+- **Context-free resumption**: one filename = full flow re-entry
+- **Silent closed-file filtering**: `CLOSED_*` never appears in candidates unless typed exactly
+- **Block-level closure respected**: both `✅` and `<!-- closed -->` markers skip blocks
+- **UI consistency**: all disambiguation uses AskUserQuestion (aligns with CLAUDE.md Rule 15)
+- **Reference-backed**: this section is the contract; `references/followup.md` is the implementation spec
 
 ---
 

@@ -2,16 +2,17 @@
 
 ## 功能說明
 
-整合七種與使用者互動的協作模式：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記整理、交接文件產出、工作報告、專案活文件維護。
+整合八種與使用者互動的協作模式：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記整理、交接文件產出、工作報告、專案活文件維護、既有互動檔接續（follow-up）。
 
 > **2026-04-17 改名**：`/team-office` → `/team`（名稱過長、補全體驗差）；`notes` 子命令改為單數 `note`。
 > **2026-04-17 新增**：`report` 子命令從 `/ask` 搬入（工作報告屬於協作產出）。
 > **2026-04-22 新增**：`living` 子命令，白板/決策表結案時自動維護的專案活文件；白板與決策表結案流程強制主動化（`CLOSED_` 前綴更名 + 活文件更新）。
+> **2026-04-22 新增**：`follow-up` 子命令 — 以 `/team follow-up <file>` 一鍵接續既有 whiteboard / decision 檔；白板檔名加 `_board` 後綴；決策檔檔名補 `YYMMDD_<topic>_decision.md` 規範；新增 `references/naming.md`、`references/followup.md` 拆分細節規則。
 
 ## 使用方式
 
 ```
-/team <todo|board|decide|note|handoff|report|living> [args...]
+/team <todo|board|decide|note|handoff|report|living|follow-up> [args...]
 ```
 
 ## Model
@@ -38,6 +39,7 @@
 | `handoff [--share]` | 交接文件（離開前產出進度 + 環境 + 待辦文件） |
 | `report [scope]` | 從修改紀錄生成簡報用工作報告（full / weekly / 指定區間） |
 | `living [view\|regen]` | 專案活文件（自動維護；手動查看或重建） |
+| `follow-up <file>` | 接續既有 whiteboard / decision 檔（支援省略副檔名 + 前綴模糊匹配；`CLOSED_*` 自動過濾） |
 
 ## 結案流程更新（2026-04-22）
 
@@ -66,11 +68,23 @@ team/
 ├── SKILL.md
 ├── README.md
 ├── references/
-│   └── interaction-modes.md     ← 四種互動模式說明（單選/多選/填寫/混合）
+│   ├── interaction-modes.md     ← 四種互動模式說明（單選/多選/填寫/混合）
+│   ├── naming.md                ← 檔名格式、時間同步（Bash date 強制）、CLOSED 前綴與區塊結案規則
+│   └── followup.md              ← /team follow-up 完整流程、檔名匹配、AskUserQuestion 互動、自由輸入題處理
 └── assets/
     ├── collab-template.md       ← 決策表初始模板
     └── whiteboard-template.md   ← 白板初始模板
 ```
+
+## References 目錄導覽
+
+> 依 CLAUDE.md Rule 19 規範，每個 skill 的 `references/` 子目錄都需提供本類導覽表，讓 Claude 與使用者快速定位規則文件。
+
+| 檔名 | 用途 | 何時 Read | 依賴 |
+|---|---|---|---|
+| `interaction-modes.md` | 四種互動模式（單選/多選/填寫/混合）語法與表格範例 | `/team decide` 生成決策表時；`/team follow-up` 解析自由輸入題時 | 無（獨立參考） |
+| `naming.md` | 檔名格式統一規範、Bash date 時間同步、CLOSED 前綴與 `✅ / <!--closed-->` 區塊結案、內嵌結案摘要模板、skill 子目錄職責 | 所有子指令產生新檔前；結案時（append 內嵌摘要 + rename）；使用者提出新檔時驗證命名 | 無 |
+| `followup.md` | `/team follow-up` 完整流程、檔名匹配策略、AskUserQuestion 互動、decision/whiteboard 處理器、自由輸入題處理 | `/team follow-up` 呼叫時 | 依賴 `naming.md`（檔名規範、CLOSED 過濾）、`interaction-modes.md`（自由輸入題語法） |
 
 ## 整合來源
 

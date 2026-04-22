@@ -1,24 +1,27 @@
-# 支援的互動模式
+# Supported Interaction Modes
 
-根據主題性質選擇最適合的模式：
+Pick the mode that best fits the topic. Output text in the mode templates below uses Traditional Chinese (project language) — the rule text is English to match SKILL.md conventions.
 
-**模式 A — 單選矩陣**（如權限等級配置）
+**Mode A — Single-Select Matrix** (e.g. permission level configuration)
 ```markdown
 | # | 項目 | [ ] 低 | [ ] 中 | [ ] 高 |
 ```
-每列僅勾選一個選項，表示選定的等級/類別。
+Each row admits exactly one check, representing the chosen level/category.
 
-**模式 B — 多選清單**（如功能開關、遷移項目）
+**Mode B — Multi-Select List** (e.g. feature flags, migration items)
 ```markdown
 | # | 項目 | 說明 | [ ] 啟用 |
 ```
-可勾選多個項目，表示啟用/選取。
+Multiple rows may be checked; each check represents "enabled / selected".
 
-**模式 C — 自由填寫**（如參數配置、名稱對照）
+**Mode C — Free-Form Input** (e.g. parameter values, name mappings)
 ```markdown
 | # | 項目 | 現狀 | 新值（請填寫） |
 ```
-使用者直接在表格中填入文字值。
+User types values directly into the table cells. For standalone free-form questions (outside tables), use the unified syntax defined in `SKILL.md §C.2` and `followup.md §6`:
+```markdown
+**答案**: ____________
+```
 
-**模式 D — 混合模式**
-上述模式可混合使用，不同區塊採用不同模式。
+**Mode D — Hybrid**
+The modes above may be mixed; different sections within one document may use different modes.

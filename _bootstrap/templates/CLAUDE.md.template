@@ -79,6 +79,8 @@
 - `.claude/skills/README.md` 已更新
 - `Sekai_workflow/` 對應資料夾已同步
 - CLAUDE.md 可用 Skills 列表已更新
+- **子目錄結構符合 Rule 19**：至少含 `references/`；`assets/` 僅放模板與範例資料（禁可執行檔）；`agents/` 與 `scripts/` 為選配（見 Rule 19 取捨）
+- **SKILL.md 僅放對外合約**（子指令路由、使用方式、步驟概要）；細節規則 / 解析器邏輯 / 資料結構一律放 `references/`
 
 ### 11. 新專案自動初始化 Skill
 - 進入新專案時，自動偵測並初始化 Skill 環境
@@ -108,7 +110,7 @@
 - **【強制】分支問題必須拆成可勾選選項**：有條件分支的問題（例：「資料可否外送？」下有 A/B/C 三種可能答案），必須列成多個互斥 `[ ]` 子項讓使用者勾選，**禁止** `[ ] 條件說明` 後留白要使用者自填字串。自由填寫格式僅限純數值／字串輸入題
 - CLI 回覆僅負責：告知文件路徑、摘要重點、等待使用者確認
 - 使用者於文件中完成選擇後回覆「OK／完成」，Claude 重新讀檔、**解析補充說明欄位**、生成變更摘要、再執行實作
-- **實作完成 → 摘要寫入 PROJECT_JOURNAL.md → 重命名 `CLOSED_` 前綴**（流程見 17.4）
+- **實作完成 → 原檔末尾 append 內嵌結案摘要 → 重命名 `CLOSED_` 前綴 → PROJECT_JOURNAL.md 寫一行索引**（流程見 17.4）
 - **尚未勾選／尚未實作者不得重命名**：決策文件在使用者尚未勾選 A/B/C、或勾選後尚未進入實作前一律保留原名；僅在「實作完成」這個明確節點才觸發重命名。
 
 #### 17.1 決策表 vs 白板 vs TODO vs PROJECT_JOURNAL — 四者用途互斥對照
@@ -119,7 +121,7 @@
 | **使用者動作** | 勾選選項 | 多輪對話補充 | 項目勾除 | 讀（不手寫） |
 | **互斥分支選項** | ✅ 必須 | ❌ | ❌（已決定） | ❌ |
 | **生命週期** | 實作完成 → `CLOSED_` | 結案 → `CLOSED_` | 常駐單檔 | **永久累積** append-only |
-| **收斂方式** | 完整摘要寫入 PROJECT_JOURNAL.md + 重命名 | 完整摘要寫入 PROJECT_JOURNAL.md + 重命名 | 完成項移歸檔區 | 由 decide/board 結案自動 append |
+| **收斂方式** | 內嵌摘要於原檔末尾 + 重命名 + PROJECT_JOURNAL 索引 | 內嵌摘要於原檔末尾 + 重命名 + PROJECT_JOURNAL 索引 | 完成項移歸檔區 | 由 decide/board 結案自動 append 索引 |
 
 - **決策表觸發**：2+ 互斥選項、多檔案／多模組影響、資源權衡、Skill／規則修改
 - **白板觸發**：系統諮詢、架構探索（尚未有明確選項）、疑難排解多輪、範例分析
@@ -139,32 +141,74 @@
 - **不適用**：單選題、互斥選項組、各選項有顯著資源／時間權衡需個別取捨的情境
 - 違反此規則：複選題未附「都做」、強迫使用者勾每一項
 
-#### 17.4 決策／白板結案流程 — PROJECT_JOURNAL.md 是專案概覽
+#### 17.4 決策／白板結案流程 — 原檔自足 + PROJECT_JOURNAL 索引（2026-04-22 改版）
 
-**PROJECT_JOURNAL.md（`.local/docs/living/PROJECT_JOURNAL.md`）是專案的單一權威總覽**，累積所有決策、討論成果、保留候選；一個新進入專案的人（或新 Claude session）讀它即可掌握「專案做了什麼、決定了什麼、為什麼」。
+**核心原則**：結案摘要**內嵌於原檔末尾**（使單檔自給自足），PROJECT_JOURNAL.md 只作為**索引**（一行一決策，連回 `CLOSED_*` 原檔）。**不再產出 `.local/docs/summary/` 獨立摘要檔**；該目錄已於 2026-04-22 刪除。
 
-**核心原則**：摘要內容**完整寫入** PROJECT_JOURNAL.md（非表格一列式指標），可依**功能區塊**拆 section，但每筆必須自足（背景 / 最終決策 / 變更 / 保留候選 / 遺留項五項齊全）。**不再產出 `.local/docs/summary/` 獨立摘要檔**。
+**原檔內嵌摘要必須五要素齊全**：背景 / 最終決策（逐項目 §n.m）/ 變更清單 / 🔖 保留候選（僅非單一路線）/ 未解決遺留項。統一模板見 `.claude/skills/team/references/naming.md` §5.2。
 
-**PROJECT_JOURNAL.md 建議結構**：依功能區塊（例：OCR Pipeline、Skill 規則、Setup、部署）拆 `##` section，每 section 內依日期倒序排 `###` entry，每 entry 含五要素（背景／決策／變更／保留候選／遺留項）+ 反向連結 `CLOSED_*.md`。
+**PROJECT_JOURNAL.md 定位**：跨專案概覽的入口檢索表；每筆紀錄單列，欄位為 日期 / 主題 / 一句話決策摘要 / 連結 `CLOSED_*.md`。新進入專案的人（或新 Claude session）先讀 PROJECT_JOURNAL 索引，點進 `CLOSED_*.md` 讀完整五要素與互動歷史。
 
 **決策表結案**（`/team decide` Step 6 強制流程）：
 1. 實作完成
-2. **在 PROJECT_JOURNAL.md 對應功能區塊寫入完整摘要 entry**（五要素齊全；連結回 `CLOSED_*`）
-3. 重命名原決策檔：`decision/<topic>.md` → `decision/CLOSED_<topic>.md`
-4. 更新 PROJECT_JOURNAL.md「最後更新」時間戳
+2. **於原決策檔末尾 append 內嵌結案摘要**（五要素齊全，保留原 §1-§n 勾選痕跡與補充說明）
+3. 重命名原決策檔：`decision/<topic>_decision.md` → `decision/CLOSED_<topic>_decision.md`
+4. **在 PROJECT_JOURNAL.md 決策紀錄表 append 一行索引**（連結指向 `CLOSED_*_decision.md`）
+5. 若內嵌摘要含「🔖 保留候選」→ 同步 append 至 PROJECT_JOURNAL 保留候選表
+6. 更新 PROJECT_JOURNAL.md「最後更新」時間戳
 
 **白板結案**（`/team board` Step 3 強制流程）：
 1. 討論結束
-2. 於白板檔末尾 append `## Closure Summary`（關鍵成果 + 決策 + 遺留項；互動紀錄留在原檔）
-3. **在 PROJECT_JOURNAL.md 對應功能區塊寫入完整摘要 entry**（同決策表步驟 2）
-4. 重命名：`whiteboard/YYMMDD_<topic>.md` → `whiteboard/CLOSED_YYMMDD_<topic>.md`
+2. **於白板檔末尾 append 內嵌結案摘要**（五要素，統一模板同決策表）
+3. 重命名：`whiteboard/YYMMDD_<topic>_board.md` → `whiteboard/CLOSED_YYMMDD_<topic>_board.md`
+4. **在 PROJECT_JOURNAL.md 討論成果表 append 一行索引**（連結指向 `CLOSED_*_board.md`）
 5. 更新 PROJECT_JOURNAL.md「最後更新」時間戳
 
 **`CLOSED_` 前綴為什麼不是刪除**：
-- `CLOSED_*.md` 保留**完整互動歷史**（勾選軌跡、補充說明輪次、Claude 回覆）——給需要鑽取的人用
-- PROJECT_JOURNAL.md 提供**已收斂的摘要**——給新進者／跨 session 的人讀
-- 兩者分工：摘要回答「做了什麼」，原檔回答「為什麼這樣做／過程中考慮過什麼」
+- `CLOSED_*.md` = **原檔互動歷史 + 末尾內嵌五要素摘要**（單檔自足，給需要鑽取的人與新 session 用）
+- PROJECT_JOURNAL.md = **跨決策索引表**（快速瀏覽專案做過哪些決定，點進去讀詳情）
+- 兩者分工：索引快查「有哪些決定」，原檔回答「做了什麼／為什麼／過程中考慮過什麼」
 - 使用者明示「刪除」才刪；預設動作是重命名保留
+
+**保留候選規則**：
+- 單一路線區塊（互斥選項）→ 只記最終採納項，不保留未選項
+- 非單一路線區塊（可複選）→ 內嵌摘要中以「🔖 保留候選（未採納但可重啟）」列出未選項 + 未採納原因 + 重啟時機
+- 候選超過 6 個月未重啟或被新決策取代 → 標註「已作廢」，**不刪除**（歷史紀錄）
+
+### 19. Skill Reference 結構強制（2026-04-22 新增）
+
+所有 `.claude/skills/<skill>/` 必須採用 **reference 分離**架構：SKILL.md 只放對外合約，細節規則拆到 `references/` 子目錄。對齊 Claude Code 官方 `skill-creator` 架構。
+
+#### 19.1 子目錄職責
+
+| 子目錄 | 必選/選配 | 內容 |
+|---|---|---|
+| `references/` | **必選** | 細節規則 `.md`，Claude 按需 Read |
+| `assets/` | 選配 | 模板 + 範例資料（禁可執行檔） |
+| `agents/` | 選配（延遲導入） | Agent 派遣 prompt 模板 |
+| `scripts/` | 選配（有條件） | 可執行邏輯 — skill 專屬工具才建；跨 skill 可執行放 `.claude/hooks/` |
+
+#### 19.2 SKILL.md 對外合約包含
+
+- frontmatter（name, description, model, argument-hint, allowed-tools）
+- Subcommand routing（總覽表）
+- Common rules（跨子指令共用規則）
+- 各子指令：Usage + Steps 概要（細節 reference `references/<detail>.md`）
+
+#### 19.3 禁止放於 SKILL.md（必須移至 references/）
+
+- 解析器邏輯 / regex 規則
+- 資料結構定義
+- 多頁流程細節（> 3 個 nested sub-step 就該拆出）
+- Template 字串（歸 `assets/`）
+
+#### 19.4 舊 skill 遷移
+
+新建 skill 強制採用；舊 skill 只在改動時順手拆（不為拆而改動穩定 skill）。
+
+#### 19.5 Reference 檔語言
+
+與對應 SKILL.md 同語言。Output template 範例內的文字可保留專案語言。
 
 ## 可用 Skills
 
