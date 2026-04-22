@@ -2,6 +2,17 @@
   "_comment": "Claude Code Hooks 模板 — 由 sp-init.bat 安裝到 .claude/settings.local.json",
   "_design": "command hooks 路徑使用 {{PROJECT_DIR}} 佔位符，由 sp-init.bat 替換為實際專案路徑",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node {{PROJECT_DIR}}/.claude/hooks/log_agent_dispatch.cjs"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write",

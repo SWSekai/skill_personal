@@ -78,6 +78,16 @@
       "files": ["memo/SKILL.md", "memo/README.md"]
     },
     {
+      "name": "dispatch",
+      "command": "/dispatch",
+      "description": "任務分派路由：依 CLAUDE.md Rule 18 啟發法選 model 層級，透過 Agent 工具產生真實切換並寫入 .local/model_dispatch.log",
+      "model": "haiku",
+      "trigger": "手動呼叫 /dispatch <task>",
+      "allowed_tools": ["Agent", "Read", "Bash(date *)", "Bash(mkdir *)", "Bash(cat *)"],
+      "files": ["dispatch/SKILL.md", "dispatch/README.md"],
+      "companion_hook": "hooks/log_agent_dispatch.cjs"
+    },
+    {
       "name": "commit-push",
       "command": "/commit-push",
       "description": "主要 commit & push 入口：品質檢查（Opus 內嵌）→ 修改日誌（Haiku 內嵌）→ README 更新 → commit → push → sekai-workflow 同步 → deploy 評估 → Context 清理 → 經驗回流。10 個步驟完整流程，所有日誌僅存本地。",
