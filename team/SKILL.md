@@ -1,15 +1,15 @@
 ---
 name: team
-description: "One-stop entry for interactive collaboration: AI TODO handling, live whiteboard, Markdown interactive decision tables, tech notes, handoff documents, and work reports. Subcommand routing: todo / board / decide / note / handoff / report."
+description: "One-stop entry for interactive collaboration: AI TODO handling, live whiteboard, Markdown interactive decision tables, tech notes, handoff documents, work reports, and living document maintenance. Subcommand routing: todo / board / decide / note / handoff / report / living."
 model: sonnet
 effort: medium
-argument-hint: "<todo|board|decide|note|handoff|report> [args...]"
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(mkdir *)
+argument-hint: "<todo|board|decide|note|handoff|report|living> [args...]"
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(mkdir *), Bash(mv *)
 ---
 
 # /team — Interactive Collaboration Merged Skill
 
-Integrates six collaboration modes that interact with the user. The first argument determines the subcommand.
+Integrates seven collaboration modes that interact with the user. The first argument determines the subcommand.
 
 ## Subcommand Routing
 
@@ -21,6 +21,7 @@ Integrates six collaboration modes that interact with the user. The first argume
 | `/team note [topic]` | Structured tech notes | tech-notes |
 | `/team handoff` | Handoff document generation | handoff |
 | `/team report [scope]` | Generate work reports from modify logs | report (moved from `/ask`) |
+| `/team living [view\|regen]` | Living document — accumulates outcomes from all board/decide closures | living (new) |
 
 When no argument is provided, ask the user to specify a subcommand.
 
@@ -114,12 +115,55 @@ Each time the user asks a follow-up or continues discussion:
    - Update "Last Updated" date
 3. Discussion direction shifts → add a new section, but keep the same document
 
-### Step 3: Closure and Archival
+### Step 3: Closure and Archival (Mandatory, Cannot Be Skipped)
 
-1. Change status to **Completed** or **Paused**
-2. Confirm all pending items have an owner or follow-up plan
-3. File stays in `.local/docs/`, not under version control
-4. Contains reusable experience → evaluate writing it into a guide (same as `/build commit` Step 9)
+> **This step is mandatory.** When the user indicates the discussion is concluded, all sub-steps below **must be completed in the same reply**.
+> Forbidden: changing the status without renaming the file, or renaming without updating the living document, or leaving any step to the next reply.
+
+#### 3.1 Change Status and Rename File
+
+1. Update the document header status to **Completed** or **Paused**
+2. Rename the file by prepending `CLOSED_` to the filename:
+   - Before: `.local/docs/whiteboard/YYMMDD_topic.md`
+   - After: `.local/docs/whiteboard/CLOSED_YYMMDD_topic.md`
+   - Use: `mv .local/docs/whiteboard/YYMMDD_topic.md .local/docs/whiteboard/CLOSED_YYMMDD_topic.md`
+
+#### 3.2 Append Closure Summary to File (Mandatory)
+
+Append a `## Closure Summary` section at the bottom of the renamed file:
+
+```markdown
+## Closure Summary
+
+> Closed: YYYY-MM-DD HH:MM
+> Status: ✅ Completed / ⏸ Paused
+
+### Key Outcomes
+(2–4 bullet points of the core conclusions reached)
+
+### Key Decisions Made
+| Decision | Result |
+|---|---|
+
+### Unresolved Items
+(Write "None" if none; or list items deferred to TODO or a follow-up session)
+```
+
+#### 3.3 Update Living Document (Mandatory)
+
+After writing the closure summary, immediately update the project living document (`.local/docs/living/PROJECT_JOURNAL.md`):
+- If the file does not exist, initialize it first (see Section G Step 1)
+- Append a new row to the "討論成果" table: date, topic, 1–2 sentence outcome summary, link to renamed file
+- If the whiteboard's decision log contains entries → also append to the "決策紀錄" table
+
+#### 3.4 Self-Check
+
+- [ ] File renamed with `CLOSED_` prefix
+- [ ] "最後更新" date in the document updated
+- [ ] Closure summary section appended
+- [ ] Living document (`.local/docs/living/PROJECT_JOURNAL.md`) updated
+- [ ] Contains reusable experience → evaluate writing it into a guide (same as `/build commit` Step 9)
+- Any not done → complete immediately; must not end the reply
 
 ### Design Principles
 
@@ -322,19 +366,28 @@ Determine whether each set of decision options is mutually exclusive:
 - Candidate cleanup: unvisited for over 6 months or superseded by a new decision → mark as "deprecated", **do not delete**
 - When a new conversation has a similar need → first read the preserved candidates in the corresponding section of summary/; restart if possible
 
-#### 6.3 Delete the Decision File (Mandatory)
+#### 6.3 Rename the Decision File (Mandatory)
 
-- **Proactively delete** `.local/docs/decision/<topic>.md`
-- The decision file is a one-time artifact; the summary is the persistent record
-- If the user explicitly says "keep the decision record" → skip deletion and note it in the reply
-- Need to preserve interaction history (not decision results) → use `/team board` instead (`whiteboard/`-type files are not deleted)
+- **Proactively rename** `.local/docs/decision/<topic>.md` → `.local/docs/decision/CLOSED_<topic>.md`
+  - Use: `mv .local/docs/decision/<topic>.md .local/docs/decision/CLOSED_<topic>.md`
+- The `CLOSED_` prefix indicates the decision process is complete; the summary is the authoritative record
+- If the user explicitly says "delete the decision record" → delete instead and note it in the reply
 
-#### 6.4 Self-Check (Mandatory)
+#### 6.4 Update Living Document (Mandatory, Cannot Be Skipped)
+
+After renaming, immediately update the project living document (`.local/docs/living/PROJECT_JOURNAL.md`):
+- If the file does not exist, initialize it first (see Section G Step 1)
+- Append new row(s) to the "決策紀錄" table: date, topic, adopted options summary (1 line per major decision block), link to both `CLOSED_<topic>.md` and the summary file
+- If the summary contains preserved candidates → also append each to the "🔖 保留候選" table
+- Update the "最後更新" timestamp
+
+#### 6.5 Self-Check (Mandatory)
 
 After Step 6 completes, confirm:
 - [ ] `.local/docs/summary/YYMMDD_<topic>_summary.md` has been created and is non-empty
 - [ ] Summary includes: background, decision table, change list, preserved candidates (if applicable), leftover items
-- [ ] `.local/docs/decision/<topic>.md` has been deleted (or the user explicitly requested retention)
+- [ ] `.local/docs/decision/<topic>.md` has been renamed to `CLOSED_<topic>.md`
+- [ ] `.local/docs/living/PROJECT_JOURNAL.md` has been updated with this decision's entries
 - Any not done → complete immediately; **must not end the reply**
 
 ### Design Principles
@@ -664,6 +717,101 @@ Write to `.local/report/`.
 4. **Concise technical highlights**: Pick only 3–5
 5. **Actionable tracking items**: Be specific; avoid "continue to optimize"
 6. **Language**: Align with project conventions (per project language setting, e.g., Traditional Chinese for Taiwan)
+
+---
+
+## G. `/team living` — Living Document Maintenance
+
+Maintain a single, continuously updated project-level document that accumulates outcomes from all whiteboard and decision table closures. Acts as the project's authoritative knowledge base for past discussions, decisions, and preserved candidates.
+
+**This subcommand is primarily auto-called** by `/team board` Step 3.3 and `/team decide` Step 6.4. Manual invocation is supported for viewing or regenerating.
+
+### Document Location
+
+`.local/docs/living/PROJECT_JOURNAL.md`
+
+One file per project; entries are append-only (never overwrite existing rows).
+
+### Triggers
+
+| Usage | Behavior |
+|---|---|
+| `/team living` | Show the living document path and last-update timestamp |
+| `/team living view` | Print the full living document |
+| `/team living regen` | Rebuild the document from all `CLOSED_*` source files |
+
+### Step 1: Initialize (First-Time Only)
+
+If `.local/docs/living/PROJECT_JOURNAL.md` does not exist, create the directory and initialize the file:
+
+```markdown
+# 專案活文件（Project Journal）
+
+> 建立：YYYY-MM-DD
+> 最後更新：YYYY-MM-DD HH:MM
+> 專案：<project-name>（from directory name or CLAUDE.md）
+
+---
+
+## 決策紀錄
+
+| 日期 | 主題 | 最終決策摘要 | 來源文件 |
+|------|------|------------|---------|
+
+---
+
+## 討論成果
+
+| 日期 | 主題 | 關鍵成果 | 來源文件 |
+|------|------|---------|---------|
+
+---
+
+## 🔖 保留候選（未採納但可重啟）
+
+| 來源主題 | 選項說明 | 未採納原因 | 重啟時機 |
+|---------|---------|----------|---------|
+```
+
+### Step 2: Append from Board Closure
+
+Called internally after `/team board` Step 3.2. Input: the renamed whiteboard file path.
+
+1. Read the closure summary section from `CLOSED_YYMMDD_topic.md`
+2. Append one row to the "討論成果" table:
+   - Date (from file or closure summary)
+   - Topic (from filename or whiteboard title)
+   - Key outcomes (1–2 sentences condensed from "Key Outcomes" bullet points)
+   - Link: `[CLOSED_YYMMDD_topic.md](.local/docs/whiteboard/CLOSED_YYMMDD_topic.md)`
+3. If the whiteboard's "決策紀錄" table has entries → also append each to "決策紀錄" table
+4. Update "最後更新" timestamp
+
+### Step 3: Append from Decide Closure
+
+Called internally after `/team decide` Step 6.4. Input: the renamed decision file path + summary file path.
+
+1. Read the summary file from `.local/docs/summary/YYMMDD_<topic>_summary.md`
+2. Append rows to the "決策紀錄" table — one row per major decision block:
+   - Date, topic, adopted option summary (1 line), links to both `CLOSED_<topic>.md` and summary file
+3. If the summary contains "🔖 Preserved Candidates" → append each candidate to the "🔖 保留候選" table
+4. Update "最後更新" timestamp
+
+### Step 4: Regen Flow
+
+For `/team living regen`:
+1. Clear the rows from all three tables (keep headers and template structure)
+2. Scan all `CLOSED_*` files in `.local/docs/whiteboard/` and `.local/docs/decision/`
+3. Scan all `*.md` files in `.local/docs/summary/`
+4. Rebuild the three tables chronologically by date
+5. Report: "Rebuilt from N whiteboard sessions, M decisions"
+
+### Design Principles
+
+- **Append-only**: entries are added, never deleted (permanent historical record)
+- **One file per project**: complete picture of all outcomes in one place
+- **Auto-updated on closure**: no manual maintenance needed — board and decide call it automatically
+- **Preserved candidates visible**: the 🔖 section surfaces prior unselected options before redesigning
+- **Linked to source**: every entry links back to the renamed `CLOSED_*` file for drill-down
 
 ---
 
