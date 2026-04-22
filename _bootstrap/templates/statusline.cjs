@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Claude Code statusLine — Sekai_workflow template
-// Segments:  cwd │  branch │  XX% [bar] │  model
+// Segments:  cwd │  branch │  XX% [bar] │ Session XX% │ Weekly XX% │  model
 // No external dependencies (Node built-ins only). Requires a Nerd Font in the terminal.
 
 'use strict';
@@ -65,15 +65,33 @@ process.stdin.on('end', () => {
     }
   }
 
-  // 4. Model
+  // 4. Session usage (5-hour rate limit — Pro/Max only, may be absent)
+  let sessionSeg = '';
+  if (data.rate_limits && data.rate_limits.five_hour
+      && typeof data.rate_limits.five_hour.used_percentage === 'number') {
+    const pct = Math.min(100, Math.max(0, Math.round(data.rate_limits.five_hour.used_percentage)));
+    sessionSeg = `${colorForPct(pct)}Session ${pct}%${RESET}`;
+  }
+
+  // 5. Weekly usage (7-day rate limit — Pro/Max only, may be absent)
+  let weekSeg = '';
+  if (data.rate_limits && data.rate_limits.seven_day
+      && typeof data.rate_limits.seven_day.used_percentage === 'number') {
+    const pct = Math.min(100, Math.max(0, Math.round(data.rate_limits.seven_day.used_percentage)));
+    weekSeg = `${colorForPct(pct)}Weekly ${pct}%${RESET}`;
+  }
+
+  // 6. Model
   const modelName = (data.model && data.model.display_name) || '';
   const modelSeg = modelName ? `${MAGENTA} ${modelName}${RESET}` : '';
 
   const SEP = ` ${DIM}│${RESET} `;
   const parts = [cwdSeg];
-  if (branchSeg) parts.push(branchSeg);
-  if (ctxSeg)    parts.push(ctxSeg);
-  if (modelSeg)  parts.push(modelSeg);
+  if (branchSeg)  parts.push(branchSeg);
+  if (ctxSeg)     parts.push(ctxSeg);
+  if (sessionSeg) parts.push(sessionSeg);
+  if (weekSeg)    parts.push(weekSeg);
+  if (modelSeg)   parts.push(modelSeg);
 
   process.stdout.write(parts.join(SEP));
 });
