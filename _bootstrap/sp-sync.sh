@@ -11,6 +11,7 @@ SP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PROJECT_DIR="$(cd "$SP_DIR/.." && pwd)"
 SKILLS_DIR="$PROJECT_DIR/.claude/skills"
 HOOKS_DIR="$PROJECT_DIR/.claude/hooks"
+USER_CLAUDE_DIR="$HOME/.claude"
 
 echo ""
 echo "========================================"
@@ -20,6 +21,7 @@ echo ""
 echo "[INFO] Sekai_workflow : $SP_DIR"
 echo "[INFO] Project skills : $SKILLS_DIR"
 echo "[INFO] Project hooks  : $HOOKS_DIR"
+echo "[INFO] User .claude   : $USER_CLAUDE_DIR"
 echo ""
 
 # --- Step 1: Git fetch + pull ---
@@ -146,13 +148,68 @@ else
     echo "  [SKIP] No hooks directory in $SP_DIR"
 fi
 
-# --- Step 4: Summary ---
+# --- Step 4: Sync statusline (user-level ~/.claude/) ---
+echo ""
+echo "[Step 4] Syncing statusline..."
+echo ""
+
+STATUSLINE_TEMPLATE="$SP_DIR/_bootstrap/templates/statusline.cjs"
+STATUSLINE_TARGET="$USER_CLAUDE_DIR/statusline.cjs"
+SETTINGS_FILE="$USER_CLAUDE_DIR/settings.json"
+STATUSLINE_FILE_STATUS="[SKIP]"
+SETTINGS_PATCH_STATUS="[SKIP]"
+
+if [ ! -f "$STATUSLINE_TEMPLATE" ]; then
+    echo "  [SKIP] No statusline template at $STATUSLINE_TEMPLATE"
+else
+    mkdir -p "$USER_CLAUDE_DIR"
+
+    if [ ! -f "$STATUSLINE_TARGET" ]; then
+        cp "$STATUSLINE_TEMPLATE" "$STATUSLINE_TARGET"
+        STATUSLINE_FILE_STATUS="[ADD]"
+    elif ! diff -q "$STATUSLINE_TEMPLATE" "$STATUSLINE_TARGET" >/dev/null 2>&1; then
+        cp "$STATUSLINE_TEMPLATE" "$STATUSLINE_TARGET"
+        STATUSLINE_FILE_STATUS="[UPDATE]"
+    else
+        STATUSLINE_FILE_STATUS="[OK]"
+    fi
+    echo "  $STATUSLINE_FILE_STATUS statusline.cjs → $STATUSLINE_TARGET"
+
+    # Patch settings.json statusLine.command (idempotent — only rewrites when needed)
+    if [ ! -f "$SETTINGS_FILE" ]; then
+        echo "  [SKIP] $SETTINGS_FILE not found; leaving statusLine binding untouched"
+    elif ! command -v node >/dev/null 2>&1; then
+        echo "  [SKIP] node not in PATH; cannot patch settings.json"
+    else
+        SETTINGS_PATCH_STATUS=$(
+            SP_STATUSLINE_TARGET="$STATUSLINE_TARGET" \
+            SP_SETTINGS_FILE="$SETTINGS_FILE" \
+            node -e '
+                const fs = require("fs");
+                const path = process.env.SP_SETTINGS_FILE;
+                const target = "node " + process.env.SP_STATUSLINE_TARGET;
+                const raw = fs.readFileSync(path, "utf8");
+                const obj = JSON.parse(raw);
+                const current = obj.statusLine && obj.statusLine.command;
+                if (current === target) { process.stdout.write("[OK]"); process.exit(0); }
+                const hadBlock = !!obj.statusLine;
+                obj.statusLine = { type: "command", command: target };
+                fs.writeFileSync(path, JSON.stringify(obj, null, 2) + "\n");
+                process.stdout.write(hadBlock ? "[UPDATE]" : "[ADD]");
+            '
+        )
+        echo "  $SETTINGS_PATCH_STATUS settings.json statusLine.command"
+    fi
+fi
+
+# --- Step 5: Summary ---
 echo ""
 echo "========================================"
 echo " Sync Summary"
 echo "========================================"
-echo "  Skills  — Added: $ADDED / Updated: $UPDATED / No change: $UNCHANGED"
-echo "  Hooks   — Added: $HOOK_ADDED / Updated: $HOOK_UPDATED / No change: $HOOK_UNCHANGED"
+echo "  Skills     — Added: $ADDED / Updated: $UPDATED / No change: $UNCHANGED"
+echo "  Hooks      — Added: $HOOK_ADDED / Updated: $HOOK_UPDATED / No change: $HOOK_UNCHANGED"
+echo "  Statusline — File: $STATUSLINE_FILE_STATUS / Settings: $SETTINGS_PATCH_STATUS"
 echo "========================================"
 echo ""
 
@@ -163,6 +220,11 @@ fi
 if [ "$HOOK_ADDED" -gt 0 ]; then
     echo "[REMINDER] New hooks added. Verify .claude/settings.local.json has matching"
     echo "           matcher/command bindings (reference: _bootstrap/templates/hooks.json)."
+fi
+
+if [ "$STATUSLINE_FILE_STATUS" = "[UPDATE]" ] || [ "$SETTINGS_PATCH_STATUS" = "[UPDATE]" ] \
+   || [ "$STATUSLINE_FILE_STATUS" = "[ADD]" ] || [ "$SETTINGS_PATCH_STATUS" = "[ADD]" ]; then
+    echo "[REMINDER] Statusline updated. Restart Claude Code to see the new status line."
 fi
 
 if [ "$AHEAD" != "0" ]; then
