@@ -418,12 +418,12 @@ If this change contains **non-obvious root causes, workarounds, or config differ
    - Does the config differ from docs / defaults?
    - Is it a workaround for a tool / platform limitation?
 
-2. **If yes**, update the corresponding `.local/docs/guide/<topic>.md`:
+2. **If yes**, update the corresponding `.local/docs/guides/<topic>.md`:
    - Add a troubleshooting / FAQ section
    - Format: **Symptom** → **Cause** → **Resolution** → **Notes**
-   - If no matching guide exists → create one under `.local/docs/guide/`
+   - If no matching guide exists → create one under `.local/docs/guides/`
 
-3. **Inform the user**: "This experience has been written into `.local/docs/guide/<topic>.md` and will be carried along when `/skm pack` runs."
+3. **Inform the user**: "This experience has been written into `.local/docs/guides/<topic>.md` and will be carried along when `/skm pack` runs."
 
 This ensures operational knowledge is deposited in portable documentation rather than left in conversation history.
 

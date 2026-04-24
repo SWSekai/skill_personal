@@ -7,18 +7,18 @@
 
 | 類型 | 目錄 | 檔名格式 | 範例 |
 |---|---|---|---|
-| whiteboard | `.local/docs/whiteboard/` | `YYMMDD_<topic>_board.md` | `260422_auth_refactor_board.md` |
-| decision | `.local/docs/decision/` | `YYMMDD_<topic>_decision.md` | `260422_team_followup_decision.md` |
+| whiteboard | `.local/docs/whiteboards/` | `YYMMDD_<topic>_board.md` | `260422_auth_refactor_board.md` |
+| decision | `.local/docs/decisions/` | `YYMMDD_<topic>_decision.md` | `260422_team_followup_decision.md` |
 | ~~summary~~ | ~~`.local/docs/summary/`~~ | ~~`YYMMDD_<topic>_summary.md`~~ | ⚠️ 廢棄（2026-04-22）結案摘要改 append 於 CLOSED_ 原檔末尾（見 §5） |
 | handoff | `.local/docs/handoff/` | `YYMMDD_handoff.md` | `260422_handoff.md` |
 | tech-note | `.local/docs/tech-note/` | `<topic-category>_<specific-topic>.md` | `sql_comments.md` |
 | report | `.local/report/` | 見 SKILL.md §F | — |
 
 ### 原則
-- **YYMMDD 強制前綴**：年月日各兩碼（如 `260422` = 2026-04-22），跨檔排序天然成立
-- **`_<type>` 類型後綴**：board / decision / summary — follow-up 解析器以後綴判別類型
-- **topic 用 snake_case**：全小寫、連字符改底線，避免空格與大寫
-- **禁止即興變體**：違反即修正（例：`260422-topic-decision.md` → `260422_topic_decision.md`）
+- **YYMMDD 前綴建議**：年月日各兩碼（如 `260422` = 2026-04-22），跨檔排序天然成立。既有無前綴檔（例：`route-a-implementation-plan.md`）仍有效，不強制 rename
+- **`_<type>` 類型後綴建議**：board / decision — follow-up 解析器以後綴**優先**判別類型；若檔名不含後綴，退回以「所在目錄」判別（`decisions/` → decision，`whiteboards/` → board）
+- **topic 用 snake_case**：全小寫、連字符改底線，避免空格與大寫。**既有含連字符檔名不強制 rename**
+- **新檔建議**：新建檔使用完整 `YYMMDD_<topic>_<type>.md`；既有不合規檔案以目錄位置為權威，不回溯 rename
 
 ## 2. 時間同步（避免 context 日期漂移）
 

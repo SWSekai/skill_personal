@@ -13,13 +13,13 @@
 
 ### 行為總覽
 1. 解析 `<file>` 引數（允許省略 `.md`、前綴模糊匹配）
-2. 於 `.local/docs/whiteboard/` 與 `.local/docs/decision/` 下搜尋匹配檔（**過濾 `CLOSED_*`**）
+2. 於 `.local/docs/whiteboards/` 與 `.local/docs/decisions/` 下搜尋匹配檔（**過濾 `CLOSED_*`**）
 3. 0 筆 / 1 筆 / 多筆 → 各自分支（見第 2 節）
 4. Read 目標檔 → 依類型分派至 §3 / §4 處理器
 5. 實作或推進單項 → 完成後結案
 
 ### 作用域
-- 僅限 `.local/docs/whiteboard/` 與 `.local/docs/decision/` 兩目錄
+- 僅限 `.local/docs/whiteboards/` 與 `.local/docs/decisions/` 兩目錄
 - 不含 `.local/docs/summary/`（summary 目錄已於 2026-04-22 廢棄；結案摘要改寫入 CLOSED_ 原檔末尾）
 - 不含 `.local/docs/tech-note/`、`.local/docs/handoff/`（非互動檔）
 
@@ -30,6 +30,7 @@
 2. **省略副檔名**：`<file>` + `.md` == 檔名 → 命中
 3. **前綴模糊匹配**：檔名以 `<file>` 開頭 → 候選
 4. **類型後綴補全**：`<file>` + `_board.md` 或 `<file>` + `_decision.md` → 候選
+5. **無後綴匹配**：若上述皆無命中，以「所在目錄」判別類型（`whiteboards/` → board handler，`decisions/` → decision handler），接收不含後綴的檔名為候選
 
 ### 2.2 CLOSED 過濾
 - 候選列舉階段即排除所有 `CLOSED_*` 檔（靜默，不提示）
