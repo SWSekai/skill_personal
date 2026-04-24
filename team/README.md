@@ -7,13 +7,14 @@
 > **2026-04-17 改名**：`/team-office` → `/team`（名稱過長、補全體驗差）；`notes` 子命令改為單數 `note`。
 > **2026-04-17 新增**：`report` 子命令從 `/ask` 搬入（工作報告屬於協作產出）。
 > **2026-04-22 新增**：`living` 子命令，白板/決策表結案時自動維護的專案活文件；白板與決策表結案流程強制主動化（`CLOSED_` 前綴更名 + 活文件更新）。
+> **2026-04-24 改名**：`living` → `journal`（原語意「living document」對使用者不直觀；`journal` 直接表達「專案日誌／索引表」）。自動呼叫路徑同步更新；`PROJECT_JOURNAL.md` 檔名不變。
 > **2026-04-22 新增**：`follow-up` 子命令 — 以 `/team follow-up <file>` 一鍵接續既有 whiteboard / decision 檔；白板檔名加 `_board` 後綴；決策檔檔名補 `YYMMDD_<topic>_decision.md` 規範；新增 `references/naming.md`、`references/followup.md` 拆分細節規則。
 > **2026-04-24 新增**：`report --daily` 模式 — 每日 Teams 日報，輸出 `.local/report/YYMMDD_brief.md`；資料源含 whiteboard/decision 結案摘要 + TODO 變化 + modify_log + 使用者交接；board 結案 Step 3.5、decide 結案 Step 6.6、`/commit-push` Step 11 **自動呼叫更新**；`/hello` Step 3.4 跨日檢查未處理交接；新增 `references/daily-brief.md` + `assets/brief-template.md`。
 
 ## 使用方式
 
 ```
-/team <todo|board|decide|note|handoff|report|living|follow-up> [args...]
+/team <todo|board|decide|note|handoff|report|journal|follow-up> [args...]
 ```
 
 ## Model
@@ -27,7 +28,7 @@
 
 - `todo` / `decide` / `note` / `handoff` / `report`：手動呼叫
 - `board`：諮詢類對話自動觸發 / 手動呼叫
-- `living`：**由 `board` 和 `decide` 結案時自動呼叫**（也可手動 `/team living view` 查看或 `/team living regen` 重建）
+- `journal`：**由 `board` 和 `decide` 結案時自動呼叫**（也可手動 `/team journal view` 查看或 `/team journal regen` 重建）
 
 ## 執行流程
 
@@ -40,7 +41,7 @@
 | `handoff [--share]` | 交接文件（離開前產出進度 + 環境 + 待辦文件） |
 | `report [scope]` | 從修改紀錄生成簡報用工作報告（full / weekly / 指定區間） |
 | `report --daily [date]` | **每日 Teams 日報**（完成／進行中／待辦／交接／決策五段，輸出 `.local/report/YYMMDD_brief.md`） |
-| `living [view\|regen]` | 專案活文件（自動維護；手動查看或重建） |
+| `journal [view\|regen]` | 專案活文件（自動維護；手動查看或重建；2026-04-24 由 `living` 改名） |
 | `follow-up <file>` | 接續既有 whiteboard / decision 檔（支援省略副檔名 + 前綴模糊匹配；`CLOSED_*` 自動過濾） |
 
 ## 結案流程更新（2026-04-22）

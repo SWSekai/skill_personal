@@ -1,9 +1,9 @@
 {
-  "version": "2.4",
+  "version": "2.5",
   "description": "Sekai_workflow 結構索引 — Claude 讀取此檔即可掌握全貌，無需逐一掃描目錄",
   "updated": "2026-04-24",
   "model_routing": "references/model-routing.md",
-  "note": "v2.4: /team report 新增 --daily flag（每日 Teams 日報模式），資料源融合 whiteboard/decision 結案摘要 + TODO + modify_log + handoff；board Step 3.5 / decide Step 6.6 / commit-push Step 11 / hello Step 3.4 加入 brief 自動更新與跨日檢查；新增 team/references/daily-brief.md + assets/brief-template.md。v2.3: Skill 命名口語化、/team notes → note、/ask report 搬至 /team report。",
+  "note": "v2.5: /skill → /skm（避免與內建 /skills 衝突）；/team living → /team journal（語意直觀化）；新增 CLAUDE.md Rule 21（pre-modification protocol：遠端檢查 + 風險評估 + 使用者確認，skill 修改同樣適用）；skill/ 目錄 rename 為 skm/。v2.4: /team report 新增 --daily flag（每日 Teams 日報模式）；board Step 3.5 / decide Step 6.6 / commit-push Step 11 / hello Step 3.4。v2.3: Skill 命名口語化、/team notes → note、/ask report 搬至 /team report。",
   "skills": [
     {
       "name": "build",
@@ -28,8 +28,8 @@
     {
       "name": "team",
       "command": "/team",
-      "description": "互動協作一站式入口：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記、交接文件、工作報告（含 --daily 每日 Teams 日報模式）、活文件、follow-up",
-      "subcommands": ["todo", "board", "decide", "note", "handoff", "report", "living", "follow-up"],
+      "description": "互動協作一站式入口：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記、交接文件、工作報告（含 --daily 每日 Teams 日報模式）、journal（原 living，2026-04-24 改名）、follow-up",
+      "subcommands": ["todo", "board", "decide", "note", "handoff", "report", "journal", "follow-up"],
       "model": "sonnet",
       "trigger": "手動呼叫 / board 自動觸發 / report --daily 由 board Step 3.5 + decide Step 6.6 + commit-push Step 11 自動呼叫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(mkdir *)", "Bash(mv *)"],
@@ -37,14 +37,14 @@
       "merged_from": ["todo", "whiteboard", "md-collab", "tech-notes", "handoff", "report"]
     },
     {
-      "name": "skill",
-      "command": "/skill",
-      "description": "Skill 環境管理一站式入口：建立新 Skill、遠端同步、專案打包、使用者確認式 Skill 改進捕捉",
+      "name": "skm",
+      "command": "/skm",
+      "description": "Skill Management 一站式入口（2026-04-24 由 /skill 改名，避免與 Claude Code 內建 /skills 對話框混淆）：建立新 Skill、遠端同步、專案打包、使用者確認式 Skill 改進捕捉",
       "subcommands": ["new", "sync", "pack", "update"],
       "model": "sonnet",
       "trigger": "手動呼叫 / sync 對話開始自動",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(mkdir *)", "Bash(date *)", "Bash(cp *)", "Bash(bash *)", "Bash(cat *)"],
-      "files": ["skill/SKILL.md", "skill/README.md", "skill/references/model-selection-guide.md", "skill/references/evaluation-decision-tree.md", "skill/references/version-control-boundaries.md", "skill/assets/SKILL.md.template", "skill/assets/README.md.template"],
+      "files": ["skm/SKILL.md", "skm/README.md", "skm/references/model-selection-guide.md", "skm/references/evaluation-decision-tree.md", "skm/references/version-control-boundaries.md", "skm/assets/SKILL.md.template", "skm/assets/README.md.template"],
       "merged_from": ["create-skill", "skill-sync", "pack"]
     },
     {
@@ -157,9 +157,9 @@
     "tech-notes": "team note",
     "handoff": "team handoff",
     "report": "team report (2026-04-17 從 /ask 搬至 /team)",
-    "create-skill": "skill new",
-    "skill-sync": "skill sync",
-    "pack": "skill pack",
+    "create-skill": "skm new (原 /skill new，2026-04-24 改名)",
+    "skill-sync": "skm sync",
+    "pack": "skm pack",
     "sys-info": "ask info",
     "trace-flow": "ask trace",
     "context-guard": "clean (合併至 clean，含 /clear 整合與 Stop hook)"

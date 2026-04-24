@@ -64,9 +64,9 @@
 | whiteboard → `/team board` | sonnet | medium |
 | md-collab → `/team decide` | sonnet | medium |
 | tech-notes → `/team note` | sonnet | medium |
-| create-skill → `/skill new` | sonnet | medium |
-| skill-sync → `/skill sync` | sonnet | medium |
-| pack → `/skill pack` | sonnet | low |
+| create-skill → `/skm new` | sonnet | medium |
+| skill-sync → `/skm sync` | sonnet | medium |
+| pack → `/skm pack` | sonnet | low |
 | sys-info → `/ask info` | opus | medium |
 | trace-flow → `/ask trace` | opus | high |
 | report → `/team report` | haiku | low |

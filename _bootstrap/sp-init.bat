@@ -395,7 +395,7 @@ for %%F in ("!MEM_PORTABLE!\*.md") do (
 
 REM ----------------------------------------------------------------
 REM  Step 8b: Also restore PACKED memory from .local/ai-context/memory/
-REM  (produced by /skill pack). These are per-project archived
+REM  (produced by /skm pack; was /skill pack before 2026-04-24). These are per-project archived
 REM  memories; restore them alongside the generic portable ones.
 REM ----------------------------------------------------------------
 set "PACKED_MEM=%PROJECT_DIR%\.local\ai-context\memory"

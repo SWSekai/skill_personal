@@ -1,6 +1,7 @@
-# skill — Skill 環境管理
+# skm — Skill 管理（Skill Management）
 
-> **2026-04-17 改名**：`/setup` → `/skill`（更準確對應「只管 Skill 環境」的職能）。舊名 `setup` 已全面停用，不保留 alias。
+> **2026-04-24 改名**：`/skill` → `/skm`（避免與 Claude Code 內建 `/skills` 對話框混淆，且符合「skill management」縮寫語義）。舊名 `/skill` 已停用，無 alias。
+> **2026-04-17 前一次改名**：`/setup` → `/skill`（當時更準確對應「只管 Skill 環境」的職能）。
 
 ## 功能說明
 
@@ -9,7 +10,7 @@
 ## 使用方式
 
 ```
-/skill <new|sync|pack|update> [args...]
+/skm <new|sync|pack|update> [args...]
 ```
 
 ## Model
@@ -20,7 +21,7 @@
 
 ## 觸發條件
 
-- `new`：手動呼叫
+- `new`：手動呼叫（收尾 Step 10 強制走 AskUserQuestion → `/commit-push --meta`，見 CLAUDE.md Rule 20）
 - `sync`：對話開始自動 / 手動
 - `pack`：手動呼叫
 - `update`：**僅手動呼叫**（刻意避免 AI 自判，由使用者明確觸發，2026-04-17 新增）
@@ -29,15 +30,15 @@
 
 | 子命令 | 用途 |
 |---|---|
-| `new [name] [desc]` | 建立新 Skill（互動式定義 → 檔案生成 → 索引更新 → 同步） |
+| `new [name] [desc]` | 建立新 Skill（互動式定義 → 檔案生成 → 索引更新 → 同步 → Step 10 commit 詢問） |
 | `sync` | Sekai_workflow 遠端同步、規則評估與三向連動 |
 | `pack` | 專案打包並清除 skill 環境 |
-| `update [hint]` | 使用者確認式 Skill 改進：對話中浮現的規則 → 使用者下 `/skill update` → 明確 diff 預覽 → 套用 + 三向同步 |
+| `update [hint]` | 使用者確認式 Skill 改進：對話中浮現的規則 → 使用者下 `/skm update` → 明確 diff 預覽 → 套用 + 三向同步 |
 
 ## 目錄結構
 
 ```
-skill/
+skm/
 ├── SKILL.md
 ├── README.md
 ├── references/

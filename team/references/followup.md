@@ -181,4 +181,4 @@ date '+%Y-%m-%d %H:%M'
 
 - `/team decide` 建立的 decision 檔 **必須**符合本檔 §6 自由輸入題語法
 - `/team board` 建立的 whiteboard 檔 **必須**用 `YYMMDD_<topic>_board.md` 格式（見 `naming.md` §1）
-- `/team living view` 不會列出正進行中的檔，只列 `CLOSED_*` 的歷史
+- `/team journal view` 不會列出正進行中的檔，只列 `CLOSED_*` 的歷史

@@ -35,7 +35,7 @@ date '+%Y-%m-%d %H:%M'
 此規則適用於所有需要日期戳的產出：
 - `/team board` / `/team decide` / `/team handoff` / `/team report` 建立檔案時
 - `/commit-push` 寫 modify_log 時
-- `/team living` 更新「最後更新」戳時
+- `/team journal` 更新「最後更新」戳時
 
 ### 注意
 - 檔名 YYMMDD 取系統時間**當日**即可（不精確到秒）

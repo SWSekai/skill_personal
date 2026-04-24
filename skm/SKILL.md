@@ -1,13 +1,15 @@
 ---
-name: skill
-description: "One-stop entry for Skill environment management: create new Skill, remote sync, project packaging, user-confirmed skill improvements. Subcommand routing: new / sync / pack / update."
+name: skm
+description: "Skill Management — one-stop entry for Skill environment management: create new Skill, remote sync, project packaging, user-confirmed skill improvements. Subcommand routing: new / sync / pack / update. Renamed from /skill on 2026-04-24 to avoid confusion with Claude Code's built-in /skills dialog."
 model: sonnet
 effort: medium
 argument-hint: "<new|sync|pack|update> [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(mkdir *), Bash(date *), Bash(cp *), Bash(bash *), Bash(cat *)
 ---
 
-# /skill — Skill Environment Management Merged Skill
+# /skm — Skill Management Merged Skill
+
+> Renamed from `/skill` on 2026-04-24 to avoid confusion with Claude Code's built-in `/skills` (plural, skill-picker dialog). All subcommands and semantics unchanged — only the entry command name.
 
 Integrates four responsibilities: create-skill, skill-sync, pack, and user-confirmed skill update. The first argument determines the subcommand.
 
@@ -15,16 +17,16 @@ Integrates four responsibilities: create-skill, skill-sync, pack, and user-confi
 
 | Subcommand | Purpose | Original Skill |
 |---|---|---|
-| `/skill new [name] [desc]` | Create new Skill | create-skill |
-| `/skill sync` | Remote sync + rule evaluation | skill-sync |
-| `/skill pack` | Project packaging (clean up skill environment) | pack |
-| `/skill update [hint]` | User-confirmed skill improvement capture (replaces CLAUDE.md Rule 8 auto-inference for deliberate cases) | — (2026-04-17 added) |
+| `/skm new [name] [desc]` | Create new Skill | create-skill |
+| `/skm sync` | Remote sync + rule evaluation | skill-sync |
+| `/skm pack` | Project packaging (clean up skill environment) | pack |
+| `/skm update [hint]` | User-confirmed skill improvement capture (replaces CLAUDE.md Rule 8 auto-inference for deliberate cases) | — (2026-04-17 added) |
 
 When no argument is provided, ask the user to specify a subcommand.
 
 ---
 
-## A. `/skill new` — Create New Skill
+## A. `/skm new` — Create New Skill
 
 Interactively create a brand-new Claude Code Skill following existing structural conventions and completing all registrations.
 
@@ -128,7 +130,7 @@ git commit -m "feat: add <name> skill"
 git push
 ```
 
-Project-specific Skill: lives only in `.claude/skills/`, not synced; inform the user it "will not be carried away by /skill pack".
+Project-specific Skill: lives only in `.claude/skills/`, not synced; inform the user it "will not be carried away by /skm pack".
 
 ### Step 8: Integrity Verification
 
@@ -190,7 +192,7 @@ Skill creation is a **meta-level maintenance** activity; its commit must not pol
 
 ---
 
-## B. `/skill sync` — Rule Evaluation and Three-Way Linkage
+## B. `/skm sync` — Rule Evaluation and Three-Way Linkage
 
 > **Remote sync (Flow 1) is now unified under `/hello` Step 2.** At the start of a conversation, use `/hello`.
 > This subcommand retains the "rule evaluation and three-way linkage" responsibility, automatically triggered when Memory is written.
@@ -252,13 +254,13 @@ See `${CLAUDE_SKILL_DIR}/references/evaluation-decision-tree.md` (if it exists; 
 
 ---
 
-## C. `/skill pack` — Project Packaging
+## C. `/skm pack` — Project Packaging
 
 Pack all AI-maintenance-related files in the project into `.local/ai-context/`, then delete the skill environment, restoring a clean project directory.
 
 ### Trigger
 
-Manual invocation: `/skill pack`
+Manual invocation: `/skm pack`
 
 ### Execution
 
@@ -308,11 +310,11 @@ After the script completes, you **must** perform an intelligent merge on `.local
 
 ---
 
-## D. `/skill update` — User-Confirmed Skill Improvement
+## D. `/skm update` — User-Confirmed Skill Improvement
 
 Explicit **user-invoked** entry to codify a skill improvement that emerged from the current conversation.
 
-**Relation to CLAUDE.md Rule 8**: Rule 8 allows Claude to proactively ask when a new rule seems to emerge. `/skill update` is the opposite direction — the user initiates, so the signal is unambiguous and Claude must not guess whether to codify. Use `/skill update` whenever you want the improvement **locked in deterministically**, bypassing AI auto-inference.
+**Relation to CLAUDE.md Rule 8**: Rule 8 allows Claude to proactively ask when a new rule seems to emerge. `/skm update` is the opposite direction — the user initiates, so the signal is unambiguous and Claude must not guess whether to codify. Use `/skm update` whenever you want the improvement **locked in deterministically**, bypassing AI auto-inference.
 
 ### Trigger
 
@@ -320,8 +322,8 @@ Manual invocation only:
 
 | Usage | Behavior |
 |---|---|
-| `/skill update` | Claude asks what to capture (free-form or recent-candidate list) |
-| `/skill update <one-line hint>` | Use the hint directly as the improvement description |
+| `/skm update` | Claude asks what to capture (free-form or recent-candidate list) |
+| `/skm update <one-line hint>` | Use the hint directly as the improvement description |
 
 ### Step 1: Clarify the Improvement
 

@@ -1,9 +1,9 @@
 ---
 name: team
-description: "One-stop entry for interactive collaboration: AI TODO handling, live whiteboard, Markdown interactive decision tables, tech notes, handoff documents, work reports, and living document maintenance. Subcommand routing: todo / board / decide / note / handoff / report / living."
+description: "One-stop entry for interactive collaboration: AI TODO handling, live whiteboard, Markdown interactive decision tables, tech notes, handoff documents, work reports, and project journal maintenance. Subcommand routing: todo / board / decide / note / handoff / report / journal (renamed from living on 2026-04-24) / follow-up."
 model: sonnet
 effort: medium
-argument-hint: "<todo|board|decide|note|handoff|report|living|follow-up> [args...]"
+argument-hint: "<todo|board|decide|note|handoff|report|journal|follow-up> [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, AskUserQuestion, Bash(git *), Bash(ls *), Bash(date *), Bash(mkdir *), Bash(mv *)
 ---
 
@@ -21,7 +21,7 @@ Integrates seven collaboration modes that interact with the user. The first argu
 | `/team note [topic]` | Structured tech notes | tech-notes |
 | `/team handoff` | Handoff document generation | handoff |
 | `/team report [scope]` | Generate work reports from modify logs | report (moved from `/ask`) |
-| `/team living [view\|regen]` | Living document — accumulates outcomes from all board/decide closures | living (new) |
+| `/team journal [view\|regen]` | Living document — accumulates outcomes from all board/decide closures | living (new) |
 | `/team follow-up <file>` | Resume processing of an existing whiteboard / decision file | follow-up (new) |
 
 When no argument is provided, ask the user to specify a subcommand.
@@ -451,13 +451,13 @@ Syntax explanation + complete runnable code example
 
 ## E. `/team handoff` — Handoff and Environment Transition (Opus)
 
-Before leaving (off-duty, vacation, project handover, environment switch), produce **two types of documents**: a human handoff document + an AI context bundle. The environment is **not destroyed** (difference from `/skill pack`: pack deletes the skill environment).
+Before leaving (off-duty, vacation, project handover, environment switch), produce **two types of documents**: a human handoff document + an AI context bundle. The environment is **not destroyed** (difference from `/skm pack`: pack deletes the skill environment).
 
 **This subcommand has an "evaluation / summarization / risk" nature, and it is recommended to invoke an Opus subtask via the Agent tool** (aligned with CLAUDE.md Rule 18).
 
-### `/skill pack` vs `/team handoff` Differences
+### `/skm pack` vs `/team handoff` Differences
 
-| Aspect | `/skill pack` | `/team handoff` |
+| Aspect | `/skm pack` | `/team handoff` |
 |---|---|---|
 | Purpose | Skill exit archival | Handoff / environment transition |
 | Environment | **Clear** .claude/skills/ + Sekai_workflow/ + CLAUDE.md | **Preserve**, environment untouched |
@@ -623,7 +623,7 @@ YYMMDD_ai-context/
 ### Design Principles
 
 - **Dual audience**: human document (colleague-friendly) + AI document (restore knowledge in new conversation)
-- **Environment non-destruction**: the biggest difference from `/skill pack` — after handoff the user can continue working
+- **Environment non-destruction**: the biggest difference from `/skm pack` — after handoff the user can continue working
 - **Mask sensitive values**: env variables list keys only, not values
 - **Actionable**: every section ends with a "next step suggestion"
 - **Decision traceability**: the AI bundle contains full decision history, so a new AI can look up preserved candidates instead of redesigning
@@ -731,7 +731,7 @@ Full rules, parser specs, edge cases: `references/daily-brief.md`. Template: `as
 
 ---
 
-## G. `/team living` — Living Document Maintenance
+## G. `/team journal` — Project Journal Maintenance (renamed from `/team living` on 2026-04-24)
 
 Maintain a single, continuously updated project-level document that accumulates outcomes from all whiteboard and decision table closures. Acts as the project's authoritative knowledge base for past discussions, decisions, and preserved candidates.
 
@@ -747,9 +747,9 @@ One file per project; entries are append-only (never overwrite existing rows).
 
 | Usage | Behavior |
 |---|---|
-| `/team living` | Show the living document path and last-update timestamp |
-| `/team living view` | Print the full living document |
-| `/team living regen` | Rebuild the document from all `CLOSED_*` source files |
+| `/team journal` | Show the living document path and last-update timestamp |
+| `/team journal view` | Print the full living document |
+| `/team journal regen` | Rebuild the document from all `CLOSED_*` source files |
 
 ### Step 1: Initialize (First-Time Only)
 
@@ -809,7 +809,7 @@ Called internally after `/team decide` Step 6.4. Input: the renamed decision fil
 
 ### Step 4: Regen Flow
 
-For `/team living regen`:
+For `/team journal regen`:
 1. Clear the rows from all three tables (keep headers and template structure)
 2. Scan all `CLOSED_*` files in `.local/docs/whiteboard/` and `.local/docs/decision/`
 3. For each CLOSED file, parse the **inline closure summary block** at its end

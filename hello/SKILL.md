@@ -29,10 +29,10 @@ git status
 
 ---
 
-## Step 2: Sync Skill Updates (merges legacy `/skill sync` flow one)
+## Step 2: Sync Skill Updates (merges legacy `/skm sync` flow one)
 
-> This step integrates the "Flow One: Remote Sync" logic from the legacy `/skill sync`.
-> `/skill sync` still retains "Flow Two: Rule Evaluation & Three-Way Linkage" for use when writing to Memory.
+> This step integrates the "Flow One: Remote Sync" logic from the legacy `/skm sync`.
+> `/skm sync` still retains "Flow Two: Rule Evaluation & Three-Way Linkage" for use when writing to Memory.
 
 ### 2.1 Check flowback.pull Setting
 
@@ -49,7 +49,7 @@ Read `sekai_workflow.flowback.pull` from `.claude/settings.local.json`:
 bash Sekai_workflow/_bootstrap/sp-sync.sh
 ```
 
-Script behavior (same as legacy `/skill sync` flow one):
+Script behavior (same as legacy `/skm sync` flow one):
 1. `git fetch origin` to get remote updates
 2. Compare local and remote commits
 3. If updates exist → `git pull --rebase origin main`
@@ -173,10 +173,10 @@ docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Service}}" 2>/dev/n
 
 | Skill | Relationship |
 |---|---|
-| `/skill sync` | `/hello` Step 2 reuses sync logic; sync can still be invoked standalone for full sync (including conflict resolution) |
+| `/skm sync` | `/hello` Step 2 reuses sync logic; sync can still be invoked standalone for full sync (including conflict resolution) |
 | `/context-guard` | `/hello` Step 3 reads summaries produced by context-guard |
 | `/team todo` | `/hello` Step 3 reads TODO status |
-| `/skill pack` | Mutually exclusive: after pack the environment is cleared, so /hello cannot run |
+| `/skm pack` | Mutually exclusive: after pack the environment is cleared, so /hello cannot run |
 | `/team handoff` | Complementary: the AI bundle produced by handoff can be manually loaded by the AI after `/hello` in a new conversation |
 
 ---

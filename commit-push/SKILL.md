@@ -24,7 +24,7 @@ When `$ARGUMENTS` contains `--meta`, this commit is classified as **skill / envi
 - **Skip Step 11** (Daily Brief append) — meta commits should not appear in daily Teams brief
 - **Keep all other steps**: quality check, README sync, stage, commit, push, sekai-workflow sync, restart eval, context cleanup, experience guide
 
-Triggered automatically by `/skill new` Step 10 (see `skill/SKILL.md` §A). Users may also invoke manually: `/commit-push --meta <message>`.
+Triggered automatically by `/skm new` Step 10 (see `skm/SKILL.md` §A). Users may also invoke manually: `/commit-push --meta <message>`.
 
 Rationale: skill/rule edits are meta-level work bound to tooling, not the project's functional deliverable. Tracking them in `modify_log` / daily `brief` would pollute the work ledger. See CLAUDE.md Rule 20.
 
@@ -402,7 +402,7 @@ If this change contains **non-obvious root causes, workarounds, or config differ
    - Format: **Symptom** → **Cause** → **Resolution** → **Notes**
    - If no matching guide exists → create one under `.local/docs/guide/`
 
-3. **Inform the user**: "This experience has been written into `.local/docs/guide/<topic>.md` and will be carried along when `/skill pack` runs."
+3. **Inform the user**: "This experience has been written into `.local/docs/guide/<topic>.md` and will be carried along when `/skm pack` runs."
 
 This ensures operational knowledge is deposited in portable documentation rather than left in conversation history.
 

@@ -34,9 +34,9 @@ Nine command entry-points (all invoked via `/command`):
 | `/hello` | Conversation bootstrap — pull updates, restore prior context, show status | Start of each session |
 | `/build <all\|plan\|do\|test\|check\|review\|deploy>` | End-to-end dev flow: analyze → design → implement → test → quality → review → deploy | You're about to build something |
 | `/commit-push [msg]` | Main commit entry — quality check → change log → README sync → commit → push → deploy eval → context cleanup | After a coherent chunk of work |
-| `/team <todo\|board\|decide\|note\|handoff\|report\|living\|follow-up>` | Human-AI collaboration: todos, whiteboards, Markdown decision tables, tech notes, handoff docs | Planning / decision moments |
+| `/team <todo\|board\|decide\|note\|handoff\|report\|journal\|follow-up>` | Human-AI collaboration: todos, whiteboards, Markdown decision tables, tech notes, handoff docs, project journal | Planning / decision moments |
 | `/ask <info\|trace>` | Ask questions about the codebase / trace a field end-to-end through the stack | "How does X flow?" questions |
-| `/skill <new\|sync\|pack>` | Manage the Skill environment itself — create, sync with upstream, package for handoff | Skill maintenance |
+| `/skm <new\|sync\|pack\|update>` | Manage the Skill environment itself — create, sync with upstream, package for handoff. Renamed from `/skill` on 2026-04-24 to avoid conflict with built-in `/skills` dialog | Skill maintenance |
 | `/clean [check\|force]` | Context window hygiene — summarize, archive, `/clear`, auto-restore | When the chat gets long |
 | `/memo` | Carry feedback / preference memory across projects | Onboarding a new repo |
 | `/dispatch <task>` | Route a task to the right model tier (Opus / Sonnet / Haiku) via a real Agent call | Model-heterogeneous work |
@@ -101,20 +101,20 @@ Three layers, one source of truth:
 ┌──────────────────────────────────────────────────────────┐
 │  github.com/SWSekai/sekai-workflow   (this repo)         │  ← upstream template
 └─────────────────────────┬────────────────────────────────┘
-                          │ clone / /skill sync
+                          │ clone / /skm sync
                           ▼
 ┌──────────────────────────────────────────────────────────┐
 │  <your-project>/.sekai-workflow/   (local template copy) │  ← git-ignored
 └─────────────────────────┬────────────────────────────────┘
-                          │ sp-init.bat / /skill sync
+                          │ sp-init.bat / /skm sync
                           ▼
 ┌──────────────────────────────────────────────────────────┐
 │  <your-project>/.claude/skills/    (active skills)       │  ← git-ignored
 └──────────────────────────────────────────────────────────┘
 ```
 
-- **Upstream updates** — someone improves a Skill → `/hello` or `/skill sync` pulls it into your project.
-- **Downstream flowback** — you improve a Skill locally → if the change is generic, `/skill sync` offers to push it back upstream (opt-in; defaults to local-only).
+- **Upstream updates** — someone improves a Skill → `/hello` or `/skm sync` pulls it into your project.
+- **Downstream flowback** — you improve a Skill locally → if the change is generic, `/skm sync` offers to push it back upstream (opt-in; defaults to local-only).
 - **Project-specific tweaks** stay in `.claude/skills/` and are never pushed back.
 
 ### Version control boundaries
@@ -138,7 +138,7 @@ Every Skill is designed to be edited. Open any `.claude/skills/<skill>/SKILL.md`
 - **Language** — commit-message language, UI text preferences
 - **Flow** — add/remove steps, change triggers
 
-Your edits stay local. If you think a change is generic enough to benefit everyone, flag it and `/skill sync` can contribute it upstream.
+Your edits stay local. If you think a change is generic enough to benefit everyone, flag it and `/skm sync` can contribute it upstream.
 
 ## Documentation
 
@@ -161,7 +161,7 @@ Skills are assigned to model tiers per workload:
 
 Issues and PRs welcome. The main repo lives at [github.com/SWSekai/sekai-workflow](https://github.com/SWSekai/sekai-workflow).
 
-When contributing a Skill change, run `/skill sync` first so your diff is against latest upstream.
+When contributing a Skill change, run `/skm sync` first so your diff is against latest upstream.
 
 Translations of this README are appreciated — add `README.<lang>.md` next to this file and update the language switcher at the top of each README.
 

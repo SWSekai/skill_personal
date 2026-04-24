@@ -40,7 +40,7 @@ cd /path/to/your-project
 |---|---|---|
 | **build** | `/build <flow\|plan\|impl\|test\|commit\|quality\|log\|restart\|eval>` | 開發全流程 |
 | **team-office** | `/team <todo\|board\|decide\|notes>` | 互動協作 |
-| **setup** | `/skill <new\|sync\|pack>` | Skill 環境管理 |
+| **setup** | `/skm <new\|sync\|pack\|update>` | Skill 管理（2026-04-24 由 `/skill` 改名，避免與內建 `/skills` 衝突） |
 | **ask** | `/ask <query\|trace\|report>` | 系統文件與報告 |
 | **context-guard** | `/context-guard` | Context Window 管理 |
 | **memory-portable** | `/teamry-portable` | Memory 跨專案攜帶 |
@@ -59,7 +59,7 @@ Sekai_workflow/ (專案內)       ← 通用模板本地副本
 .claude/skills/ (專案內)       ← 專案專屬 Skill，可客製化
 ```
 
-- **上游更新**：有人改進通用 Skill → `/skill sync` 自動拉取並合併
+- **上游更新**：有人改進通用 Skill → `/skm sync` 自動拉取並合併
 - **下游回流**：你在專案中改進了某個 Skill 且具通用性 → 自動回流至遠端倉庫
 
 ### 版控邊界

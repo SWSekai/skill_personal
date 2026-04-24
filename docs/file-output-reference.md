@@ -42,7 +42,7 @@
 | **team-office** | `todo` | 手動 `/team todo` | `TODO.md` | `.local/collab/` | AI 待辦事項清單 |
 | **build** | `impl` | 衍生任務時 | 追加至 TODO.md | `.local/collab/` | 從 impl 發現的衍生 TODO |
 | （使用者手動） | — | 需要時提供範例 | `<類別>/*.md` | `.local/samples/` | 使用者提供的參考樣本（格式模板、範例檔等）|
-| **setup** | `pack` | 手動 `/skill pack` | 打包結果 + `manifest.txt` | `.local/ai-context/` | AI 上下文打包（含 memory、guides、project-skills）|
+| **setup** | `pack` | 手動 `/skm pack` | 打包結果 + `manifest.txt` | `.local/ai-context/` | AI 上下文打包（含 memory、guides、project-skills）|
 
 ---
 
@@ -68,7 +68,7 @@
 | 類型 | 存放位置 | 管理者 |
 |---|---|---|
 | 專案 Memory | `~/.claude/projects/<encoded-path>/memory/` | auto memory system + `memory_skill_sync` hook |
-| 跨專案 Portable Memory | `sekai-workflow/memory-portable/` | `/skill pack` 回寫 + `sp-init.bat` Step 8 還原 |
+| 跨專案 Portable Memory | `sekai-workflow/memory-portable/` | `/skm pack` 回寫 + `sp-init.bat` Step 8 還原 |
 
 ---
 
@@ -104,8 +104,8 @@
 - `.local/` 整個目錄由 `.gitignore` 排除，不入專案版控
 - 目錄由各 Skill 首次使用時自動建立
 - `/ask report` 依賴 `.local/modify_log/` 的內容來生成報告
-- `/skill pack` 會收集 `.local/` 下所有子目錄打包至 `.local/ai-context/`
-- `/skill pack` 另外收集 Memory 至 `.local/ai-context/memory/`，由 `sp-init.bat` Step 8b 自動還原
+- `/skm pack` 會收集 `.local/` 下所有子目錄打包至 `.local/ai-context/`
+- `/skm pack` 另外收集 Memory 至 `.local/ai-context/memory/`，由 `sp-init.bat` Step 8b 自動還原
 - `.local/samples/` 是樣本專用資料夾：當使用者需要提供格式範例、模板參考時，統一丟到此目錄，AI 需要範例時只從這裡找
 
 ## v2.2 變更記錄（2026-04-15）
