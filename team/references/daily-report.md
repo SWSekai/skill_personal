@@ -122,8 +122,20 @@ This is the integrity mechanism answering the user's concern about bypass of `/c
 - **Transparency on blockers** — name the blocker plainly, name the short-term workaround, name when the long-term fix is planned. Do not hide or spin.
 - **Engineering detail belongs in the appendix** — §6 作業記錄 and linked `modify_log` / CLOSED docs carry the depth. The main body should read in under 60 seconds.
 - **No Claude / tooling commentary** — never mention Claude Code internals, model tiers, context modes, Skill names, or flow interruptions. The supervisor does not care which AI tool was used.
+- **No AI–user dialogue or workflow meta-notes** — discussions between Claude and the user, tooling habits, prompt details, and process detours must not appear. The supervisor reads outcomes, not how the report was generated.
+- **One sentence per entry** — every bullet states exactly one outcome in one sentence. If detail is needed, split into sub-bullets (max 2 levels); never stack multiple sentences in the same bullet.
+- **`<br>` after `>` header lines followed by bullets** — when a `>` blockquote line is immediately followed by a bullet list (or by another `>` line in a multi-line header), append `<br>` at the line end so Teams renders line breaks correctly.
 
 **Failure mode to avoid**: a daily report that reads like a dev diary (exhaustive, commit-by-commit, with jargon) buries the actual progress signal. If the reader has to re-read a sentence to understand what was accomplished, the style has failed.
+
+### 4.0.1 Pre-write Self-check
+
+Before writing any entry, confirm:
+
+- [ ] No phrase resembling「我們討論後決定…」「我幫你…」「這裡用 /commit-push…」
+- [ ] No `.local/...` paths, `Step N`, `--flag`, decision-doc paths in body text
+- [ ] Each bullet is a single sentence; multi-sentence content is split into sub-bullets
+- [ ] No vague continuations like「持續優化」「再觀察」— each entry has an outcome or an explicit action
 
 ### 4.1 Section Structure
 
