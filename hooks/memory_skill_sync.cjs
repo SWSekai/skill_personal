@@ -14,8 +14,10 @@ const path = require('path');
 // but not MEMORY.md (index file)
 const MEMORY_WRITE_RE = /[\/\\]\.claude[\/\\]projects[\/\\][^\/\\]+[\/\\]memory[\/\\][^\/\\]+\.md$/i;
 
-// Matches paths under .claude/skills/ OR sekai-workflow/<name>/SKILL.md|README.md
-const SKILL_WRITE_RE = /(?:[\/\\]\.claude[\/\\]skills[\/\\])|(?:[\/\\]sekai-workflow[\/\\][^\/\\]+[\/\\](?:SKILL|README)\.md$)/i;
+// Matches paths under .claude/skills/ OR (.)sekai-workflow/<name>/{SKILL,README}.md
+// Accepts both `sekai-workflow/` and `.sekai-workflow/` (latter is used when the
+// mirror lives inside the project tree and must be gitignored).
+const SKILL_WRITE_RE = /(?:[\/\\]\.claude[\/\\]skills[\/\\])|(?:[\/\\]\.?sekai-workflow[\/\\][^\/\\]+[\/\\](?:SKILL|README)\.md$)/i;
 
 let input = '';
 process.stdin.setEncoding('utf8');
