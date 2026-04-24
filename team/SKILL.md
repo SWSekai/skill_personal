@@ -838,6 +838,9 @@ When `--daily` flag is present, execute the daily report flow fully defined in `
 > - No function names / flag names / parameter values / decision-doc paths in body text (those belong in `modify_log` / appendix)
 > - Quantify with the team's KPI (e.g. `Recall 37.7→44.6% (+6.9 pp)`), not "大幅改善"
 > - Never mention Claude Code internals, model tiers, context modes, or flow interruptions
+> - **No AI–user dialogue or workflow meta-notes**: discussions between Claude and the user, tooling habits, prompt details, and process detours must not appear; the report reader is the supervisor
+> - **One sentence per entry**: each bullet states one outcome in one sentence; if detail is needed, use sub-bullets — never multi-sentence prose in the same bullet
+> - **`<br>` after `>` header lines followed by bullets**: append `<br>` after the `>` header line so Teams renders line breaks correctly
 > - Reading test: an outside reader grasps progress in under 60 seconds
 > This rule applies to **all** triggers — manual, board closure, decide closure, and `/commit-push` Step 11 auto-populate.
 
