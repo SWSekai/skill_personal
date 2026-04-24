@@ -254,59 +254,106 @@ See `${CLAUDE_SKILL_DIR}/references/evaluation-decision-tree.md` (if it exists; 
 
 ---
 
-## C. `/skm pack` — Project Packaging
+## C. `/skm pack` — Project Packaging (Closure Flow)
 
-Pack all AI-maintenance-related files in the project into `.local/ai-context/`, then delete the skill environment, restoring a clean project directory.
+Pack all AI-maintenance-related files, archive cross-project knowledge assets, and restore a clean project directory. Serves as the **project closure flow**.
+
+The pack flow runs **all phases in one invocation**: audit → collect → changeset review → execute. **No writes occur before the user confirms the changeset in Phase 3.**
 
 ### Trigger
 
 Manual invocation: `/skm pack`
 
-### Execution
+---
 
-Directly run the automation script:
+### Phase 1: Pre-Pack Audit
 
-```bash
-bash Sekai_workflow/_bootstrap/sp-pack.sh
+#### Step 1: Memory Audit
+
+Scan all memory files in `~/.claude/projects/<path>/memory/`:
+- Assess each entry: **Keep** (cross-session, non-duplicate) / **Merge** (same rule in two entries) / **Remove** (stale, duplicate, ephemeral)
+- Do **not** modify yet — queue for Phase 3 confirmation
+
+#### Step 2: Skill Sync Verification
+
+For each skill in `.claude/skills/`: diff against `sekai-workflow/<skill>/`:
+- **Synced** / **Diverged** (needs push) / **Local-only** (project-specific)
+- If any general skill is diverged → invoke `/skm sync` before proceeding
+- Confirm remote is current: `cd sekai-workflow && git fetch origin && git status`
+
+#### Step 3: CLAUDE.md Comparison
+
+Compare local `CLAUDE.md` against `sekai-workflow/_bootstrap/CLAUDE.md.template`:
+- Identify local additions → propose reflow if cross-project general
+- Queue approved changes for Phase 3 confirmation
+
+---
+
+### Phase 2: Collect & Package
+
+#### Step 4: Export Session Commands
+- Diff `.claude/skills/` vs `sekai-workflow/` → project-specific entries
+- List `CLAUDE.md` entries not in `sekai-workflow/manifest.json`
+- Output: `.local/bag/session-commands.md`
+
+#### Step 5: Archive Knowledge Documents
+- Scan `.local/docs/`, `docs/`, project root for guides / ADRs
+- Output: `.local/bag/docs/`
+
+#### Step 6: Auto-Generate `.skill` Files
+- For each project-specific skill: generate `.local/bag/project-skills/<name>.skill` from frontmatter
+
+#### Step 7: Document Consolidation into `bag/`
+- Merge same-topic docs into single files; annotate conflicts; delete originals
+- Also snapshot: `.local/bag/memory/`, `.local/bag/CLAUDE.md`, `.local/bag/skills/`
+
+---
+
+### Phase 3: Changeset Review
+
+#### Step 8: Changeset Preview & User Confirmation
+
+Present full planned changeset before any writes:
 ```
+📦 Pack Changeset Review
+[Memory]      Keep / Merge / Remove counts
+[Skill Sync]  Synced / Diverged / Local-only
+[CLAUDE.md]   Template additions / local-only rules
+[bag/ tree]   Full file list
+[Cleanup]     Files to delete after confirmation
+⚠️  Sensitive files: <list or "none">
+```
+Use AskUserQuestion — Phase 4 executes only after approval.
 
-### Script Behavior
+---
 
-1. **Collect** — `CLAUDE.md`, `.local/` work records, Memory, skills snapshot
-2. **Detect project-specific skills** — compare `.claude/skills/` vs `Sekai_workflow/`; the difference is project-specific
-3. **Preserve project-specific skills** → `.local/ai-context/project-skills/`
-4. **Collect general guides** — scan `.local/docs/`, `docs/`, and the project root for documents containing `guide` or `指南`, copied to `guides/`
-5. **Generate manifest.txt** — packaging time, file list, restore instructions
-6. **Clean up** — delete `.claude/skills/`, `Sekai_workflow/`, `CLAUDE.md`
+### Phase 4: Execute
 
-### Post-Script — AI Merge Guide (Mandatory)
+#### Step 9: Clean Up
+After user approval:
+1. Apply memory changes (Step 1 plan)
+2. Update `sekai-workflow/_bootstrap/CLAUDE.md.template` if approved (Step 3)
+3. Run `bash sekai-workflow/_bootstrap/sp-pack.sh` — collects, generates manifest.txt, deletes `.claude/skills/`, `sekai-workflow/`, `CLAUDE.md`, temp files
+4. `bag/` is **not deleted** — remains for user review and transfer
 
-After the script completes, you **must** perform an intelligent merge on `.local/ai-context/guides/`:
+#### Step 10: Output Closure Report
+Generate `.local/bag/closure-report.md` covering all phases.
 
-1. Read all collected guide documents
-2. Identify duplicate/overlapping topics (e.g. multiple K8s deployment guides)
-3. Merge documents on the same topic:
-   - Preserve all information as much as possible; do not discard any practical details
-   - Topic naming (`guide-k8s-deployment.md`, `guide-cicd-pipeline.md`)
-   - Note original source paths at the top of the merged document
-   - Conflicting information is kept side-by-side with differences annotated
-4. Delete the original files that have been merged
-5. Independent guides with no overlap → keep as-is, only rename
+---
 
 ### Notes
 
-- The script will ask the user to confirm (y/N) before executing deletion
-- Results are in `.local/ai-context/` (already .gitignored, not under version control)
-- See `manifest.txt` for the restore procedure
-- **Environment info and progress notes are produced by `/team handoff`** (handoff scenarios); pack only handles Skill exit archival
+- All output is under `.local/bag/` (gitignored)
+- `bag/` is the primary transfer artifact for new projects
+- **Environment info / progress notes → `/team handoff`**; pack handles Skill exit archival only
 
 ### Restore Flow
 
-1. `Sekai_workflow/_bootstrap/sp-init.bat` — rebuild environment
-2. `bash Sekai_workflow/_bootstrap/sp-sync.sh` — sync latest skills
-3. Copy `project-skills/` back to `.claude/skills/`
-4. Copy `CLAUDE.md` back to the project root
-5. Copy `memory/` back to `~/.claude/projects/.../memory/`
+1. `sekai-workflow/_bootstrap/sp-init.bat` — rebuild environment
+2. `bash sekai-workflow/_bootstrap/sp-sync.sh` — sync latest skills
+3. Copy `.local/bag/project-skills/` back to `.claude/skills/`
+4. Copy `.local/bag/CLAUDE.md` back to the project root
+5. Copy `.local/bag/memory/` back to `~/.claude/projects/.../memory/`
 
 ---
 
