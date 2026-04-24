@@ -781,6 +781,15 @@ When `--daily` flag is present, execute the daily report flow fully defined in `
 - **Integrity**: cross-check `git log` vs `.local/modify_log/` — commits without modify_log marked ⚠️
 - **Cross-day**: `/hello` Step 3.4 surfaces yesterday's unresolved handoffs and missing modify_logs
 
+> ⚠️ **MANDATORY — Audience & Writing Style** (see `references/daily-report.md` §4.0):
+> Daily report is written for the **supervisor / external stakeholder**, not as a dev diary. Before writing any entry:
+> - Lead with outcomes, not implementation
+> - No function names / flag names / parameter values / decision-doc paths in body text (those belong in `modify_log` / appendix)
+> - Quantify with the team's KPI (e.g. `Recall 37.7→44.6% (+6.9 pp)`), not "大幅改善"
+> - Never mention Claude Code internals, model tiers, context modes, or flow interruptions
+> - Reading test: an outside reader grasps progress in under 60 seconds
+> This rule applies to **all** triggers — manual, board closure, decide closure, and `/commit-push` Step 11 auto-populate.
+
 Full rules, parser specs, edge cases: `references/daily-report.md`. Template: `assets/daily-report-template.md`.
 
 ---

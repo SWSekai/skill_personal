@@ -432,6 +432,7 @@ This ensures operational knowledge is deposited in portable documentation rather
 ## Step 11: Auto-Append to Daily Report (Mandatory, silent)
 
 > **`--meta` mode**: skip this step entirely. Skill maintenance commits do not land in daily report (CLAUDE.md Rule 20).
+> ⚠️ **Audience rule (MANDATORY)**: the daily report is written for the user's supervisor, not as a dev diary. When populating §1 本日完成 / §5 本日決策 from this commit, follow `team/references/daily-report.md` §4.0 — outcomes first, no function names / parameter values / decision-doc paths in body text, quantify with KPI, never mention Claude internals. Commit message and modify_log may contain implementation detail; do NOT copy them verbatim into the daily report body.
 
 Append this commit's record to today's daily report `.local/report/YYMMDD_daily_report.md` per `team/references/daily-report.md` §7.3. Every `/commit-push` run must land in the daily report so that daily work ledger is complete regardless of trigger count.
 
