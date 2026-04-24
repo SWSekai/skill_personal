@@ -255,6 +255,7 @@ After writing the closure summary, immediately update the project living documen
 - [ ] "最後更新" date in the document updated
 - [ ] Closure summary section appended
 - [ ] Living document (`.local/docs/living/PROJECT_JOURNAL.md`) updated
+- [ ] **Leftover items from closure summary appended to `TODO.md` Pending** with `(from CLOSED_*_board.md)` tag (2026-04-24 expanded per Rule 17.1.4: whiteboard unresolved items auto-append to prevent forgetting after CLOSED archival)
 - [ ] Daily report updated (Step 3.5)
 - [ ] Contains reusable experience → evaluate writing it into a guide (same as `/build commit` Step 9)
 - Any not done → complete immediately; must not end the reply
@@ -466,6 +467,7 @@ After Step 6 completes, confirm:
 - [ ] `.local/docs/decisions/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`
 - [ ] `.local/docs/living/PROJECT_JOURNAL.md` has been updated with this decision's entries (link → `CLOSED_*_decision.md`)
 - [ ] **No** `.local/docs/summary/` file has been created (directory was removed 2026-04-22; writing there is a violation)
+- [ ] **Leftover items from closure summary appended to `TODO.md` Pending** with `(from CLOSED_*_decision.md)` tag (2026-04-24 expanded per Rule 17.1.4: previously only 實作項 appended; now 遺留項 also auto-append to prevent forgetting after CLOSED archival)
 - [ ] Daily report updated (Step 6.6)
 - Any not done → complete immediately; **must not end the reply**
 

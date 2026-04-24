@@ -43,7 +43,7 @@ Consultation / planning / troubleshooting conversations **with 3 rounds of back-
 
 - Whiteboard reveals mutually exclusive decision → open decide sub-file inside whiteboard, link reference
 - TODO item needs architectural decision → tag `@needs-decide` + open separate decide; after decide closure, TODO item appends link
-- After decide closure with remaining execution items → change list's "implementation items" auto-append to TODO (tag `from CLOSED_*_decision.md`)
+- After decide / board closure: change list's **implementation items** AND **unresolved leftover items** (`未解決遺留項`) both auto-append to TODO with `(from CLOSED_*_decision.md)` or `(from CLOSED_*_board.md)` tag. (2026-04-24 expanded: was implementation-only; now covers leftover items per feedback — 遺留項 dropping into TODO ensures they don't get forgotten after CLOSED archival)
 - journal vs daily report: journal permanent index (CLOSED history); daily report is today's active page (TODO / closure / commit / handoff)
 
 ## 6. Rule 17.1.5 — Anti-Pattern Detection (Advisory Mode)
