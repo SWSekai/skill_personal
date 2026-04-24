@@ -22,9 +22,9 @@
 
 | 步驟 | 說明 |
 |---|---|
-| 1. 拉取專案更新 | `git fetch` + 顯示 upstream 差異（不自動 merge） |
-| 2. 同步 Skill | 執行 `sp-sync.sh`（原 `/skm sync` 流程一）→ sekai-workflow → .claude/skills/ |
-| 3. 恢復 Context | 讀取最新 context_summary + current_topic + TODO |
+| 1. 拉取專案更新 | `git fetch` + 列出新 commit → **AskUserQuestion 確認後**才套用 |
+| 2. 同步 Skill | 預覽全域 Skill 庫新版本 → **AskUserQuestion 確認後**才執行 `sp-sync.sh` |
+| 3. 恢復 Context | 讀取最新 context_summary + current_topic + **今日可處理 TODO（In Progress 優先）** |
 | 4. 狀態總覽 | 一屏精簡輸出：分支 / commit / 同步結果 / 待辦 / 未提交變更 |
 | 5. 環境檢查 | 有 Docker 才執行，列出容器狀態（可選） |
 

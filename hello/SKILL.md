@@ -18,14 +18,19 @@ Call at the start of every new conversation to complete in one stop: pull update
 ## Step 1: Pull Project Updates
 
 ```bash
-# Project itself
 git fetch origin
-git status
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+git log HEAD..origin/$BRANCH --oneline 2>/dev/null | head -10
 ```
 
-- If upstream has updates → show how many commits `origin/HEAD` is ahead; **do not auto-merge** (avoids conflicts)
-- Notify user: "Remote has N new commits; run `git pull` when needed"
-- If already up to date → show "Project is up to date"
+- If upstream has updates:
+  1. Show new commit count and list (max 10 entries)
+  2. Call AskUserQuestion: **"專案遠端有 N 個新 commit，是否套用？"**
+     - `立即套用（git pull --rebase）` ← (Recommended)
+     - `稍後手動執行（僅記錄）`
+  3. If apply → `git pull --rebase origin <branch>`
+  4. If skip → note "Project updates: N commits pending" in Step 4 status overview
+- If already up to date → proceed to Step 2
 
 ---
 
@@ -43,19 +48,29 @@ Read `sekai_workflow.flowback.pull` from `.claude/settings.local.json`:
 | `true` (default) | Proceed to 2.2 |
 | `false` | Skip remote pull, only do local sync (2.3) |
 
-### 2.2 Execute sp-sync.sh (Remote Sync)
+### 2.2 Preview and Apply Skill Library Updates
+
+Before running the sync script, preview what's available:
 
 ```bash
-bash Sekai_workflow/_bootstrap/sp-sync.sh
+cd Sekai_workflow && git fetch origin
+git log HEAD..origin/main --oneline 2>/dev/null | head -10
 ```
 
-Script behavior (same as legacy `/skm sync` flow one):
-1. `git fetch origin` to get remote updates
-2. Compare local and remote commits
-3. If updates exist → `git pull --rebase origin main`
-4. Compare each skill's SKILL.md / README.md between `Sekai_workflow/` and `.claude/skills/`
-5. Automatically copy new or differing skills to `.claude/skills/`
-6. Output Added / Updated / No change summary
+- If Skill library has updates:
+  1. Show new commit list (max 10 entries) as a preview
+  2. Call AskUserQuestion: **"全域 Skill 庫有 N 個新版本可套用，是否立即同步？"**
+     - `套用（執行 sp-sync.sh）` ← (Recommended)
+     - `跳過（保留目前版本）`
+  3. If apply → `bash Sekai_workflow/_bootstrap/sp-sync.sh`
+  4. If skip → note "Skill library: N commits pending" in Step 4 status overview
+- If already up to date → proceed to Step 2.3
+
+**sp-sync.sh behavior** (when executed):
+1. `git pull --rebase origin main` in Sekai_workflow/
+2. Compare each skill's SKILL.md / README.md between `Sekai_workflow/` and `.claude/skills/`
+3. Automatically copy new or differing skills to `.claude/skills/`
+4. Output Added / Updated / No change summary
 
 **Cases the script cannot handle**:
 - Pull conflicts → abort and notify user to resolve manually
@@ -95,12 +110,22 @@ Read `.local/context_summary/current_topic.md`:
 - If exists → display "Current topic: <topic>"
 - If not → skip
 
-### 3.3 Read TODOs
+### 3.3 Today's Actionable TODOs
 
 Read `.local/collab/TODO.md`:
 
-- If Pending / In Progress items exist → summarize the top 3~5
+- Display **In Progress** items first (highest priority — already started)
+- Then top 3~5 **Pending** items as today's candidates
 - If none → skip
+- Output format:
+
+```
+今日可處理 TODO：
+  🔄 In Progress: <item>
+  ⬜ Pending: <item>
+  ⬜ Pending: <item>
+  （+ N 項，執行 /team todo 查看全部）
+```
 
 ### 3.4 Daily Report Cross-Day Check
 
@@ -144,9 +169,9 @@ Project: <PROJECT_NAME>
 Branch: <branch> (↑N ↓M vs origin)
 Last commit: <hash> <message> (<time ago>)
 
-Skill sync: ✓ Synced (N updates)
+Updates: Project ✓ up to date | ⚠ N commits pending  /  Skill sync ✓ | ⚠ N commits pending
 Context: <last topic>
-TODO: N pending
+TODO: In Progress N / Pending N
 
 Uncommitted changes: N files
 Unpushed commits: N
