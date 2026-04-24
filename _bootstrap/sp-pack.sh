@@ -108,6 +108,38 @@ else
     echo "  [SKIP] Memory 目錄未找到"
 fi
 
+# --- Step 3c: 保護 handbook — 刪除前強制 push ---
+# handbook/ 是跨專案知識資料，本地累積若未 push 將於 Step 9 永久遺失
+echo "[Step 3c] 檢查 handbook 是否需要 push..."
+if [ -d "$SP_DIR/handbook" ]; then
+    cd "$SP_DIR"
+    if ! git diff --quiet handbook/ 2>/dev/null || ! git diff --cached --quiet handbook/ 2>/dev/null; then
+        echo "  [WARN] handbook/ 有未 commit 的本地修改"
+        git add handbook/ 2>/dev/null
+        git commit -m "sync: 保留 handbook 變更（sp-pack pre-delete）
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>" 2>/dev/null || true
+    fi
+    UNPUSHED=$(git rev-list origin/main..HEAD --count 2>/dev/null || echo 0)
+    if [ "$UNPUSHED" != "0" ]; then
+        echo "  [INFO] 有 $UNPUSHED 個未 push commit，嘗試 push..."
+        if git push origin main 2>/dev/null; then
+            echo "  [OK] handbook 已同步至遠端"
+        else
+            echo "  [WARN] push 失敗 — handbook 本地變更將於 Step 9 遺失！"
+            read -p "  是否中止打包？(Y/n) " abort_confirm
+            if [[ ! "$abort_confirm" =~ ^[nN]$ ]]; then
+                echo "[ABORT] 請進入 $SP_DIR 手動 push handbook 後重新執行"
+                exit 1
+            fi
+        fi
+    else
+        echo "  [OK] handbook 已與遠端同步"
+    fi
+else
+    echo "  [SKIP] handbook/ 不存在"
+fi
+
 # --- Step 4b: 回寫 portable memory 到 Sekai_workflow ---
 echo "[Step 3b] 回寫 portable memory..."
 MEM_PORTABLE="$SP_DIR/memo"

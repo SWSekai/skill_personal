@@ -1,6 +1,6 @@
 ---
 name: kb
-description: "Manage sekai-workflow/knowledge_base/ — archive general technical notes (Docker, K8s, ETL, algorithms, backend patterns), auto-extract from decision/board closures, and retrieve relevant content when answering technical questions."
+description: "Manage sekai-workflow/handbook/ — engineering handbook of general technical notes (Docker, K8s, ETL, algorithms, backend patterns); auto-extract from decision/board closures; retrieve relevant content when answering technical questions."
 model: sonnet
 effort: medium
 argument-hint: "<add|search|extract> [topic|query|source-path]"
@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(mkdir *), Bash(l
 
 # /kb — Knowledge Base Manager
 
-Maintains `sekai-workflow/knowledge_base/` as a cross-project reference library. Engineers and the model retrieve notes, templates, and best-practice examples without re-deriving them from scratch.
+Maintains `sekai-workflow/handbook/` as a cross-project engineering handbook. Engineers and the model retrieve notes, templates, and best-practice examples without re-deriving them from scratch.
 
 ## Subcommand Routing
 
@@ -28,7 +28,7 @@ When no subcommand provided → treat as `/kb search <$ARGUMENTS>`.
 
 ### Step 1: Determine Category
 
-Map topic to a directory under `sekai-workflow/knowledge_base/`:
+Map topic to a directory under `sekai-workflow/handbook/`:
 
 | Keyword signals | Directory |
 |---|---|
@@ -41,7 +41,7 @@ Map topic to a directory under `sekai-workflow/knowledge_base/`:
 
 ### Step 2: Check Existing Document
 
-Glob `sekai-workflow/knowledge_base/<category>/<topic>.md`:
+Glob `sekai-workflow/handbook/<category>/<topic>.md`:
 - Exists → update (append section or revise stale content)
 - Not exists → create new
 
@@ -53,7 +53,7 @@ Requirement: content must be **general and reusable** — no project-specific bu
 
 ### Step 4: Update `_index.md`
 
-Append or update the row in `sekai-workflow/knowledge_base/_index.md`:
+Append or update the row in `sekai-workflow/handbook/_index.md`:
 ```
 | <topic> | <category> | <one-line description> | YYYY-MM-DD |
 ```
@@ -62,7 +62,7 @@ Append or update the row in `sekai-workflow/knowledge_base/_index.md`:
 
 ```bash
 cd sekai-workflow
-git add knowledge_base/
+git add handbook/
 git commit -m "docs(kb): add/update <topic>"
 git push
 ```
@@ -78,7 +78,7 @@ Parse `$ARGUMENTS` for keywords; strip stop words.
 ### Step 2: Glob + Grep
 
 ```bash
-grep -ri "<keyword>" sekai-workflow/knowledge_base/ --include="*.md" -l
+grep -ri "<keyword>" sekai-workflow/handbook/ --include="*.md" -l
 ```
 
 Read top 3 most relevant files (score by: title match > heading match > body frequency).
@@ -87,7 +87,7 @@ Read top 3 most relevant files (score by: title match > heading match > body fre
 
 Present relevant sections directly in the reply — do not make the user open the file. Note source path at the end for deep reading.
 
-If 0 results → answer from model knowledge; if the answer is substantial, offer `/kb add` to archive it.
+If 0 results → answer from model knowledge; if the answer is substantial, offer `/kb add` to archive it into the handbook.
 
 ---
 
@@ -134,9 +134,9 @@ Call the add flow inline for each approved item.
 
 When answering a technical question (infrastructure, patterns, algorithms, backend):
 
-1. Glob `sekai-workflow/knowledge_base/**/*.md` for topic-relevant files
+1. Glob `sekai-workflow/handbook/**/*.md` for topic-relevant files
 2. If relevant doc found → read it, prefix the answer with retrieved content, note source path
-3. If no doc found → answer from model knowledge; if answer is > 200 words, offer to add it to knowledge_base
+3. If no doc found → answer from model knowledge; if answer is > 200 words, offer to add it to the handbook
 
 ---
 

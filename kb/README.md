@@ -2,7 +2,7 @@
 
 ## 功能說明
 
-維護 `sekai-workflow/knowledge_base/` 作為**跨專案通用知識庫**，集中存放 Docker/K8s 模板、ETL 邏輯、常用算法最佳實踐、後端設計模式等可重複使用的技術筆記。目標：
+維護 `sekai-workflow/handbook/` 作為**跨專案通用知識庫**，集中存放 Docker/K8s 模板、ETL 邏輯、常用算法最佳實踐、後端設計模式等可重複使用的技術筆記。目標：
 
 - **工程師**：面對不熟悉領域或實作新專案時，可直接查閱筆記，不需從零學習
 - **模型**：回答技術問題時先掃描知識庫，避免重複思考、提供更一致的答案
@@ -29,22 +29,22 @@
 | 手動 `search` | 查詢知識庫 |
 | 手動 `extract <path>` | 從指定 decision/board 檔案抽取可重用內容 |
 | **自動** — `/team` 結案 | `/team decide` 或 `/team board` 產生 `CLOSED_*` 檔時，自動掃描可抽取項 |
-| **自動** — 技術提問 | 使用者提問技術性主題時（後端、基礎設施、演算法），先查 knowledge_base，有相關文件就引用 |
+| **自動** — 技術提問 | 使用者提問技術性主題時（後端、基礎設施、演算法），先查 handbook，有相關文件就引用 |
 
 ## 執行流程
 
 ### A. `/kb add <topic>` — 新增/更新知識文件
 
 1. **分類判斷** — 依關鍵字對應到 `docker/` / `kubernetes/` / `etl/` / `algorithms/` / `backend/` / `_general/`
-2. **檢查既有檔案** — `sekai-workflow/knowledge_base/<category>/<topic>.md` 已存在則更新，否則新建
+2. **檢查既有檔案** — `sekai-workflow/handbook/<category>/<topic>.md` 已存在則更新，否則新建
 3. **使用模板撰寫** — 依 `assets/kb-doc-template.md` 結構（Overview / Quick Reference / Details / Examples / References）
-4. **更新索引** — 在 `knowledge_base/_index.md` 加入或更新該筆
+4. **更新索引** — 在 `handbook/_index.md` 加入或更新該筆
 5. **commit & push** — 推送至 `sekai-workflow` 遠端
 
 ### B. `/kb search <query>` — 查詢
 
 1. 關鍵字解析
-2. Grep knowledge_base（依 title → heading → body 頻率排序）
+2. Grep handbook（依 title → heading → body 頻率排序）
 3. **直接於對話中回傳內容**（不要求使用者開檔），末尾附檔案路徑供深讀
 4. 若查無結果 → 用模型知識回答，若答案完整則詢問是否執行 `/kb add` 歸檔
 
@@ -58,7 +58,7 @@
 ### D. 自動觸發 — 提問增強
 
 回答技術問題時自動執行：
-1. Glob `sekai-workflow/knowledge_base/**/*.md` 找相關檔
+1. Glob `sekai-workflow/handbook/**/*.md` 找相關檔
 2. 有相關文件 → 以知識庫內容為基礎回答，末尾附來源路徑
 3. 無相關文件 → 用模型知識回答；答案超過 200 字時主動詢問是否 `/kb add` 歸檔
 
@@ -71,7 +71,7 @@
 └── assets/
     └── kb-doc-template.md     ← 知識文件統一模板
 
-sekai-workflow/knowledge_base/   ← 實際知識庫（跨專案共享）
+sekai-workflow/handbook/   ← 實際知識庫（跨專案共享）
 ├── _index.md                    ← 主題索引
 ├── docker/
 ├── kubernetes/

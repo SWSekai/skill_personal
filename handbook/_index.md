@@ -1,6 +1,9 @@
-# Knowledge Base Index
+# Engineering Handbook Index
 
-跨專案通用技術筆記索引。新增筆記時由 `/kb add` 自動更新此檔。
+跨專案工程手冊索引（人讀 + 機讀）。新增筆記時由 `/kb add` 自動更新此檔。
+
+> **目錄身份**：此為 `sekai-workflow/` 下的**資料目錄**，不是 skill（無 `SKILL.md`）。由 `/kb` skill 管理。
+> **原名**：`knowledge_base/`（2026-04-24 改為 `handbook/`，避免與頂層 skill 目錄混淆）。
 
 ## 使用方式
 

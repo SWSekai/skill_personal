@@ -495,6 +495,8 @@ if "%DIRNAME%"==".git" exit /b 0
 if "%DIRNAME%"=="_bootstrap" exit /b 0
 if "%DIRNAME%"=="docs" exit /b 0
 if "%DIRNAME%"=="hooks" exit /b 0
+if "%DIRNAME%"=="references" exit /b 0
+if "%DIRNAME%"=="handbook" exit /b 0
 if "%DIRNAME:~0,1%"=="." exit /b 0
 
 if "!MODE!"=="init" (
