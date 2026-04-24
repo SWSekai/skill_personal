@@ -31,9 +31,13 @@
 | 子命令 | 用途 |
 |---|---|
 | `new [name] [desc]` | 建立新 Skill（互動式定義 → 檔案生成 → 索引更新 → 同步 → Step 10 commit 詢問） |
-| `sync` | Sekai_workflow 遠端同步、規則評估與三向連動；含 Rule 23 非 skill 目錄變更檢查（`handbook/`、`docs/` 等）|
+| `sync` | Sekai_workflow 遠端同步、規則評估與三向連動；Flow 1 Step 2b 以 `file_manifest.json` 偵測並互動式清除重新命名殘留資料夾，並含 Rule 23 非 skill 目錄變更檢查（`handbook/`、`docs/` 等） |
 | `pack` | 專案打包（四階段：Memory/Skill/CLAUDE.md 審計 → 收集至 `bag/` → Changeset Review 使用者確認 → 執行清理），確認前不寫入 |
 | `update [hint]` | 使用者確認式 Skill 改進：對話中浮現的規則 → 使用者下 `/skm update` → Gap + Ecosystem 稽核 → 明確 diff 預覽 → 套用 + 三向同步 |
+
+## file_manifest.json（2026-04-24 新增）
+
+`/skm sync` 依 `Sekai_workflow/file_manifest.json` 進行檔案位置核對。凡 Skill 改名、重構、退役，都必須更新此檔的 `skill_aliases` 映射，同步流程才能在所有機器上自動清除舊資料夾，避免本地殘留舊 Skill（例如 `/skill` → `/skm` 改名後殘留 `.claude/skills/skill/`）。詳見 SKILL.md Flow 3「file_manifest.json Maintenance」。
 
 ## 目錄結構
 

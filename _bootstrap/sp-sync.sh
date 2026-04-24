@@ -113,6 +113,65 @@ for skill_dir in "$SP_DIR"/*/; do
     fi
 done
 
+# --- Step 2b: Manifest reconciliation (detect stale/renamed folders) ---
+echo ""
+echo "[Step 2b] Checking file_manifest.json for stale folders..."
+echo ""
+
+MANIFEST="$SP_DIR/file_manifest.json"
+STALE_COUNT=0
+
+if [ ! -f "$MANIFEST" ]; then
+    echo "  [SKIP] No manifest at $MANIFEST — skipping reconciliation."
+elif ! command -v node >/dev/null 2>&1; then
+    echo "  [SKIP] node not in PATH — cannot parse manifest."
+else
+    STALE_LIST=$(
+        SP_DIR="$SP_DIR" SKILLS_DIR="$SKILLS_DIR" MANIFEST="$MANIFEST" \
+        node -e '
+            const fs = require("fs");
+            const m = JSON.parse(fs.readFileSync(process.env.MANIFEST, "utf8"));
+            const aliases = m.skill_aliases || {};
+            const skillsDir = process.env.SKILLS_DIR;
+            const spDir = process.env.SP_DIR;
+            const found = [];
+            for (const oldName of Object.keys(aliases)) {
+                const a = `${skillsDir}/${oldName}`;
+                const b = `${spDir}/${oldName}`;
+                if (fs.existsSync(a)) found.push(a);
+                if (fs.existsSync(b)) found.push(b);
+            }
+            process.stdout.write(found.join("\n"));
+        '
+    )
+
+    if [ -n "$STALE_LIST" ]; then
+        echo "  [STALE] Folders renamed/retired per manifest (skill_aliases):"
+        echo "$STALE_LIST" | sed 's/^/    - /'
+        echo ""
+        if [ -t 0 ]; then
+            read -p "  Remove these stale folders? (y/N): " CONFIRM
+        else
+            CONFIRM="n"
+            echo "  [INFO] Non-interactive mode — skipping removal."
+        fi
+        if [ "$CONFIRM" = "y" ] || [ "$CONFIRM" = "Y" ]; then
+            while IFS= read -r dir; do
+                [ -z "$dir" ] && continue
+                if [ -d "$dir" ]; then
+                    rm -rf "$dir"
+                    echo "  [REMOVED] $dir"
+                    STALE_COUNT=$((STALE_COUNT + 1))
+                fi
+            done <<< "$STALE_LIST"
+        else
+            echo "  [KEEP] Stale folders preserved. Remove manually or rerun sync."
+        fi
+    else
+        echo "  [OK] No stale folders detected."
+    fi
+fi
+
 # --- Step 3: Sync hooks ---
 echo ""
 echo "[Step 3] Comparing hooks..."
@@ -208,6 +267,7 @@ echo "========================================"
 echo " Sync Summary"
 echo "========================================"
 echo "  Skills     — Added: $ADDED / Updated: $UPDATED / No change: $UNCHANGED"
+echo "  Manifest   — Stale removed: $STALE_COUNT"
 echo "  Hooks      — Added: $HOOK_ADDED / Updated: $HOOK_UPDATED / No change: $HOOK_UNCHANGED"
 echo "  Statusline — File: $STATUSLINE_FILE_STATUS / Settings: $SETTINGS_PATCH_STATUS"
 echo "========================================"

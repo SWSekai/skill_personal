@@ -216,8 +216,10 @@ The script performs:
 2. Compare local and remote commits
 3. If updated → `git pull --rebase origin main`
 4. **Skills sync** — Compare each skill's SKILL.md / README.md between `Sekai_workflow/` and `.claude/skills/`; copy new or differing skills
-5. **Hooks sync** — Compare each `*.cjs` / `*.sh` between `Sekai_workflow/hooks/` and `.claude/hooks/`; copy new or differing hook scripts
-6. Output Added / Updated / No change summary for both skills and hooks
+5. **Manifest reconciliation** — Read `Sekai_workflow/file_manifest.json`; for every entry in `skill_aliases` (old→new rename map), detect stale folders at `.claude/skills/<old>/` and `Sekai_workflow/<old>/`, then interactively prompt the user to remove them. Non-interactive runs skip removal.
+6. **Hooks sync** — Compare each `*.cjs` / `*.sh` between `Sekai_workflow/hooks/` and `.claude/hooks/`; copy new or differing hook scripts
+7. **Statusline sync** — Sync `statusline.cjs` + patch `~/.claude/settings.json` `statusLine.command`
+8. Output Added / Updated / No change summary for skills, manifest-stale, hooks, and statusline
 
 **Cannot be handled by script (manual required)**:
 - Pull conflict → abort; resolve manually then rerun
@@ -240,6 +242,58 @@ The script performs:
 Full decision tree and 5 evaluation questions:
 
 See `${CLAUDE_SKILL_DIR}/references/evaluation-decision-tree.md` (if it exists; otherwise included in this file).
+
+### Flow 3: `file_manifest.json` Maintenance (Mandatory for Renames/Retirements)
+
+`Sekai_workflow/file_manifest.json` is the single source of truth for **which folders should exist where** and **which old folders must be cleaned up** after a rename/retirement. `sp-sync.sh` Step 2b reads this file to detect stale folders and interactively remove them.
+
+#### Structure
+
+```json
+{
+  "version": 1,
+  "updated": "<YYYY-MM-DD>",
+  "skill_aliases": { "<old-name>": "<new-name>" },
+  "skills":        { "<name>": { "required_files": [...] } },
+  "hooks":         { "<name>": { "file": "...cjs", "binding": "..." } },
+  "system":        { "statusline": { "template": "...", "canonical": "..." } },
+  "data_folders":  { "<name>": { "location": "...", "description": "..." } }
+}
+```
+
+#### When to Update the Manifest
+
+| Scenario | Required Update |
+|---|---|
+| Rename a skill (e.g. `skill` → `skm`) | Add `skill_aliases["skill"] = "skm"`; rename the `skills` entry; bump `updated` |
+| Retire a skill | Add it to `skill_aliases` with the new owner or `null`; remove from `skills` |
+| Add a new skill | Add a `skills` entry with `required_files` |
+| Add a new hook | Add a `hooks` entry with `file` + `binding` |
+| Move a system-level file | Update the corresponding `system` entry |
+| Add a new cross-project data folder (like `knowledge_base/`) | Add a `data_folders` entry |
+
+#### Enforcement Points
+
+- **`/skm new` Step 3b** — when creating a skill, write an entry to `skills` in the manifest
+- **`/skm update` Step 3** — when the change is a rename/move, update `skill_aliases` in the same diff
+- **`/skm sync` Flow 1** — `sp-sync.sh` Step 2b reads manifest and reconciles stale folders (interactive)
+- **Manual manifest edit → commit + push `.sekai-workflow/`** so other machines pick it up on next sync
+
+#### Stale Detection Logic (Step 2b)
+
+For each `(oldName, newName)` in `skill_aliases`:
+- If `.claude/skills/<oldName>/` exists → flag as STALE (local)
+- If `.sekai-workflow/<oldName>/` exists → flag as STALE (sekai)
+- List all flagged paths → ask user `y/N` → `rm -rf` on `y`
+- Non-interactive run (no tty) → skip removal, keep for manual cleanup
+
+#### Safety Principles
+
+1. **Remove only what is in `skill_aliases`** — orphan detection (folders in .claude/skills but nowhere in manifest) is a **future enhancement**; do not delete anything outside the alias map
+2. **Always interactive** — the script asks before deleting; never silent `rm -rf`
+3. **Manifest is the contract** — do not hand-delete renamed folders; update the manifest and let `sp-sync.sh` do it so every cloned project converges
+
+---
 
 ### Version Control Boundaries (Important)
 

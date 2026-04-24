@@ -1,0 +1,38 @@
+{
+  "_comment": "File location manifest for sp-sync.sh reconciliation. Records skill/system file canonical paths and rename aliases so sync can detect and remove stale folders. Update this whenever a skill is renamed, moved, or retired.",
+  "version": 1,
+  "updated": "2026-04-24",
+  "skill_aliases": {
+    "skill": "skm"
+  },
+  "skills": {
+    "ask":         { "required_files": ["SKILL.md", "README.md"] },
+    "build":       { "required_files": ["SKILL.md", "README.md"] },
+    "clean":       { "required_files": ["SKILL.md", "README.md"] },
+    "commit-push": { "required_files": ["SKILL.md", "README.md"] },
+    "dispatch":    { "required_files": ["SKILL.md", "README.md"] },
+    "hello":       { "required_files": ["SKILL.md", "README.md"] },
+    "kb":          { "required_files": ["SKILL.md", "README.md"] },
+    "memo":        { "required_files": ["SKILL.md", "README.md"] },
+    "skm":         { "required_files": ["SKILL.md", "README.md"] },
+    "team":        { "required_files": ["SKILL.md", "README.md"] }
+  },
+  "hooks": {
+    "check_skill_sync":    { "file": "check_skill_sync.cjs",    "binding": "Stop" },
+    "check_yn_question":   { "file": "check_yn_question.cjs",   "binding": "Stop" },
+    "log_agent_dispatch":  { "file": "log_agent_dispatch.cjs",  "binding": "PreToolUse:Agent" },
+    "memory_skill_sync":   { "file": "memory_skill_sync.cjs",   "binding": "PostToolUse:Write,PostToolUse:Edit" }
+  },
+  "system": {
+    "statusline": {
+      "template": "_bootstrap/templates/statusline.cjs",
+      "canonical": "~/.claude/statusline.cjs"
+    }
+  },
+  "data_folders": {
+    "handbook": {
+      "location": ".sekai-workflow/handbook/",
+      "description": "Cross-project general technical notes (renamed from knowledge_base on 2026-04-24), maintained by /kb. Not mirrored to .claude/skills/. Under sekai-workflow git — renames handled by git, no manifest cleanup needed."
+    }
+  }
+}
