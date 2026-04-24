@@ -177,7 +177,7 @@ Skill creation is a **meta-level maintenance** activity; its commit must not pol
 
 2. If user chose ① → execute `/commit-push --meta` inline. The `--meta` flag:
    - Skips Step 5 Modify Log
-   - Skips Step 11 Daily Brief Append
+   - Skips Step 11 Daily Report Append
    - Keeps Step 1 Quality Check, Step 2 README Sync, Step 4 Commit, Step 6 Push, Step 7 sekai-workflow flowback, Step 8 Restart Eval, Step 9 Context Cleanup, Step 10 Guide
    - Commit message prefix recommendation: `chore(skill):` or `docs(skill):` — per `commit-push/references/commit-conventions.md`
 
@@ -185,7 +185,7 @@ Skill creation is a **meta-level maintenance** activity; its commit must not pol
    ```
    已跳過 commit。新 skill 檔案已就位；自行 commit 時請加 --meta flag：
      /commit-push --meta "<訊息>"
-   以確保不誤寫 modify_log / brief。
+   以確保不誤寫 modify_log / daily report。
    ```
 
 4. Direct-call alternative: instead of AskUserQuestion, users may also configure their workflow to always auto-commit by directly invoking `/commit-push --meta` at Step 10 tail. Both paths are permitted per Rule 20 — AskUserQuestion is preferred default for safety, direct-call is opt-in.

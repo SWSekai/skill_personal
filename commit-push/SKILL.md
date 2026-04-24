@@ -1,6 +1,6 @@
 ---
 name: commit-push
-description: "Commit & Push standalone entry — quality check (Opus) → modify log (Haiku) → README sync → commit → push → restart evaluation → Context cleanup. Built-in complete commit flow, all logs kept local only, not under version control. Supports --meta flag for skill-maintenance commits (skips modify_log + brief append)."
+description: "Commit & Push standalone entry — quality check (Opus) → modify log (Haiku) → README sync → commit → push → restart evaluation → Context cleanup. Built-in complete commit flow, all logs kept local only, not under version control. Supports --meta flag for skill-maintenance commits (skips modify_log + daily report append)."
 model: sonnet
 effort: medium
 argument-hint: "[--meta] [commit message override]"
@@ -21,12 +21,12 @@ Execute the following steps in order. **Do not skip steps** (unless `--meta` fla
 When `$ARGUMENTS` contains `--meta`, this commit is classified as **skill / environment maintenance** rather than project product work:
 
 - **Skip Step 5** (Modify Log creation) — meta commits are not project contributions
-- **Skip Step 11** (Daily Brief append) — meta commits should not appear in daily Teams brief
+- **Skip Step 11** (Daily Report append) — meta commits should not appear in daily Teams report
 - **Keep all other steps**: quality check, README sync, stage, commit, push, sekai-workflow sync, restart eval, context cleanup, experience guide
 
 Triggered automatically by `/skm new` Step 10 (see `skm/SKILL.md` §A). Users may also invoke manually: `/commit-push --meta <message>`.
 
-Rationale: skill/rule edits are meta-level work bound to tooling, not the project's functional deliverable. Tracking them in `modify_log` / daily `brief` would pollute the work ledger. See CLAUDE.md Rule 20.
+Rationale: skill/rule edits are meta-level work bound to tooling, not the project's functional deliverable. Tracking them in `modify_log` / daily report would pollute the work ledger. See CLAUDE.md Rule 20.
 
 ---
 
@@ -408,17 +408,17 @@ This ensures operational knowledge is deposited in portable documentation rather
 
 ---
 
-## Step 11: Auto-Append to Daily Brief (Mandatory, silent)
+## Step 11: Auto-Append to Daily Report (Mandatory, silent)
 
-> **`--meta` mode**: skip this step entirely. Skill maintenance commits do not land in daily brief (CLAUDE.md Rule 20).
+> **`--meta` mode**: skip this step entirely. Skill maintenance commits do not land in daily report (CLAUDE.md Rule 20).
 
-Append this commit's record to today's daily brief `.local/report/YYMMDD_brief.md` per `team/references/daily-brief.md` §7.3. Every `/commit-push` run must land in the brief so that daily work ledger is complete regardless of trigger count.
+Append this commit's record to today's daily report `.local/report/YYMMDD_daily_report.md` per `team/references/daily-report.md` §7.3. Every `/commit-push` run must land in the daily report so that daily work ledger is complete regardless of trigger count.
 
 ### 11.1 Resolve target
 
 1. Get today's date: `date '+%y%m%d'` → `YYMMDD`
-2. Target path: `.local/report/YYMMDD_brief.md`
-3. If brief does not exist → create from `team/assets/brief-template.md` skeleton with header filled in
+2. Target path: `.local/report/YYMMDD_daily_report.md`
+3. If daily report does not exist → create from `team/assets/daily-report-template.md` skeleton with header filled in
 
 ### 11.2 Append commit row to §6 作業記錄
 
@@ -428,11 +428,11 @@ Find the `## 作業記錄` → `### commit 記錄` table. Append one row:
 | {HH:MM} | `{short_hash}` | {commit message first line} | ✅ |
 ```
 
-Mark ✅ because `/commit-push` guaranteed `modify_log` was written in Step 5 — the brief's integrity cross-check (spec §3.6) will see this commit covered.
+Mark ✅ because `/commit-push` guaranteed `modify_log` was written in Step 5 — the daily report's integrity cross-check (spec §3.6) will see this commit covered.
 
 ### 11.3 Refresh other auto-updated sections
 
-Per `references/daily-brief.md` §6.1, also smart-update §1 本日完成 / §2 進行中 / §3 待辦與阻塞 / §5 本日決策與討論結論 from current TODO.md and any CLOSED_ files dated today. §4 交接事項 is preserved (not touched).
+Per `references/daily-report.md` §6.1, also smart-update §1 本日完成 / §2 進行中 / §3 待辦與阻塞 / §5 本日決策與討論結論 from current TODO.md and any CLOSED_ files dated today. §4 交接事項 is preserved (not touched).
 
 ### 11.4 Update header stamp
 
@@ -443,11 +443,11 @@ Update the header line to:
 
 ### 11.5 Silent mode
 
-No user prompt, no handoff question. This is equivalent to calling `/team report --daily` in automatic mode on the current commit — the brief is a **daily accumulator** that captures every commit even if the user skips `/commit-push` later (see `references/daily-brief.md` §3.6 integrity mechanism for bypassed commits).
+No user prompt, no handoff question. This is equivalent to calling `/team report --daily` in automatic mode on the current commit — the daily report is a **daily accumulator** that captures every commit even if the user skips `/commit-push` later (see `references/daily-report.md` §3.6 integrity mechanism for bypassed commits).
 
 ### 11.6 Self-check
 
-- [ ] `.local/report/YYMMDD_brief.md` exists after this step
+- [ ] `.local/report/YYMMDD_daily_report.md` exists after this step
 - [ ] This commit's hash appears in §6 commit 記錄 table with ✅
 - [ ] Header "最後更新" timestamp advanced
 - [ ] §4 交接事項 content unchanged from previous state

@@ -33,7 +33,7 @@
       "model": "sonnet",
       "trigger": "手動呼叫 / board 自動觸發 / report --daily 由 board Step 3.5 + decide Step 6.6 + commit-push Step 11 自動呼叫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(mkdir *)", "Bash(mv *)"],
-      "files": ["team/SKILL.md", "team/README.md", "team/references/interaction-modes.md", "team/references/naming.md", "team/references/followup.md", "team/references/daily-brief.md", "team/assets/collab-template.md", "team/assets/whiteboard-template.md", "team/assets/brief-template.md"],
+      "files": ["team/SKILL.md", "team/README.md", "team/references/interaction-modes.md", "team/references/naming.md", "team/references/followup.md", "team/references/daily-report.md", "team/assets/collab-template.md", "team/assets/whiteboard-template.md", "team/assets/daily-report-template.md"],
       "merged_from": ["todo", "whiteboard", "md-collab", "tech-notes", "handoff", "report"]
     },
     {

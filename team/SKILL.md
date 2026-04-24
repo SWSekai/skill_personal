@@ -62,6 +62,23 @@ All interactive output files follow the pattern `YYMMDD_<topic>_<type>.md` where
 | `/team todo list` | List all pending items |
 | `/team todo <n>` | Process the specified item number |
 
+### Triggers (CLAUDE.md Rule 17.1.1 / 17.1.7 / 17.1.8)
+
+**Auto-capture** (silent, append to Pending, one-line tail hint in reply):
+- User says `btw`, `順便`, `臨時想到`, `對了` → capture the mentioned item
+- User signals **future trial**: `以後想試 X` / `未來可以做 X` / `將 X 加入代辦` / `之後可以試 X` → append to TODO (NOT decide); this is cross-project synchronized rule (Rule 17.1.7)
+
+**Auto-create file**: if `.local/collab/TODO.md` does not exist on first TODO signal → Claude creates it with skeleton (`## Pending / ## In Progress / ## Completed`) automatically (Rule 17.1.8).
+
+**Manual**: `/team todo add <desc>` explicit; `/team todo list`; `/team todo <n>`.
+
+### Anti-patterns (when NOT to use TODO; Rule 17.1.9)
+
+- ❌ User needs to choose A/B/C (互斥選項) → use `decide` or `AskUserQuestion` (Rule 17.1.2)
+- ❌ Item requires multi-line design discussion (>200 chars or contains branching `?`) → propose upgrade to decide
+- ❌ Already decided + in progress item described vaguely → ask follow-up first (Step 3)
+- ❌ "Future trial" items being stuffed into decision tables as `[ ]` options → move to TODO, mark original as `~~~~（移往 TODO）`
+
 ### Step 1: Read and Parse
 
 Read `.local/collab/TODO.md` (or the path specified by the project), parse all items in the "Pending" section, extract description, priority tag, and indented notes.
@@ -110,10 +127,21 @@ Present a processing summary (completed / deferred / derived). If there are unco
 
 For consultation, planning, and troubleshooting conversations, create a continuously updated markdown document as a live whiteboard.
 
-### Triggers
+### Triggers (CLAUDE.md Rule 17.1 / 17.1.3)
 
-**Auto-trigger**: the conversation involves system consultation, solution evaluation, problem troubleshooting, or discussion requiring multi-step progress tracking.
-**Do not trigger**: pure code modification, one-off Q&A, execution work with a clearly defined task.
+**Auto-trigger** (tightened 2026-04-24 per Rule 17.1.3):
+- Consultation / planning / troubleshooting conversation, AND
+- **3 rounds of back-and-forth without convergence** (no clear TODO, no decide opened, no final answer)
+- → auto-create `.local/docs/whiteboard/YYMMDD_<topic>_board.md`
+
+1-2 rounds with quick convergence → inline answer, do NOT open whiteboard.
+
+**Do not trigger** (anti-patterns per Rule 17.1.5/17.1.9):
+- ❌ Pure code modification with clear task
+- ❌ One-off Q&A (should answer in conversation, not archive)
+- ❌ Execution work already scoped (should be in TODO)
+- ❌ User needs to choose A/B/C (should be decide or AskUserQuestion)
+- ❌ Quick follow-up to already-closed whiteboard (use `/team follow-up` instead)
 
 ### Step 1: Create the Whiteboard
 
@@ -201,23 +229,23 @@ After writing the closure summary, immediately update the project living documen
 - [ ] "最後更新" date in the document updated
 - [ ] Closure summary section appended
 - [ ] Living document (`.local/docs/living/PROJECT_JOURNAL.md`) updated
-- [ ] Daily brief updated (Step 3.5)
+- [ ] Daily report updated (Step 3.5)
 - [ ] Contains reusable experience → evaluate writing it into a guide (same as `/build commit` Step 9)
 - Any not done → complete immediately; must not end the reply
 
-#### 3.5 Auto-Update Daily Brief (Mandatory, silent)
+#### 3.5 Auto-Update Daily Report (Mandatory, silent)
 
-After Step 3.3 living doc update, invoke `/team report --daily` flow inline (per `references/daily-brief.md` §7.1):
+After Step 3.3 living doc update, invoke `/team report --daily` flow inline (per `references/daily-report.md` §7.1):
 
-1. Target: `.local/report/YYMMDD_brief.md` (today's date from `date '+%y%m%d'`)
+1. Target: `.local/report/YYMMDD_daily_report.md` (today's date from `date '+%y%m%d'`)
 2. Read this closed whiteboard's inline closure summary
-3. Extract 「最終決策」 table → append to brief's **「本日決策與討論結論」** section (one row per decision)
+3. Extract 「最終決策」 table → append to daily report's **「本日決策與討論結論」** section (one row per decision)
 4. Extract 「背景」/「變更清單」 → append one-line entry to **「本日完成」**
-5. Update brief header: `> 最後更新：YYYY-MM-DD HH:MM | 來源：board closure (CLOSED_YYMMDD_<topic>_board.md)`
+5. Update daily report header: `> 最後更新：YYYY-MM-DD HH:MM | 來源：board closure (CLOSED_YYMMDD_<topic>_board.md)`
 6. **Silent mode** — do NOT prompt for handoff (per decision §3.3.a); preserve §4 交接事項 section untouched
-7. If brief file does not exist → create from `assets/brief-template.md` and populate only §1, §5, §6-closure-record
+7. If daily report file does not exist → create from `assets/daily-report-template.md` and populate only §1, §5, §6-closure-record
 
-Parser rules: `references/daily-brief.md` §9.1 (closure block detection), §9.4 (section boundaries).
+Parser rules: `references/daily-report.md` §9.1 (closure block detection), §9.4 (section boundaries).
 
 ### Design Principles
 
@@ -232,6 +260,32 @@ Parser rules: `references/daily-brief.md` §9.1 (closure block detection), §9.4
 ## C. `/team decide` — Markdown Interactive Decision Table
 
 Generate structured markdown for the user to check options, which Claude then reads back to implement.
+
+### Triggers (CLAUDE.md Rule 17.1 / 17.1.2 / 17.1.7)
+
+**Always manual — never auto-open** (Rule 17.1 table `自動觸發條件` row). Either:
+- User explicitly requests decision document
+- Chain transition: `board` reveals mutually-exclusive choices → open sub-decide referenced from whiteboard
+- Chain transition: TODO item needs architectural decision (`@needs-decide` tag) → open decide
+
+**Prefer AskUserQuestion instead** (Rule 17.1.2) when:
+- A/B options are simple (color, preset, display preference)
+- Each option description fits in 5 words
+- No spec discussion, weigh-in, or current-state comparison needed
+- → use `AskUserQuestion`; decision history is the conversation itself
+
+**Open decide file** when:
+- Options need weighing, pre-fill, current-state comparison, supplementary notes
+- Multi-file / multi-module impact
+- Skill / rule / workflow modification
+- Resource trade-offs
+
+### Anti-patterns (when NOT to use decide; Rule 17.1.5 / 17.1.9)
+
+- ❌ Single-line bug fix (over-documentation)
+- ❌ Simple A/B that could be `AskUserQuestion` (Rule 17.1.2)
+- ❌ Informational lookup (goes to `ask info`)
+- ❌ **Future trial items stuffed as `[ ]` options** (Rule 17.1.7): items like "以後想試 CNN model" are NOT mutually exclusive with other options — they belong in TODO. If closure finds such items in decide → move to TODO and mark original `~~~~（移往 TODO）`.
 
 ### Step 1: Analyze the Topic
 
@@ -363,22 +417,22 @@ After Step 6 completes, confirm:
 - [ ] `.local/docs/decision/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`
 - [ ] `.local/docs/living/PROJECT_JOURNAL.md` has been updated with this decision's entries (link → `CLOSED_*_decision.md`)
 - [ ] **No** `.local/docs/summary/` file has been created (directory was removed 2026-04-22; writing there is a violation)
-- [ ] Daily brief updated (Step 6.6)
+- [ ] Daily report updated (Step 6.6)
 - Any not done → complete immediately; **must not end the reply**
 
-#### 6.6 Auto-Update Daily Brief (Mandatory, silent)
+#### 6.6 Auto-Update Daily Report (Mandatory, silent)
 
-After Step 6.4 living doc update, invoke `/team report --daily` flow inline (per `references/daily-brief.md` §7.2):
+After Step 6.4 living doc update, invoke `/team report --daily` flow inline (per `references/daily-report.md` §7.2):
 
-1. Target: `.local/report/YYMMDD_brief.md` (today's date from `date '+%y%m%d'`)
+1. Target: `.local/report/YYMMDD_daily_report.md` (today's date from `date '+%y%m%d'`)
 2. Read this closed decision file's inline closure summary (at file end)
-3. Extract 「最終決策（逐項目 §n.m）」 table → append to brief's **「本日決策與討論結論」** — collapse §n.m sub-items into one summary row
+3. Extract 「最終決策（逐項目 §n.m）」 table → append to daily report's **「本日決策與討論結論」** — collapse §n.m sub-items into one summary row
 4. Extract 「變更清單」 → append entries to **「本日完成」** (one line per file change topic)
-5. Update brief header: `> 最後更新：YYYY-MM-DD HH:MM | 來源：decide closure (CLOSED_YYMMDD_<topic>_decision.md)`
+5. Update daily report header: `> 最後更新：YYYY-MM-DD HH:MM | 來源：decide closure (CLOSED_YYMMDD_<topic>_decision.md)`
 6. **Silent mode** — do NOT prompt for handoff (per decision §3.3.a); preserve §4 交接事項 section untouched
-7. If brief file does not exist → create from `assets/brief-template.md` and populate only §1, §5, §6-closure-record
+7. If daily report file does not exist → create from `assets/daily-report-template.md` and populate only §1, §5, §6-closure-record
 
-Parser rules: `references/daily-brief.md` §9.1 (closure block detection), §9.4 (section boundaries).
+Parser rules: `references/daily-report.md` §9.1 (closure block detection), §9.4 (section boundaries).
 
 ### Design Principles
 
@@ -632,7 +686,7 @@ YYMMDD_ai-context/
 
 ## F. `/team report` — Work Report Generation
 
-Consolidate project modify logs into a work report suitable for a **2–3 minute briefing**. (Moved here from `/ask report` on 2026-04-17.) 2026-04-24 added `--daily` flag for daily Teams-renderable brief (full spec in `references/daily-brief.md`).
+Consolidate project modify logs into a work report suitable for a **2–3 minute briefing**. (Moved here from `/ask report` on 2026-04-17.) 2026-04-24 added `--daily` flag for daily Teams-renderable daily report (full spec in `references/daily-report.md`).
 
 ### Triggers
 
@@ -641,15 +695,15 @@ Consolidate project modify logs into a work report suitable for a **2–3 minute
 | `/team report` | Full report (all modify logs) |
 | `/team report weekly` | Weekly report (past 7 days) |
 | `/team report YYMMDD YYMMDD` | Specified range |
-| `/team report --daily` | **Daily Teams brief (today)** — details in `references/daily-brief.md` |
-| `/team report --daily YYMMDD` | Daily Teams brief for specified day |
-| `/team report --daily YYMMDD YYMMDD` | Teams brief for specified range (aggregated) |
+| `/team report --daily` | **Daily Teams report (today)** — details in `references/daily-report.md` |
+| `/team report --daily YYMMDD` | Daily Teams report for specified day |
+| `/team report --daily YYMMDD YYMMDD` | Teams daily report for specified range (aggregated) |
 
-If `--daily` is present, branch to the Teams brief flow (`references/daily-brief.md`). Otherwise continue with the formal report flow below.
+If `--daily` is present, branch to the daily report flow (`references/daily-report.md`). Otherwise continue with the formal report flow below.
 
 ### Step 1: Determine the scope
 
-- `--daily` present → switch to Teams brief flow per `references/daily-brief.md` and skip Steps 2–4 below
+- `--daily` present → switch to daily report flow per `references/daily-report.md` and skip Steps 2–4 below
 - No argument / `full` → read everything
 - `weekly` → past 7 days (filter by date prefix in filename)
 - `YYMMDD YYMMDD` → specified range
@@ -714,11 +768,11 @@ Write to `.local/report/`.
 5. **Actionable tracking items**: Be specific; avoid "continue to optimize"
 6. **Language**: Align with project conventions (per project language setting, e.g., Traditional Chinese for Taiwan)
 
-### `--daily` Mode (Daily Brief)
+### `--daily` Mode (Daily Report)
 
-When `--daily` flag is present, execute the daily brief flow fully defined in `references/daily-brief.md`. Key differences vs default mode:
+When `--daily` flag is present, execute the daily report flow fully defined in `references/daily-report.md`. Key differences vs default mode:
 
-- **Output**: `.local/report/YYMMDD_brief.md` (one per day, smart-update)
+- **Output**: `.local/report/YYMMDD_daily_report.md` (one per day, smart-update)
 - **Sources**: whiteboard/decision closure summaries + TODO deltas + modify_log + user handoff
 - **Sections**: 本日完成 / 進行中 / 待辦與阻塞 / 交接事項 / 本日決策與討論結論 / 作業記錄
 - **Format**: Teams-safe markdown subset with `- [ ]` checkboxes
@@ -727,7 +781,7 @@ When `--daily` flag is present, execute the daily brief flow fully defined in `r
 - **Integrity**: cross-check `git log` vs `.local/modify_log/` — commits without modify_log marked ⚠️
 - **Cross-day**: `/hello` Step 3.4 surfaces yesterday's unresolved handoffs and missing modify_logs
 
-Full rules, parser specs, edge cases: `references/daily-brief.md`. Template: `assets/brief-template.md`.
+Full rules, parser specs, edge cases: `references/daily-report.md`. Template: `assets/daily-report-template.md`.
 
 ---
 
@@ -736,6 +790,17 @@ Full rules, parser specs, edge cases: `references/daily-brief.md`. Template: `as
 Maintain a single, continuously updated project-level document that accumulates outcomes from all whiteboard and decision table closures. Acts as the project's authoritative knowledge base for past discussions, decisions, and preserved candidates.
 
 **This subcommand is primarily auto-called** by `/team board` Step 3.3 and `/team decide` Step 6.4. Manual invocation is supported for viewing or regenerating.
+
+### Triggers (CLAUDE.md Rule 17.1)
+
+- **Auto**: `/team board` closure Step 3.3 + `/team decide` closure Step 6.4 → append one row to the appropriate journal table
+- **Manual**: `/team journal` (show path) / `/team journal view` (print full) / `/team journal regen` (rebuild from CLOSED_* files)
+
+### Anti-patterns (Rule 17.1.5 / 17.1.9)
+
+- ❌ Manual editing of `PROJECT_JOURNAL.md` (violates auto-index principle) — use CLOSED_ source file edits instead, then `/team journal regen`
+- ❌ Using journal as TODO replacement (journal is read-only historical index)
+- ❌ Using journal for daily work accumulation (that's `/team report --daily`)
 
 ### Document Location
 

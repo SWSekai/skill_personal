@@ -1,18 +1,18 @@
-# /team report --daily — Daily Brief Mode Spec
+# /team report --daily — Daily Daily Report Mode Spec
 
 > Full specification for the `--daily` flag of `/team report`; `team/SKILL.md §F` keeps only the external contract.
-> Aligned with decision `260424_team_brief_subcommand_decision.md`.
+> Aligned with decision `260424_team_daily report_subcommand_decision.md`.
 
 ## 1. Purpose and Scope
 
-`/team report --daily` is a **daily Teams-renderable brief** mode layered on top of `/team report`. Differences from the default mode:
+`/team report --daily` is a **daily Teams-renderable daily report** mode layered on top of `/team report`. Differences from the default mode:
 
 | Aspect | `/team report` (existing) | `/team report --daily` (new mode) |
 |---|---|---|
 | Purpose | Long-cycle formal report (weekly / range) | Daily message pastable into Microsoft Teams |
 | Primary sources | `modify_log` | closure summaries (board + decide) + TODO deltas + `modify_log` + user handoff |
 | Time unit | Weekly / range | Today (default) / specified day / specified range |
-| Output file | `.local/report/YYMMDD_<scope>_report.md` | `.local/report/YYMMDD_brief.md` |
+| Output file | `.local/report/YYMMDD_<scope>_report.md` | `.local/report/YYMMDD_daily_report.md` |
 | Format | Table-heavy, formal | Teams-safe subset, `- [ ]` checkboxes |
 | Trigger | Manual | Manual + board closure auto + decide closure auto + `/commit-push` auto |
 | Update model | One-shot generation | Daily accumulator (smart merge each trigger) |
@@ -28,24 +28,24 @@ If both `weekly` and `--daily` appear, `--daily` wins (daily semantics override 
 
 ## 2. File Location and Naming
 
-- **Path**: `.local/report/YYMMDD_brief.md`
+- **Path**: `.local/report/YYMMDD_daily_report.md`
 - **One file per day**: same-day re-invocation → smart update (see §7), never a second file
 - **Cross-day separation**: filename `YYMMDD_` prefix naturally partitions history
-- **No auto-deletion**: yesterday's brief and earlier are preserved as history (do not rename to `CLOSED_`; the `CLOSED_` prefix is reserved for board/decision files)
+- **No auto-deletion**: yesterday's daily report and earlier are preserved as history (do not rename to `CLOSED_`; the `CLOSED_` prefix is reserved for board/decision files)
 - **No version control**: lives under `.local/` which is gitignored
 
 ---
 
 ## 3. Data Sources (per decision §2.1)
 
-All sources merge into one daily brief via smart update. Selected sources: **a + b + c + d + f**.
+All sources merge into one daily daily report via smart update. Selected sources: **a + b + c + d + f**.
 
 ### 3.1 Whiteboard Closure Summary (§2.1.a)
 
 For each `.local/docs/whiteboard/CLOSED_YYMMDD_*_board.md` within scope:
 
 1. Read the "# 結案摘要（Closure Summary）" block at file end
-2. Extract 「最終決策」 table → append to brief's **「本日決策與討論結論」** section as one row per decision: `(topic) | (outcome) | [link to CLOSED file]`
+2. Extract 「最終決策」 table → append to daily report's **「本日決策與討論結論」** section as one row per decision: `(topic) | (outcome) | [link to CLOSED file]`
 3. Extract 「背景」 → used as narrative in 「本日完成」 one-line entry
 
 ### 3.2 Decision Closure Summary (§2.1.b)
@@ -53,16 +53,16 @@ For each `.local/docs/whiteboard/CLOSED_YYMMDD_*_board.md` within scope:
 For each `.local/docs/decision/CLOSED_YYMMDD_*_decision.md` within scope:
 
 1. Read the inline "# 結案摘要（Closure Summary）" block at file end
-2. Extract 「最終決策（逐項目 §n.m）」 → append to brief's **「本日決策與討論結論」** section
-3. Multiple decision rows per file → one brief row per major decision topic (collapse §n.m sub-items into one summary line)
+2. Extract 「最終決策（逐項目 §n.m）」 → append to daily report's **「本日決策與討論結論」** section
+3. Multiple decision rows per file → one daily report row per major decision topic (collapse §n.m sub-items into one summary line)
 
 ### 3.3 TODO State Changes (§2.1.c)
 
 Scan `.local/collab/TODO.md`:
 
-- **Completed today**: parse `## Completed` section, filter entries with `done YYYY-MM-DD HH:MM` matching scope → fill brief's **「本日完成」**
-- **In Progress**: parse `## In Progress` section → fill brief's **「進行中」**
-- **Pending**: parse `## Pending` section → fill brief's **「待辦與阻塞」**
+- **Completed today**: parse `## Completed` section, filter entries with `done YYYY-MM-DD HH:MM` matching scope → fill daily report's **「本日完成」**
+- **In Progress**: parse `## In Progress` section → fill daily report's **「進行中」**
+- **Pending**: parse `## Pending` section → fill daily report's **「待辦與阻塞」**
   - Items tagged `@blocked` or in a "Blocker" sub-section → annotate with blocker reason if present
 - If `TODO.md` does not exist → TODO-based sections empty, do not fail
 
@@ -79,7 +79,7 @@ For each `.local/modify_log/YYMMDD_*.md` within scope:
 Per decision §6.2 (selected options: b + c with hybrid rule「若未能從todo抓取對應資料則詢問」):
 
 1. **Primary — TODO `@handoff:<name>` tag**: scan `TODO.md` (any section) for lines containing `@handoff:<name>` pattern
-   - Matched → extract item text + `<name>` → fill brief's **「交接事項」** as `交給 @<name>：<text>`
+   - Matched → extract item text + `<name>` → fill daily report's **「交接事項」** as `交給 @<name>：<text>`
    - Regex: `@handoff:(\w+)` (case-insensitive)
 2. **Fallback — AskUserQuestion**: if no `@handoff:*` tags found AND trigger is **manual**, ask:
    > 今日是否有需要交接的事項？若有，請提供：交給誰、要告訴他什麼。
@@ -104,13 +104,13 @@ For each commit:
 
 Append all commits (including missing-log ones) to **「作業記錄 → commit 記錄」** table. ⚠️ rows preserve order — do not drop.
 
-This is the integrity mechanism answering the user's concern about bypass of `/commit-push` (see decision §3.1.e 補充). The brief does not block commits; it surfaces the gap.
+This is the integrity mechanism answering the user's concern about bypass of `/commit-push` (see decision §3.1.e 補充). The daily report does not block commits; it surfaces the gap.
 
 ---
 
 ## 4. Output Content Structure (per decision §6.1)
 
-Brief content has 6 sections. Sections 1–5 are user-facing; section 6 is engineering detail.
+Daily Report content has 6 sections. Sections 1–5 are user-facing; section 6 is engineering detail.
 
 1. **本日完成** — completed items (TODO done + whiteboard outcomes)
 2. **進行中** — in-progress items (TODO in_progress)
@@ -119,7 +119,7 @@ Brief content has 6 sections. Sections 1–5 are user-facing; section 6 is engin
 5. **本日決策與討論結論** — decision table (from closures)
 6. **作業記錄** (附錄 / appendix) — commit + closure cross-check
 
-Full template: `team/assets/brief-template.md`.
+Full template: `team/assets/daily report-template.md`.
 
 ---
 
@@ -150,7 +150,7 @@ Always use `- [ ]` / `- [x]` format; do not use emoji `⬜` / `✅` in pending s
 
 ## 6. Smart Update Strategy (per decision §4.3.a)
 
-When same-day brief exists:
+When same-day daily report exists:
 
 ### 6.1 Auto-updated sections (overwrite each trigger)
 - §1 本日完成
@@ -180,8 +180,8 @@ In the header, append the latest triggering source:
 
 Inserted in `team/SKILL.md §B Step 3` after Step 3.4 (self-check). After living doc update completes:
 
-1. Detect date: if today has existing `.local/report/YYMMDD_brief.md` → smart-update §1/§3/§5/§6 from this closed whiteboard
-2. If no brief yet today → create new brief using template, fill §1/§5 from this closure, leave other sections to next trigger
+1. Detect date: if today has existing `.local/report/YYMMDD_daily_report.md` → smart-update §1/§3/§5/§6 from this closed whiteboard
+2. If no daily report yet today → create new daily report using template, fill §1/§5 from this closure, leave other sections to next trigger
 3. Silent mode: no handoff prompt, no user confirmation
 4. Append to trigger source tag
 
@@ -194,8 +194,8 @@ Inserted in `team/SKILL.md §C Step 6` after Step 6.5 (self-check). Same behavio
 Inserted in `commit-push/SKILL.md` after Step 10 (experience sync-back). After commit + push + modify_log + cleanup complete:
 
 1. Detect date from the commit timestamp (normally "today")
-2. If brief exists → append this commit row to §6 作業記錄 (auto-mark ✅ since commit-push writes modify_log)
-3. If no brief yet → create new brief, write §6 with this commit as seed, other sections populated from TODO.md + existing CLOSED files within today
+2. If daily report exists → append this commit row to §6 作業記錄 (auto-mark ✅ since commit-push writes modify_log)
+3. If no daily report yet → create new daily report, write §6 with this commit as seed, other sections populated from TODO.md + existing CLOSED files within today
 4. Silent mode (no handoff prompt)
 
 ### 7.4 Manual — `/team report --daily` direct call
@@ -210,33 +210,33 @@ Inserted in `hello/SKILL.md` Step 3 (Restore Context) as sub-step 3.4 (new):
 
 ### 8.1 Detection logic
 1. Get today's date: `date '+%Y%m%d'` (convert to YYMMDD: last 6 chars)
-2. Glob `.local/report/*_brief.md` → pick the latest by filename sort
-3. Compare latest brief's YYMMDD vs today's YYMMDD:
+2. Glob `.local/report/*_daily report.md` → pick the latest by filename sort
+3. Compare latest daily report's YYMMDD vs today's YYMMDD:
 
 | Condition | Display |
 |---|---|
-| No brief files | Skip |
-| Latest = today | `本日 brief: N 完成 / M 進行中 / K 待辦`（concise inline） |
+| No daily report files | Skip |
+| Latest = today | `本日 daily report: N 完成 / M 進行中 / K 待辦`（concise inline） |
 | Latest < today | See §8.2 |
 
-### 8.2 Yesterday's brief reminder (cross-day)
+### 8.2 Yesterday's daily report reminder (cross-day)
 
 Display block in status overview:
 
 ```
 ━━━ 跨日檢查 ━━━
-昨日 brief：.local/report/YYMMDD_brief.md
+昨日 daily report：.local/report/YYMMDD_daily_report.md
   未處理交接：N 項（若 §4 非「無」）
   modify_log 缺失：M 筆（若 §6 有 ⚠️ 標記）
-今日 brief：尚未建立（將於今日首次觸發時新建）
+今日 daily report：尚未建立（將於今日首次觸發時新建）
 ━━━━━━━━━━━━━━
 ```
 
 ### 8.3 No cleanup / no rename
-Per decision §8.1.a, do NOT rename yesterday's brief to `CLOSED_` (reserved for decision/whiteboard). "Cleanup" semantics is satisfied by natural `YYMMDD` partition — yesterday's file becomes a historical artifact automatically when today writes a new `YYMMDD_brief.md`.
+Per decision §8.1.a, do NOT rename yesterday's daily report to `CLOSED_` (reserved for decision/whiteboard). "Cleanup" semantics is satisfied by natural `YYMMDD` partition — yesterday's file becomes a historical artifact automatically when today writes a new `YYMMDD_daily_report.md`.
 
 ### 8.4 Optional promotion of yesterday handoffs
-If yesterday's brief §4 交接事項 is non-empty and non-"無" → `/hello` Step 3.4 output includes a subtle hint:
+If yesterday's daily report §4 交接事項 is non-empty and non-"無" → `/hello` Step 3.4 output includes a subtle hint:
 
 > 昨日有 N 項交接事項未確認。如需延續到今天，執行 `/team report --daily` 手動合併。
 
@@ -271,7 +271,7 @@ Extract full line containing the tag + strip the tag itself for handoff text.
 
 In each `YYMMDD_*.md`, find pattern `\bGit 版本\b.*\b([a-f0-9]{7,40})\b` → collect short-hash list for cross-check.
 
-### 9.4 Brief section boundary recognition
+### 9.4 Daily Report section boundary recognition
 
 When smart-updating, locate sections by H2 heading exact match:
 - `## 本日完成`
@@ -292,10 +292,10 @@ Unknown sections → preserve as-is (future-extensibility).
 | No TODO.md | Skip TODO-derived sections; continue |
 | No closure files within scope | §1/§5 filled from TODO only |
 | No commits today | §6 table shows "無 commit 紀錄" |
-| Brief exists but malformed | Back up `YYMMDD_brief.md.bak`, regenerate from template |
+| Daily Report exists but malformed | Back up `YYMMDD_daily_report.md.bak`, regenerate from template |
 | Range spans multiple days | Aggregate all days; single output file with the **end-date** as filename YYMMDD |
-| Cross-day trigger (commit-push at 00:05) | Use commit timestamp's YYMMDD, not wall-clock — so late commits land in yesterday's brief |
-| User's `--daily` with empty everything | Still produce brief file with all sections "無"; serves as "today had no activity" record |
+| Cross-day trigger (commit-push at 00:05) | Use commit timestamp's YYMMDD, not wall-clock — so late commits land in yesterday's daily report |
+| User's `--daily` with empty everything | Still produce daily report file with all sections "無"; serves as "today had no activity" record |
 
 ---
 
@@ -303,4 +303,4 @@ Unknown sections → preserve as-is (future-extensibility).
 
 Sonnet — main flow runs inline (read multi-file + smart-merge + write). No Agent sub-dispatch needed for standard execution.
 
-Exception: if brief generation must summarize 10+ closure files → dispatch Haiku Agent for structured text assembly, Sonnet remains primary.
+Exception: if daily report generation must summarize 10+ closure files → dispatch Haiku Agent for structured text assembly, Sonnet remains primary.
