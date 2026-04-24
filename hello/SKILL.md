@@ -102,6 +102,35 @@ Read `.local/collab/TODO.md`:
 - If Pending / In Progress items exist → summarize the top 3~5
 - If none → skip
 
+### 3.4 Daily Brief Cross-Day Check
+
+Per `team/references/daily-brief.md` §8, detect whether yesterday's brief has unresolved carry-over.
+
+1. Compute today's `YYMMDD` from `date '+%y%m%d'`
+2. Glob `.local/report/*_brief.md` and pick the file with the highest YYMMDD prefix
+3. Branch:
+
+| Condition | Behavior |
+|---|---|
+| No brief files exist | Skip (no output) |
+| Latest brief's YYMMDD = today | Output inline: `本日 brief：N 完成 / M 進行中 / K 待辦` |
+| Latest brief's YYMMDD < today | Show cross-day block (see below) |
+
+4. Cross-day block template:
+
+```
+━━━ 跨日檢查 ━━━
+昨日 brief：.local/report/YYMMDD_brief.md
+  未處理交接：N 項（解析 §4 交接事項，非「無」即計數）
+  modify_log 缺失：M 筆（§6 commit 記錄中標 ⚠️ 的 row 數）
+今日 brief：尚未建立（將於今日首次觸發時新建）
+━━━━━━━━━━━━━━
+```
+
+5. **No auto-rename, no auto-delete**: yesterday's brief stays under its original `YYMMDD_brief.md` filename (do NOT apply `CLOSED_` — that prefix is reserved for decision/whiteboard closure). "Cleanup" is achieved by natural YYMMDD partition when today's first trigger creates a fresh file.
+
+6. If the user wants to carry yesterday's handoff forward → prompt subtly: `如需延續昨日交接到今日，執行 /team report --daily 手動合併`. Do not auto-merge.
+
 ---
 
 ## Step 4: Status Overview

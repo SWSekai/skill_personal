@@ -1,9 +1,9 @@
 {
-  "version": "2.3",
+  "version": "2.4",
   "description": "Sekai_workflow 結構索引 — Claude 讀取此檔即可掌握全貌，無需逐一掃描目錄",
-  "updated": "2026-04-17",
+  "updated": "2026-04-24",
   "model_routing": "references/model-routing.md",
-  "note": "v2.3: Skill 命名口語化 — /team-office → /team、/setup → /skill、/memory-portable → /memo；/build 子命令 flow→all / impl→do / quality→check；/team notes → note；/ask query → info；/ask report 搬移至 /team report。",
+  "note": "v2.4: /team report 新增 --daily flag（每日 Teams 日報模式），資料源融合 whiteboard/decision 結案摘要 + TODO + modify_log + handoff；board Step 3.5 / decide Step 6.6 / commit-push Step 11 / hello Step 3.4 加入 brief 自動更新與跨日檢查；新增 team/references/daily-brief.md + assets/brief-template.md。v2.3: Skill 命名口語化、/team notes → note、/ask report 搬至 /team report。",
   "skills": [
     {
       "name": "build",
@@ -28,12 +28,12 @@
     {
       "name": "team",
       "command": "/team",
-      "description": "互動協作一站式入口：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記、交接文件、工作報告",
-      "subcommands": ["todo", "board", "decide", "note", "handoff", "report"],
+      "description": "互動協作一站式入口：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記、交接文件、工作報告（含 --daily 每日 Teams 日報模式）、活文件、follow-up",
+      "subcommands": ["todo", "board", "decide", "note", "handoff", "report", "living", "follow-up"],
       "model": "sonnet",
-      "trigger": "手動呼叫 / board 自動觸發",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(mkdir *)"],
-      "files": ["team/SKILL.md", "team/README.md", "team/references/interaction-modes.md", "team/assets/collab-template.md", "team/assets/whiteboard-template.md"],
+      "trigger": "手動呼叫 / board 自動觸發 / report --daily 由 board Step 3.5 + decide Step 6.6 + commit-push Step 11 自動呼叫",
+      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(mkdir *)", "Bash(mv *)"],
+      "files": ["team/SKILL.md", "team/README.md", "team/references/interaction-modes.md", "team/references/naming.md", "team/references/followup.md", "team/references/daily-brief.md", "team/assets/collab-template.md", "team/assets/whiteboard-template.md", "team/assets/brief-template.md"],
       "merged_from": ["todo", "whiteboard", "md-collab", "tech-notes", "handoff", "report"]
     },
     {
