@@ -1,5 +1,6 @@
 {
-  "_comment": "File location manifest for sp-sync.sh reconciliation. Records skill/system file canonical paths and rename aliases so sync can detect and remove stale folders. Update this whenever a skill is renamed, moved, or retired.",
+  "_comment": "File location manifest for sp-sync.sh reconciliation. Records skill/system file canonical paths, rename aliases, and version gates. schema_version gates the sp-sync.sh parser — bump when adding new fields/semantics and raise SCRIPT_SCHEMA_COMPAT in sp-sync.sh in the same commit.",
+  "schema_version": 1,
   "version": 1,
   "updated": "2026-04-24",
   "skill_aliases": {
@@ -27,6 +28,11 @@
     "statusline": {
       "template": "_bootstrap/templates/statusline.cjs",
       "canonical": "~/.claude/statusline.cjs"
+    },
+    "sp_sync_script": {
+      "canonical": "_bootstrap/sp-sync.sh",
+      "version": "1.1",
+      "purpose": "Receiver of this manifest. Performs schema_version compat check at Step 0 (pre-fetch) and Step 1c (post-pull). Bump its SCRIPT_VERSION whenever Step logic changes; bump SCRIPT_SCHEMA_COMPAT only when it gains support for a newer manifest schema_version."
     }
   },
   "data_folders": {

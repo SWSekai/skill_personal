@@ -6,12 +6,21 @@
 
 set -euo pipefail
 
+# Version gates (paired with file_manifest.json):
+#   SCRIPT_VERSION         — bump when this script's logic changes
+#   SCRIPT_SCHEMA_COMPAT   — the highest manifest.schema_version this script can parse
+# If manifest.schema_version > SCRIPT_SCHEMA_COMPAT, this script aborts so the
+# receiver cannot silently misinterpret newer-structure manifests.
+SCRIPT_VERSION="1.1"
+SCRIPT_SCHEMA_COMPAT=1
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PROJECT_DIR="$(cd "$SP_DIR/.." && pwd)"
 SKILLS_DIR="$PROJECT_DIR/.claude/skills"
 HOOKS_DIR="$PROJECT_DIR/.claude/hooks"
 USER_CLAUDE_DIR="$HOME/.claude"
+MANIFEST_FILE="$SP_DIR/file_manifest.json"
 
 echo ""
 echo "========================================"
@@ -22,6 +31,37 @@ echo "[INFO] Sekai_workflow : $SP_DIR"
 echo "[INFO] Project skills : $SKILLS_DIR"
 echo "[INFO] Project hooks  : $HOOKS_DIR"
 echo "[INFO] User .claude   : $USER_CLAUDE_DIR"
+echo "[INFO] Script version : $SCRIPT_VERSION (schema compat up to $SCRIPT_SCHEMA_COMPAT)"
+echo ""
+
+# Helper: parse manifest schema_version via node. Empty string if missing/unreadable.
+read_manifest_schema() {
+    local mf="$1"
+    [ ! -f "$mf" ] && return 0
+    command -v node >/dev/null 2>&1 || return 0
+    MF_PATH="$mf" node -e '
+        try {
+            const m = JSON.parse(require("fs").readFileSync(process.env.MF_PATH, "utf8"));
+            const v = (m.schema_version == null) ? "" : String(m.schema_version);
+            process.stdout.write(v);
+        } catch(e) { /* swallow */ }
+    ' 2>/dev/null
+}
+
+# --- Step 0: Pre-fetch manifest compat check ---
+echo "[Step 0] Checking manifest schema compatibility..."
+LOCAL_SCHEMA=$(read_manifest_schema "$MANIFEST_FILE")
+if [ -z "$LOCAL_SCHEMA" ]; then
+    echo "  [SKIP] No local manifest / node unavailable — deferring check to Step 1c."
+else
+    if [ "$LOCAL_SCHEMA" -gt "$SCRIPT_SCHEMA_COMPAT" ] 2>/dev/null; then
+        echo "  [ABORT] manifest.schema_version ($LOCAL_SCHEMA) > SCRIPT_SCHEMA_COMPAT ($SCRIPT_SCHEMA_COMPAT)"
+        echo "          This sp-sync.sh ($SCRIPT_VERSION) is too old to parse the current manifest."
+        echo "          Update sp-sync.sh from the latest Sekai_workflow and rerun."
+        exit 2
+    fi
+    echo "  [OK] Local manifest schema_version=$LOCAL_SCHEMA (within compat)."
+fi
 echo ""
 
 # --- Step 1: Git fetch + pull ---
@@ -49,6 +89,34 @@ elif [ "$BEHIND" != "0" ]; then
     echo "[OK] Pull successful."
     echo ""
 fi
+
+# --- Step 1c: Post-pull version drift check ---
+echo "[Step 1c] Post-pull version drift check..."
+NEW_SCHEMA=$(read_manifest_schema "$MANIFEST_FILE")
+DRIFT_ABORT=0
+
+if [ -n "$NEW_SCHEMA" ] && [ "$NEW_SCHEMA" -gt "$SCRIPT_SCHEMA_COMPAT" ] 2>/dev/null; then
+    echo "  [ABORT] Pulled manifest.schema_version=$NEW_SCHEMA > current script compat=$SCRIPT_SCHEMA_COMPAT."
+    echo "          A new sp-sync.sh has arrived on disk — rerun this same command to use it:"
+    echo "            bash $0"
+    DRIFT_ABORT=1
+fi
+
+# Check disk-vs-running script version (only if different, hint rerun)
+if [ -f "$0" ] && command -v grep >/dev/null 2>&1; then
+    DISK_VERSION=$(grep -m1 '^SCRIPT_VERSION=' "$0" | cut -d'"' -f2 2>/dev/null || echo "")
+    if [ -n "$DISK_VERSION" ] && [ "$DISK_VERSION" != "$SCRIPT_VERSION" ]; then
+        echo "  [WARN] On-disk sp-sync.sh is version $DISK_VERSION; running process is $SCRIPT_VERSION."
+        echo "         Rerun to pick up new sync logic:  bash $0"
+        DRIFT_ABORT=1
+    fi
+fi
+
+if [ "$DRIFT_ABORT" = "1" ]; then
+    exit 3
+fi
+echo "  [OK] Script $SCRIPT_VERSION and manifest schema $NEW_SCHEMA are in sync."
+echo ""
 
 # --- Step 2: Compare and sync skills ---
 echo "[Step 2] Comparing skills..."
@@ -266,6 +334,7 @@ echo ""
 echo "========================================"
 echo " Sync Summary"
 echo "========================================"
+echo "  Version    — Script: $SCRIPT_VERSION / Schema: ${NEW_SCHEMA:-n/a} (compat ≤ $SCRIPT_SCHEMA_COMPAT)"
 echo "  Skills     — Added: $ADDED / Updated: $UPDATED / No change: $UNCHANGED"
 echo "  Manifest   — Stale removed: $STALE_COUNT"
 echo "  Hooks      — Added: $HOOK_ADDED / Updated: $HOOK_UPDATED / No change: $HOOK_UNCHANGED"

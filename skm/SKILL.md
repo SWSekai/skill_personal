@@ -212,14 +212,16 @@ bash Sekai_workflow/_bootstrap/sp-sync.sh
 ```
 
 The script performs:
-1. `git fetch origin` to retrieve remote updates
-2. Compare local and remote commits
-3. If updated → `git pull --rebase origin main`
-4. **Skills sync** — Compare each skill's SKILL.md / README.md between `Sekai_workflow/` and `.claude/skills/`; copy new or differing skills
-5. **Manifest reconciliation** — Read `Sekai_workflow/file_manifest.json`; for every entry in `skill_aliases` (old→new rename map), detect stale folders at `.claude/skills/<old>/` and `Sekai_workflow/<old>/`, then interactively prompt the user to remove them. Non-interactive runs skip removal.
-6. **Hooks sync** — Compare each `*.cjs` / `*.sh` between `Sekai_workflow/hooks/` and `.claude/hooks/`; copy new or differing hook scripts
-7. **Statusline sync** — Sync `statusline.cjs` + patch `~/.claude/settings.json` `statusLine.command`
-8. Output Added / Updated / No change summary for skills, manifest-stale, hooks, and statusline
+1. **Step 0 Pre-fetch compat check** — Read local `file_manifest.json`; if `manifest.schema_version > SCRIPT_SCHEMA_COMPAT`, abort (exit 2) with "update sp-sync.sh and rerun". Skip if no manifest yet or node unavailable.
+2. `git fetch origin` to retrieve remote updates
+3. Compare local and remote commits
+4. If updated → `git pull --rebase origin main`
+5. **Step 1c Post-pull drift check** — Re-read pulled manifest; same schema gate. Also compare on-disk `sp-sync.sh` `SCRIPT_VERSION` against the currently running value — if different, warn and abort (exit 3) so the user reruns with the newer script.
+6. **Skills sync** — Compare each skill's SKILL.md / README.md between `Sekai_workflow/` and `.claude/skills/`; copy new or differing skills
+7. **Manifest reconciliation** — Read `Sekai_workflow/file_manifest.json`; for every entry in `skill_aliases` (old→new rename map), detect stale folders at `.claude/skills/<old>/` and `Sekai_workflow/<old>/`, then interactively prompt the user to remove them. Non-interactive runs skip removal.
+8. **Hooks sync** — Compare each `*.cjs` / `*.sh` between `Sekai_workflow/hooks/` and `.claude/hooks/`; copy new or differing hook scripts
+9. **Statusline sync** — Sync `statusline.cjs` + patch `~/.claude/settings.json` `statusLine.command`
+10. Output `Version — Script / Schema` plus Added / Updated / No change summaries for skills, manifest-stale, hooks, and statusline
 
 **Cannot be handled by script (manual required)**:
 - Pull conflict → abort; resolve manually then rerun
@@ -280,12 +282,16 @@ See `${CLAUDE_SKILL_DIR}/references/evaluation-decision-tree.md` (if it exists; 
 
 ```json
 {
+  "schema_version": 1,
   "version": 1,
   "updated": "<YYYY-MM-DD>",
   "skill_aliases": { "<old-name>": "<new-name>" },
   "skills":        { "<name>": { "required_files": [...] } },
   "hooks":         { "<name>": { "file": "...cjs", "binding": "..." } },
-  "system":        { "statusline": { "template": "...", "canonical": "..." } },
+  "system":        {
+    "statusline":     { "template": "...", "canonical": "..." },
+    "sp_sync_script": { "canonical": "...", "version": "1.1", "purpose": "..." }
+  },
   "data_folders":  { "<name>": { "location": "...", "description": "..." } }
 }
 ```
@@ -321,6 +327,33 @@ For each `(oldName, newName)` in `skill_aliases`:
 1. **Remove only what is in `skill_aliases`** — orphan detection (folders in .claude/skills but nowhere in manifest) is a **future enhancement**; do not delete anything outside the alias map
 2. **Always interactive** — the script asks before deleting; never silent `rm -rf`
 3. **Manifest is the contract** — do not hand-delete renamed folders; update the manifest and let `sp-sync.sh` do it so every cloned project converges
+
+#### Schema Version & Script Compat (2026-04-24 added)
+
+`sp-sync.sh` is the **receiving end** that consumes this manifest; they are versioned together to prevent old scripts from silently misinterpreting newer-structure manifests.
+
+| Field | Location | Meaning |
+|---|---|---|
+| `schema_version` | `file_manifest.json` (top-level) | Integer describing the manifest's field set and semantics. Bump when adding new tracked field types or changing how existing fields are interpreted. |
+| `SCRIPT_VERSION` | `sp-sync.sh` (top of file) | Semver-ish string identifying this script's logic. Bump when Step flow or behavior changes. |
+| `SCRIPT_SCHEMA_COMPAT` | `sp-sync.sh` (top of file) | Integer — the highest `schema_version` this script can correctly parse. Bump only when the script gains support for newer manifest schemas. |
+| `system.sp_sync_script.version` | `file_manifest.json` | Declared current script version — documentation for humans; the authoritative check compares the running-process `SCRIPT_VERSION` against the `SCRIPT_VERSION=` line in the on-disk script after pull. |
+
+**Check points** (implemented in sp-sync.sh):
+
+1. **Step 0 Pre-fetch** — read local manifest; abort with exit 2 if `schema_version > SCRIPT_SCHEMA_COMPAT`. Guards against running with an old local script after a prior machine pushed a schema bump.
+2. **Step 1c Post-pull** — re-read manifest after pull + grep on-disk script's `SCRIPT_VERSION=`; abort with exit 3 if either drifted. The receiver must rerun with the freshly pulled sp-sync.sh so the new logic is actually in effect.
+
+**Bump rules**:
+
+| Change kind | schema_version | SCRIPT_VERSION | SCRIPT_SCHEMA_COMPAT |
+|---|---|---|---|
+| Cosmetic script fix (logs, formatting) | — | +0.1 | — |
+| New Step or non-schema logic change | — | +0.1 | — |
+| New manifest field consumed by script | +1 (manifest) | +0.1 (script) | raise to new schema_version |
+| Breaking rename of manifest field | +1 (manifest) | new major (script) | raise to new schema_version |
+
+**Hard rule**: A manifest commit that bumps `schema_version` **must in the same commit** bump `SCRIPT_SCHEMA_COMPAT` in sp-sync.sh — otherwise the pushing machine itself will fail Step 0 on the next sync.
 
 ---
 

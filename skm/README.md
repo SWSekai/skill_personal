@@ -39,6 +39,15 @@
 
 `/skm sync` 依 `Sekai_workflow/file_manifest.json` 進行檔案位置核對。凡 Skill 改名、重構、退役，都必須更新此檔的 `skill_aliases` 映射，同步流程才能在所有機器上自動清除舊資料夾，避免本地殘留舊 Skill（例如 `/skill` → `/skm` 改名後殘留 `.claude/skills/skill/`）。詳見 SKILL.md Flow 3「file_manifest.json Maintenance」。
 
+### schema_version 與 sp-sync.sh 相容性（2026-04-24 新增）
+
+manifest 頂層 `schema_version` 與 sp-sync.sh 的 `SCRIPT_SCHEMA_COMPAT` 配對運作，作為**受端 (receiving end) 的版本檢查機制**：
+
+- **Step 0**：同步開始、fetch 之前，讀本地 manifest；若 `schema_version > SCRIPT_SCHEMA_COMPAT` 立即中止（exit 2），提示升級 sp-sync.sh
+- **Step 1c**：pull 完成後重讀 manifest；若 schema 超出或磁碟上 sp-sync.sh `SCRIPT_VERSION` 與執行中不符 → 中止（exit 3），要求以新腳本重跑
+
+**硬規則**：`schema_version` bump 的 commit **必須同時** bump `SCRIPT_SCHEMA_COMPAT`，否則推送者自己下一次同步就會被自己卡住。詳見 SKILL.md「Schema Version & Script Compat」子區塊。
+
 ## 目錄結構
 
 ```
