@@ -252,6 +252,21 @@ See `${CLAUDE_SKILL_DIR}/references/evaluation-decision-tree.md` (if it exists; 
 
 **Do not use `git add -f`**: files in `.gitignore` must never be added to project version control by any means.
 
+### Non-Skill Directory Changes (CLAUDE.md Rule 23)
+
+When adding, renaming, or deleting **non-skill top-level directories** under `sekai-workflow/` (those without a `SKILL.md`, e.g. `handbook/`, `docs/`, `hooks/`, `references/`), you **must** also verify and update the bootstrap scripts:
+
+| Script | Checkpoint | Failure mode if missed |
+|---|---|---|
+| `_bootstrap/sp-init.bat` | `:CopySkill` skip list | Directory mis-copied into `.claude/skills/` as a fake skill |
+| `_bootstrap/sp-sync.sh` | `SKIP_DIRS` variable | Noisy sync log (silent pass due to `SKILL.md` guard, but should be explicit) |
+| `_bootstrap/sp-pack.sh` | preserve-before-delete logic | `rm -rf $SP_DIR` deletes unpushed local content |
+| `_bootstrap/sp-verify.bat` | verification checklist | Missing infra validation |
+| `manifest.json` | `skills` / data-dir classification | Directory mis-classified |
+
+**Criterion**: does the directory contain `SKILL.md`? No → non-skill → this rule applies.
+**Origin**: 2026-04-24 `handbook/` rename incident where `sp-init.bat` and `sp-pack.sh` would have silently broken; rule codified into CLAUDE.md Rule 23.
+
 ---
 
 ## C. `/skm pack` — Project Packaging (Closure Flow)

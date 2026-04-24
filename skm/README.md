@@ -31,7 +31,7 @@
 | 子命令 | 用途 |
 |---|---|
 | `new [name] [desc]` | 建立新 Skill（互動式定義 → 檔案生成 → 索引更新 → 同步 → Step 10 commit 詢問） |
-| `sync` | Sekai_workflow 遠端同步、規則評估與三向連動 |
+| `sync` | Sekai_workflow 遠端同步、規則評估與三向連動；含 Rule 23 非 skill 目錄變更檢查（`handbook/`、`docs/` 等）|
 | `pack` | 專案打包（四階段：Memory/Skill/CLAUDE.md 審計 → 收集至 `bag/` → Changeset Review 使用者確認 → 執行清理），確認前不寫入 |
 | `update [hint]` | 使用者確認式 Skill 改進：對話中浮現的規則 → 使用者下 `/skm update` → Gap + Ecosystem 稽核 → 明確 diff 預覽 → 套用 + 三向同步 |
 
