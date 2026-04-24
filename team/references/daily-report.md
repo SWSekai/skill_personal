@@ -110,6 +110,23 @@ This is the integrity mechanism answering the user's concern about bypass of `/c
 
 ## 4. Output Content Structure (per decision §6.1)
 
+### 4.0 Audience and Writing Style (MANDATORY)
+
+**Primary audience**: the user's **supervisor / manager / external stakeholder** — someone who skims the report to track progress and outcomes, not the engineer who produced it.
+
+**Writing rules**:
+
+- **Outcomes first, implementation last** — lead with what was achieved (metrics, user-visible behaviour). If context is needed, one plain-language sentence. Reserve parameter values, function names, code paths, and decision-doc references for `modify_log` / CLOSED files, not the daily report.
+- **No internal jargon in body text** — avoid function names (`enhance_roi_for_ocr`), flag names (`PDFDET_DEBUG_VALUE`), branch names (`conservative branch`), parameter tuples (`min=8, param2=30`). If a reader outside the project cannot parse the sentence, rewrite it.
+- **Quantify where possible** — "Recall 37.7 → 44.6 % (+6.9 pp)" beats "大幅改善". Use the same KPI the team tracks.
+- **Transparency on blockers** — name the blocker plainly, name the short-term workaround, name when the long-term fix is planned. Do not hide or spin.
+- **Engineering detail belongs in the appendix** — §6 作業記錄 and linked `modify_log` / CLOSED docs carry the depth. The main body should read in under 60 seconds.
+- **No Claude / tooling commentary** — never mention Claude Code internals, model tiers, context modes, Skill names, or flow interruptions. The supervisor does not care which AI tool was used.
+
+**Failure mode to avoid**: a daily report that reads like a dev diary (exhaustive, commit-by-commit, with jargon) buries the actual progress signal. If the reader has to re-read a sentence to understand what was accomplished, the style has failed.
+
+### 4.1 Section Structure
+
 Daily Report content has 6 sections. Sections 1–5 are user-facing; section 6 is engineering detail.
 
 1. **本日完成** — completed items (TODO done + whiteboard outcomes)
@@ -119,7 +136,7 @@ Daily Report content has 6 sections. Sections 1–5 are user-facing; section 6 i
 5. **本日決策與討論結論** — decision table (from closures)
 6. **作業記錄** (附錄 / appendix) — commit + closure cross-check
 
-Full template: `team/assets/daily report-template.md`.
+Full template: `team/assets/daily-report-template.md`.
 
 ---
 
