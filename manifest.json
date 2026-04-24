@@ -1,9 +1,9 @@
 {
-  "version": "2.5",
+  "version": "2.6",
   "description": "Sekai_workflow 結構索引 — Claude 讀取此檔即可掌握全貌，無需逐一掃描目錄",
   "updated": "2026-04-24",
   "model_routing": "references/model-routing.md",
-  "note": "v2.5: /skill → /skm（避免與內建 /skills 衝突）；/team living → /team journal（語意直觀化）；新增 CLAUDE.md Rule 21（pre-modification protocol：遠端檢查 + 風險評估 + 使用者確認，skill 修改同樣適用）；skill/ 目錄 rename 為 skm/。v2.4: /team report 新增 --daily flag（每日 Teams 日報模式）；board Step 3.5 / decide Step 6.6 / commit-push Step 11 / hello Step 3.4。v2.3: Skill 命名口語化、/team notes → note、/ask report 搬至 /team report。",
+  "note": "v2.6: 新增 /kb（knowledge base）skill — 維護 sekai-workflow/knowledge_base/ 跨專案通用技術筆記，支援 add/search/extract 三子命令 + /team 結案自動抽取 + 技術提問自動增強；/skm pack 重構為四階段（audit → collect → changeset review → execute），輸出至 .local/bag/。v2.5: /skill → /skm（避免與內建 /skills 衝突）；/team living → /team journal（語意直觀化）；新增 CLAUDE.md Rule 21（pre-modification protocol：遠端檢查 + 風險評估 + 使用者確認，skill 修改同樣適用）；skill/ 目錄 rename 為 skm/。v2.4: /team report 新增 --daily flag（每日 Teams 日報模式）；board Step 3.5 / decide Step 6.6 / commit-push Step 11 / hello Step 3.4。v2.3: Skill 命名口語化、/team notes → note、/ask report 搬至 /team report。",
   "skills": [
     {
       "name": "build",
@@ -86,6 +86,17 @@
       "allowed_tools": ["Agent", "Read", "Bash(date *)", "Bash(mkdir *)", "Bash(cat *)"],
       "files": ["dispatch/SKILL.md", "dispatch/README.md"],
       "companion_hook": "hooks/log_agent_dispatch.cjs"
+    },
+    {
+      "name": "kb",
+      "command": "/kb",
+      "description": "Knowledge Base 管理：維護 sekai-workflow/knowledge_base/ 跨專案通用技術筆記（Docker/K8s/ETL/算法/後端），add/search/extract 三子命令 + 自動抽取與提問增強",
+      "subcommands": ["add", "search", "extract"],
+      "model": "sonnet",
+      "trigger": "手動呼叫 / /team 結案自動抽取 / 技術提問自動查詢",
+      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(mkdir *)", "Bash(ls *)", "Bash(date *)"],
+      "files": ["kb/SKILL.md", "kb/README.md", "kb/assets/kb-doc-template.md"],
+      "data_path": "knowledge_base/"
     },
     {
       "name": "commit-push",
