@@ -13,7 +13,7 @@
 | Primary sources | `modify_log` | closure summaries (board + decide) + TODO deltas + `modify_log` + user handoff |
 | Time unit | Weekly / range | Today (default) / specified day / specified range |
 | Output file | `.local/report/YYMMDD_<scope>_report.md` | `.local/report/YYMMDD_daily_report.md` |
-| Format | Table-heavy, formal | Teams-safe subset, `- [ ]` checkboxes |
+| Format | Table-heavy, formal | Teams-safe subset, plain bullets (`-`) |
 | Trigger | Manual | Manual + board closure auto + decide closure auto + `/commit-push` auto |
 | Update model | One-shot generation | Daily accumulator (smart merge each trigger) |
 
@@ -151,7 +151,8 @@ Full template: `team/assets/daily-report-template.md`.
 - Inline code `code`
 - Code blocks (fenced triple-backtick) — post-only, may render as plain text in chat messages
 - Emoji (✅ ⚠️ 🔖 📝 🚧 etc.)
-- Checkboxes `- [ ]` / `- [x]` (static render in Teams, no interaction)
+
+> **Note**: `- [ ]` / `- [x]` checkboxes are NOT used in daily report body text (see §5.3). Retained only for Claude's internal self-check lists inside `commit-push/SKILL.md` / this spec — never output into the report.
 
 ### 5.2 Avoid
 - Deep nesting (> 2 levels) — Teams flattens or breaks
@@ -160,8 +161,21 @@ Full template: `team/assets/daily-report-template.md`.
 - Task lists rendered as interactive (GitHub-only)
 - Very long lines (> 120 chars) — mobile truncation risk
 
-### 5.3 Pending checkbox (decision §5.2.a)
-Always use `- [ ]` / `- [x]` format; do not use emoji `⬜` / `✅` in pending sections (reserve `✅` for closure markers).
+### 5.3 Bullet format (updated 2026-04-24)
+
+**Use plain bullets (`-`) in body text; do NOT use `- [ ]` / `- [x]` checkboxes.**
+
+Rationale: the three primary sections (§1 本日完成 / §2 進行中 / §3 待辦與阻塞) carry their status via section heading itself — the `[ ]` / `[x]` marker is redundant visual noise when the outcome is "today already closed / still ongoing / pending". Plain bullets render cleaner in Teams and remove the interactive-checkbox misconception (Teams renders them static anyway).
+
+- ✅ Correct: `- 廠區下拉只顯示有啟用資料的廠區`
+- ❌ Wrong: `- [x] 廠區下拉只顯示有啟用資料的廠區`
+
+Other markers remain unchanged:
+- 🚧 for blockers within §3 待辦與阻塞
+- ✅ reserved for closure / cross-check cells (commit table's modify_log column, closure records)
+- ⚠️ for `modify_log` missing warnings in §6 commit 記錄 table
+
+When smart-updating sections §9.4, scan lines regardless of checkbox prefix (legacy reports may still contain `- [ ]` / `- [x]` — normalize to `- ` on rewrite).
 
 ---
 
