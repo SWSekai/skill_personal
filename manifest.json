@@ -90,7 +90,7 @@
     {
       "name": "commit-push",
       "command": "/commit-push",
-      "description": "主要 commit & push 入口：品質檢查（Opus 內嵌）→ 修改日誌（Haiku 內嵌）→ README 更新 → commit → push → sekai-workflow 同步 → deploy 評估 → Context 清理 → 經驗回流。10 個步驟完整流程，所有日誌僅存本地。",
+      "description": "主要 commit & push 入口：品質檢查（Opus 內嵌）→ 修改日誌（Haiku 內嵌）→ README 更新 → commit → push → sekai-workflow 同步 → deploy 評估 → Context 清理 → 經驗回流。10 個步驟完整流程，所有日誌僅存本地。支援 --meta（skill 維護略過 modify_log / 日報）與 --no-subagent（1M context 無法派生 sub-agent 時改由主 session 直跑）兩旗標。",
       "model": "sonnet",
       "trigger": "手動呼叫",
       "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(docker *)"],

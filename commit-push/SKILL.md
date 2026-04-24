@@ -1,9 +1,9 @@
 ---
 name: commit-push
-description: "Commit & Push standalone entry — quality check (Opus) → modify log (Haiku) → README sync → commit → push → restart evaluation → Context cleanup. Built-in complete commit flow, all logs kept local only, not under version control. Supports --meta flag for skill-maintenance commits (skips modify_log + daily report append)."
+description: "Commit & Push standalone entry — quality check (Opus) → modify log (Haiku) → README sync → commit → push → restart evaluation → Context cleanup. Built-in complete commit flow, all logs kept local only, not under version control. Supports --meta flag for skill-maintenance commits (skips modify_log + daily report append) and --no-subagent flag for 1M-context / sub-agent-avoidance runs."
 model: sonnet
 effort: medium
-argument-hint: "[--meta] [commit message override]"
+argument-hint: "[--meta] [--no-subagent] [commit message override]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(ls *), Bash(date *), Bash(docker *)
 ---
 
@@ -28,11 +28,31 @@ Triggered automatically by `/skm new` Step 10 (see `skm/SKILL.md` §A). Users ma
 
 Rationale: skill/rule edits are meta-level work bound to tooling, not the project's functional deliverable. Tracking them in `modify_log` / daily report would pollute the work ledger. See CLAUDE.md Rule 20.
 
+## `--no-subagent` Flag (1M Context / Sub-agent Avoidance Mode)
+
+When `$ARGUMENTS` contains `--no-subagent`, **all steps run inline in the main session** — no `Agent` tool invocations are made:
+
+- **Step 1 Quality Check**: main session performs the audit directly (no Opus sub-agent spawn)
+- **Step 5 Modify Log**: main session writes the log directly (no Haiku sub-agent spawn)
+- **All other steps**: unchanged
+
+**When to use**:
+- Current session runs in **Opus 4.7 1M context** mode without `/extra-usage` enabled — sub-agent spawn hits the API gateway's extra-usage wall and halts the flow mid-run. Detection hint: model id suffix `[1m]`, or a prior run aborted with `API Error: Extra usage is required for 1M context`.
+- User wants a single-transcript audit trail (all reasoning visible in main session, not buried in sub-agent logs).
+- Debugging a Skill behavior and need step-by-step visibility of the audit/log decisions.
+
+**Trade-off**: default mode optimises for model specialisation (Opus depth on audit, Haiku brevity on log writing). Inline mode trades that for reliability under 1M-gate / visibility; the Sonnet main session is still fully capable of both duties.
+
+**Combinable with `--meta`**: e.g. `/commit-push --meta --no-subagent <msg>` — skill-maintenance commit in 1M mode, skips modify_log + daily report AND avoids sub-agent spawn.
+
 ---
 
 ## Step 1: Quality Check (embedded Opus deep analysis)
 
-Perform a complete quality audit on all changes in the staging area / working tree. This step is recommended to be invoked via the Agent tool as an Opus subtask for deep analysis capability.
+Perform a complete quality audit on all changes in the staging area / working tree.
+
+**Default**: invoke via Agent tool as an Opus subtask for deep-analysis capability.
+**`--no-subagent` mode**: main Sonnet session performs the audit inline using the same 1.1–1.7 checklist below (no Agent call).
 
 ### 1.1 Scan Items
 
@@ -208,8 +228,9 @@ EOF
 ## Step 5: Create Modify Log (embedded Haiku structured output)
 
 > **`--meta` mode**: skip this step entirely. Skill maintenance commits do not generate modify logs (CLAUDE.md Rule 20).
+> **`--no-subagent` mode**: main Sonnet session writes the log inline using the same 5.1–5.4 format (no Haiku Agent spawn).
 
-Recommended to invoke a Haiku subtask via the Agent tool to generate the log (structured text writing attribute).
+**Default**: invoke a Haiku subtask via the Agent tool to generate the log (structured text-writing attribute).
 
 **All logs are kept local only and must never enter version control.**
 
