@@ -68,7 +68,12 @@ All interactive output files follow the pattern `YYMMDD_<topic>_<type>.md` where
 - User says `btw`, `順便`, `臨時想到`, `對了` → capture the mentioned item
 - User signals **future trial**: `以後想試 X` / `未來可以做 X` / `將 X 加入代辦` / `之後可以試 X` → append to TODO (NOT decide); this is cross-project synchronized rule (Rule 17.1.7)
 
-**Auto-create file**: if `.local/collab/TODO.md` does not exist on first TODO signal → Claude creates it with skeleton (`## Pending / ## In Progress / ## Completed`) automatically (Rule 17.1.8).
+**TODO location resolution** (checked in order):
+1. Project root `./TODO.md` — canonical per CLAUDE.md Rule 17.1 (matches most existing projects)
+2. `.local/collab/TODO.md` — legacy path for projects that opted into `.local/collab/` layout
+3. Path specified by `CLAUDE.md` or project-level override
+
+**Auto-create file**: if no TODO.md exists at either location on first TODO signal → Claude creates it at **project root** (`./TODO.md`) with skeleton (`## Pending / ## In Progress / ## Completed`) automatically (Rule 17.1.8).
 
 **Manual**: `/team todo add <desc>` explicit; `/team todo list`; `/team todo <n>`.
 
@@ -81,7 +86,7 @@ All interactive output files follow the pattern `YYMMDD_<topic>_<type>.md` where
 
 ### Step 1: Read and Parse
 
-Read `.local/collab/TODO.md` (or the path specified by the project), parse all items in the "Pending" section, extract description, priority tag, and indented notes.
+Read TODO.md (resolve path per the location resolution order above — project root first, then `.local/collab/`), parse all items in the "Pending" section, extract description, priority tag, and indented notes.
 If the action is `add` / `list`, execute the corresponding branch and exit.
 
 ### Step 2: Sort and Select
@@ -132,7 +137,7 @@ For consultation, planning, and troubleshooting conversations, create a continuo
 **Auto-trigger** (tightened 2026-04-24 per Rule 17.1.3):
 - Consultation / planning / troubleshooting conversation, AND
 - **3 rounds of back-and-forth without convergence** (no clear TODO, no decide opened, no final answer)
-- → auto-create `.local/docs/whiteboard/YYMMDD_<topic>_board.md`
+- → auto-create `.local/docs/whiteboards/YYMMDD_<topic>_board.md`
 
 1-2 rounds with quick convergence → inline answer, do NOT open whiteboard.
 
@@ -146,7 +151,7 @@ For consultation, planning, and troubleshooting conversations, create a continuo
 ### Step 1: Create the Whiteboard
 
 - **First**: call `date '+%Y-%m-%d %H:%M'` to get authoritative time (see Common Rules)
-- Path: `.local/docs/whiteboard/YYMMDD_<topic>_board.md` (snake_case topic; `_board` suffix is mandatory)
+- Path: `.local/docs/whiteboards/YYMMDD_<topic>_board.md` (snake_case topic; `_board` suffix recommended for new files but legacy files without the suffix are still valid)
 - Same topic on the same day → update the existing file, do not create another
 - Structural principles:
   - **Pending**: pure checkbox list, see at a glance what remains
@@ -177,9 +182,9 @@ Each time the user asks a follow-up or continues discussion:
 
 1. Update the document header status to **Completed** or **Paused**
 2. Rename the file by prepending `CLOSED_` to the filename:
-   - Before: `.local/docs/whiteboard/YYMMDD_<topic>_board.md`
-   - After: `.local/docs/whiteboard/CLOSED_YYMMDD_<topic>_board.md`
-   - Use: `mv .local/docs/whiteboard/YYMMDD_<topic>_board.md .local/docs/whiteboard/CLOSED_YYMMDD_<topic>_board.md`
+   - Before: `.local/docs/whiteboards/YYMMDD_<topic>_board.md`
+   - After: `.local/docs/whiteboards/CLOSED_YYMMDD_<topic>_board.md`
+   - Use: `mv .local/docs/whiteboards/YYMMDD_<topic>_board.md .local/docs/whiteboards/CLOSED_YYMMDD_<topic>_board.md`
 
 #### 3.2 Append Inline Closure Summary (Mandatory, Unified Template)
 
@@ -296,7 +301,7 @@ Generate structured markdown for the user to check options, which Claude then re
 ### Step 2: Generate Interactive Markdown
 
 - **First**: call `date '+%Y-%m-%d %H:%M'` to get authoritative time (see Common Rules)
-- Default location: `.local/docs/decision/YYMMDD_<topic>_decision.md` (snake_case topic; `_decision` suffix is mandatory; user can specify another path but the pattern is enforced)
+- Default location: `.local/docs/decisions/YYMMDD_<topic>_decision.md` (snake_case topic; `_decision` suffix recommended for new files. Legacy files without the suffix are still valid — do not rename existing files just to conform)
 
 Format specification:
 - Checkboxes `[ ]` / `[x]`
@@ -396,8 +401,8 @@ For each decision block:
 
 #### 6.3 Rename the Decision File (Mandatory)
 
-- **Proactively rename** `.local/docs/decision/YYMMDD_<topic>_decision.md` → `.local/docs/decision/CLOSED_YYMMDD_<topic>_decision.md`
-  - Use: `mv .local/docs/decision/YYMMDD_<topic>_decision.md .local/docs/decision/CLOSED_YYMMDD_<topic>_decision.md`
+- **Proactively rename** `.local/docs/decisions/YYMMDD_<topic>_decision.md` → `.local/docs/decisions/CLOSED_YYMMDD_<topic>_decision.md`
+  - Use: `mv .local/docs/decisions/YYMMDD_<topic>_decision.md .local/docs/decisions/CLOSED_YYMMDD_<topic>_decision.md`
 - The `CLOSED_` prefix indicates the decision process is complete; the inline summary (appended in 6.1) is the authoritative record
 - If the user explicitly says "delete the decision record" → delete instead and note it in the reply
 
@@ -414,7 +419,7 @@ After renaming, immediately update `.local/docs/living/PROJECT_JOURNAL.md`:
 After Step 6 completes, confirm:
 - [ ] Inline closure summary has been appended to the end of `YYMMDD_<topic>_decision.md` (before rename)
 - [ ] Inline summary includes: background, decision table (per §n.m item), change list, preserved candidates (if any non-single-path), leftover items
-- [ ] `.local/docs/decision/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`
+- [ ] `.local/docs/decisions/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`
 - [ ] `.local/docs/living/PROJECT_JOURNAL.md` has been updated with this decision's entries (link → `CLOSED_*_decision.md`)
 - [ ] **No** `.local/docs/summary/` file has been created (directory was removed 2026-04-22; writing there is a violation)
 - [ ] Daily report updated (Step 6.6)
@@ -534,14 +539,14 @@ Read the following information sources in parallel:
 |---|---|---|
 | Project overview | `CLAUDE.md` / root `README.md` | Human §A / AI bundle |
 | Recent work | `.local/modify_log/*.md` (most recent 10~20) | Human §B |
-| Pending items | `.local/collab/TODO.md` | Human §C |
+| Pending items | `./TODO.md` (project root) or `.local/collab/TODO.md` | Human §C |
 | Plans in progress | `.local/docs/plan/*.md` (unfinished steps) | Human §C |
 | Risk records | "Potential risks" sections in `.local/modify_log/` | Human §D |
 | Environment architecture | `docker-compose.yml` / `.env` / config | Human §E / AI bundle |
 | Git status | `git status` / `git log origin..HEAD` / `git branch` | Human §F |
 | Decision history | `.local/docs/summary/*.md` | AI bundle |
 | Memory | `~/.claude/projects/<proj>/memory/*.md` | AI bundle |
-| Experience guides | `.local/docs/guide/*.md` | AI bundle |
+| Experience guides | `.local/docs/guides/*.md` | AI bundle |
 | Context summaries | Latest in `.local/context_summary/` | AI bundle |
 
 ### Step 2: Generate Human Handoff Document (`YYMMDD_handoff.md`)
@@ -628,9 +633,9 @@ YYMMDD_ai-context/
 ├── project-summary.md         ← AI-only summary (template below)
 ├── memory/                    ← Memory snapshot (*.md)
 ├── decision-history/          ← Copy of .local/docs/summary/*.md
-├── guides/                    ← Copy of .local/docs/guide/*.md
+├── guides/                    ← Copy of .local/docs/guides/*.md
 ├── recent-modify-logs/        ← Most recent 10 from .local/modify_log/
-├── todo-snapshot.md           ← Copy of .local/collab/TODO.md
+├── todo-snapshot.md           ← Copy of ./TODO.md (or .local/collab/TODO.md if that's where project keeps it)
 └── context-snapshot.md        ← Latest summary from .local/context_summary/
 ```
 
@@ -867,7 +872,7 @@ Called internally after `/team board` Step 3.2. Input: the renamed whiteboard fi
    - Date (from file or closure summary)
    - Topic (from filename or whiteboard title)
    - Key outcomes (1–2 sentences condensed from "Key Outcomes" bullet points)
-   - Link: `[CLOSED_YYMMDD_topic.md](.local/docs/whiteboard/CLOSED_YYMMDD_topic.md)`
+   - Link: `[CLOSED_YYMMDD_topic.md](.local/docs/whiteboards/CLOSED_YYMMDD_topic.md)`
 3. If the whiteboard's "決策紀錄" table has entries → also append each to "決策紀錄" table
 4. Update "最後更新" timestamp
 
@@ -885,7 +890,7 @@ Called internally after `/team decide` Step 6.4. Input: the renamed decision fil
 
 For `/team journal regen`:
 1. Clear the rows from all three tables (keep headers and template structure)
-2. Scan all `CLOSED_*` files in `.local/docs/whiteboard/` and `.local/docs/decision/`
+2. Scan all `CLOSED_*` files in `.local/docs/whiteboards/` and `.local/docs/decisions/`
 3. For each CLOSED file, parse the **inline closure summary block** at its end
 4. Rebuild the three tables chronologically by date
 5. Report: "Rebuilt from N whiteboard sessions, M decisions"
@@ -918,7 +923,7 @@ Filename accepts: full name, no-extension form, or prefix (e.g. `260422_team` ma
 ### Step 1: Parse argument + locate file
 
 1. Apply matching strategy (see `references/followup.md` §2)
-2. Search scope: `.local/docs/whiteboard/` + `.local/docs/decision/`
+2. Search scope: `.local/docs/whiteboards/` + `.local/docs/decisions/`
 3. **Filter out `CLOSED_*` files silently** at candidate listing stage
 4. Exact-typed `CLOSED_xxx` → special-case message "file is closed, see summary at …"
 5. Zero matches → list nearest 3 candidates via AskUserQuestion
@@ -930,8 +935,8 @@ Detected via filename suffix (`_board` vs `_decision`) with directory as fallbac
 
 | Type | Handler | Reference |
 |---|---|---|
-| `_board.md` in `.local/docs/whiteboard/` | whiteboard follow-up handler | `references/followup.md` §4 |
-| `_decision.md` in `.local/docs/decision/` | decision follow-up handler | `references/followup.md` §3 |
+| `_board.md` in `.local/docs/whiteboards/` | whiteboard follow-up handler | `references/followup.md` §4 |
+| `_decision.md` in `.local/docs/decisions/` | decision follow-up handler | `references/followup.md` §3 |
 
 ### Step 3: Parse (skip closed blocks)
 

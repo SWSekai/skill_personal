@@ -227,6 +227,35 @@ The script performs:
 - **New hook → the script copies the file but `.claude/settings.local.json` binding is not auto-modified** (per-project risk). Reference `_bootstrap/templates/hooks.json` for the expected matcher/command shape; manually add the `PreToolUse` / `PostToolUse` / `Stop` entry.
 - Push local changes → the script does not auto-push; you must `cd Sekai_workflow && git push origin main`
 
+### Flow 1b: `.local/` Structure Drift Scan (Mandatory Post-Sync)
+
+After Flow 1 completes, **scan `.local/` for drift against the newly-synced Skill expectations**. Skill renames, path conventions changes, or deprecated directories often leave stale files in `.local/` that Skills no longer reference — silently accumulating dead state.
+
+**Scan items** (report, do not auto-delete):
+
+1. **Legacy singular/plural directories** — e.g. `modify_logs/` when skills use `modify_log/`, `whiteboards/` vs `whiteboard/`. List any `.local/<dir>` or `.local/docs/<dir>` not referenced by any synced SKILL.md.
+2. **Renamed subcommand artifacts** — e.g. if `/team living` renamed to `/team journal`, check whether `.local/docs/living/` needs redirect / alias.
+3. **Orphan directories** — directories under `.local/` with no SKILL.md reference (grep `.local/<name>` across all `.claude/skills/**/*.md`). Classify as: likely-obsolete / project-specific / needs-user-judgment.
+4. **Filename convention drift** — files in `decisions/` without `_decision.md` suffix, in `whiteboards/` without `_board.md` suffix, etc. Report count, do not rename (existing files per `team/references/naming.md` remain valid).
+5. **Path-expectation mismatches** — e.g. Skill expects `.local/collab/TODO.md` but project keeps `./TODO.md`. Check config-flexible paths (see `team/SKILL.md` §A location resolution).
+
+**Output format** (present to user, require confirmation for destructive ops):
+
+```
+.local/ Drift Report (Skill sync revealed):
+  A. Safe auto-merge (executed):
+     - modify_logs/ → modify_log/ (2 files merged)
+  B. Needs decision:
+     - docs/decisions/ vs Skill singular spec (4 files)
+  C. Orphan dirs (no Skill reference):
+     - docs/pending/ (1 file) — suggest archive to PROJECT_JOURNAL.md
+     - docs/changelog/ (experiment data, likely retain)
+  D. Path mismatches:
+     - ./TODO.md at root (Skill now accepts both root + .local/collab/)
+```
+
+Safe merges (pure rename of legacy-plural → active-singular with no semantic conflict) may be auto-executed. All other categories require user confirmation before action.
+
 ### Flow 2: Rule Evaluation and Three-Way Linkage (Mandatory)
 
 > **When writing to Memory, evaluation and execution must be completed in the same reply. Do not end the reply after just writing Memory.**
