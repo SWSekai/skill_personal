@@ -143,6 +143,7 @@ Project-specific Skill: lives only in `.claude/skills/`, not synced; inform the 
 | `Sekai_workflow/<name>/` synced (if general) | |
 | `Sekai_workflow/manifest.json` updated (if general) | |
 | `Sekai_workflow/README.md` updated (if general) | |
+| Step 10 commit prompt executed (AskUserQuestion or direct `/commit-push --meta`) | |
 
 ### Step 9: Output Summary
 
@@ -161,6 +162,31 @@ Updated:
 - CLAUDE.md
 - Sekai_workflow/ (if general)
 ```
+
+### Step 10: Commit Prompt (Mandatory, per CLAUDE.md Rule 20)
+
+Skill creation is a **meta-level maintenance** activity; its commit must not pollute the project's modify_log or daily brief. The final step asks the user whether to commit now:
+
+1. Use AskUserQuestion (single-select) to confirm:
+
+   | Question | Options |
+   |---|---|
+   | Skill 已建立完成。要立即 commit 嗎？ | ① 立即 commit & push（`/commit-push --meta`）／② 先不 commit，稍後自行處理 |
+
+2. If user chose ① → execute `/commit-push --meta` inline. The `--meta` flag:
+   - Skips Step 5 Modify Log
+   - Skips Step 11 Daily Brief Append
+   - Keeps Step 1 Quality Check, Step 2 README Sync, Step 4 Commit, Step 6 Push, Step 7 sekai-workflow flowback, Step 8 Restart Eval, Step 9 Context Cleanup, Step 10 Guide
+   - Commit message prefix recommendation: `chore(skill):` or `docs(skill):` — per `commit-push/references/commit-conventions.md`
+
+3. If user chose ② → print:
+   ```
+   已跳過 commit。新 skill 檔案已就位；自行 commit 時請加 --meta flag：
+     /commit-push --meta "<訊息>"
+   以確保不誤寫 modify_log / brief。
+   ```
+
+4. Direct-call alternative: instead of AskUserQuestion, users may also configure their workflow to always auto-commit by directly invoking `/commit-push --meta` at Step 10 tail. Both paths are permitted per Rule 20 — AskUserQuestion is preferred default for safety, direct-call is opt-in.
 
 ---
 

@@ -210,6 +210,35 @@
 
 與對應 SKILL.md 同語言。Output template 範例內的文字可保留專案語言。
 
+### 20. Skill 新增流程收尾規範（2026-04-24 新增）
+
+Skill 新增屬於**元層（meta）維護**而非專案正式貢獻，commit 必須與產品功能 commit 區隔。
+
+#### 20.1 `/skill new` 最終步驟（強制）
+
+`/skill new` Step 10 二擇一：
+- **方案 A（預設推薦）**：`AskUserQuestion` 詢問是否立即 commit → 選 yes 內聯執行 `/commit-push --meta`
+- **方案 B（進階）**：直接呼叫 `/commit-push --meta`（無互動）
+
+不得以純文字 Y/N 取代 AskUserQuestion（違反 Rule 15）。
+
+#### 20.2 `/commit-push --meta` flag 行為
+
+`$ARGUMENTS` 含 `--meta` 時：
+- **跳過 Step 5**（modify_log 建立）
+- **跳過 Step 11**（brief append）
+- 保留所有其他 step
+- commit message 建議前綴：`chore(skill):` 或 `docs(skill):`
+
+#### 20.3 使用時機
+
+`--meta` 適用：`/skill new`、`/skill update/sync`、CLAUDE.md / manifest.json / hooks 修改、Sekai_workflow 結構改動。
+`--meta` 不適用：專案產品功能、bug fix、測試、使用者可見行為改動。
+
+#### 20.4 灰區
+
+同一次 commit 混合功能 + skill 維護：**優先拆兩次**；無法拆則走正常 `/commit-push`（功能優先）。
+
 ## 可用 Skills
 
 合併版（17 → 6），透過子命令路由至原 Skill 對應職能。

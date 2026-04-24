@@ -201,8 +201,23 @@ After writing the closure summary, immediately update the project living documen
 - [ ] "最後更新" date in the document updated
 - [ ] Closure summary section appended
 - [ ] Living document (`.local/docs/living/PROJECT_JOURNAL.md`) updated
+- [ ] Daily brief updated (Step 3.5)
 - [ ] Contains reusable experience → evaluate writing it into a guide (same as `/build commit` Step 9)
 - Any not done → complete immediately; must not end the reply
+
+#### 3.5 Auto-Update Daily Brief (Mandatory, silent)
+
+After Step 3.3 living doc update, invoke `/team report --daily` flow inline (per `references/daily-brief.md` §7.1):
+
+1. Target: `.local/report/YYMMDD_brief.md` (today's date from `date '+%y%m%d'`)
+2. Read this closed whiteboard's inline closure summary
+3. Extract 「最終決策」 table → append to brief's **「本日決策與討論結論」** section (one row per decision)
+4. Extract 「背景」/「變更清單」 → append one-line entry to **「本日完成」**
+5. Update brief header: `> 最後更新：YYYY-MM-DD HH:MM | 來源：board closure (CLOSED_YYMMDD_<topic>_board.md)`
+6. **Silent mode** — do NOT prompt for handoff (per decision §3.3.a); preserve §4 交接事項 section untouched
+7. If brief file does not exist → create from `assets/brief-template.md` and populate only §1, §5, §6-closure-record
+
+Parser rules: `references/daily-brief.md` §9.1 (closure block detection), §9.4 (section boundaries).
 
 ### Design Principles
 
@@ -348,7 +363,22 @@ After Step 6 completes, confirm:
 - [ ] `.local/docs/decision/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`
 - [ ] `.local/docs/living/PROJECT_JOURNAL.md` has been updated with this decision's entries (link → `CLOSED_*_decision.md`)
 - [ ] **No** `.local/docs/summary/` file has been created (directory was removed 2026-04-22; writing there is a violation)
+- [ ] Daily brief updated (Step 6.6)
 - Any not done → complete immediately; **must not end the reply**
+
+#### 6.6 Auto-Update Daily Brief (Mandatory, silent)
+
+After Step 6.4 living doc update, invoke `/team report --daily` flow inline (per `references/daily-brief.md` §7.2):
+
+1. Target: `.local/report/YYMMDD_brief.md` (today's date from `date '+%y%m%d'`)
+2. Read this closed decision file's inline closure summary (at file end)
+3. Extract 「最終決策（逐項目 §n.m）」 table → append to brief's **「本日決策與討論結論」** — collapse §n.m sub-items into one summary row
+4. Extract 「變更清單」 → append entries to **「本日完成」** (one line per file change topic)
+5. Update brief header: `> 最後更新：YYYY-MM-DD HH:MM | 來源：decide closure (CLOSED_YYMMDD_<topic>_decision.md)`
+6. **Silent mode** — do NOT prompt for handoff (per decision §3.3.a); preserve §4 交接事項 section untouched
+7. If brief file does not exist → create from `assets/brief-template.md` and populate only §1, §5, §6-closure-record
+
+Parser rules: `references/daily-brief.md` §9.1 (closure block detection), §9.4 (section boundaries).
 
 ### Design Principles
 
@@ -602,7 +632,7 @@ YYMMDD_ai-context/
 
 ## F. `/team report` — Work Report Generation
 
-Consolidate project modify logs into a work report suitable for a **2–3 minute briefing**. (Moved here from `/ask report` on 2026-04-17 because reporting is a collaborative deliverable, not a documentation lookup.)
+Consolidate project modify logs into a work report suitable for a **2–3 minute briefing**. (Moved here from `/ask report` on 2026-04-17.) 2026-04-24 added `--daily` flag for daily Teams-renderable brief (full spec in `references/daily-brief.md`).
 
 ### Triggers
 
@@ -611,9 +641,15 @@ Consolidate project modify logs into a work report suitable for a **2–3 minute
 | `/team report` | Full report (all modify logs) |
 | `/team report weekly` | Weekly report (past 7 days) |
 | `/team report YYMMDD YYMMDD` | Specified range |
+| `/team report --daily` | **Daily Teams brief (today)** — details in `references/daily-brief.md` |
+| `/team report --daily YYMMDD` | Daily Teams brief for specified day |
+| `/team report --daily YYMMDD YYMMDD` | Teams brief for specified range (aggregated) |
+
+If `--daily` is present, branch to the Teams brief flow (`references/daily-brief.md`). Otherwise continue with the formal report flow below.
 
 ### Step 1: Determine the scope
 
+- `--daily` present → switch to Teams brief flow per `references/daily-brief.md` and skip Steps 2–4 below
 - No argument / `full` → read everything
 - `weekly` → past 7 days (filter by date prefix in filename)
 - `YYMMDD YYMMDD` → specified range
@@ -677,6 +713,21 @@ Write to `.local/report/`.
 4. **Concise technical highlights**: Pick only 3–5
 5. **Actionable tracking items**: Be specific; avoid "continue to optimize"
 6. **Language**: Align with project conventions (per project language setting, e.g., Traditional Chinese for Taiwan)
+
+### `--daily` Mode (Daily Brief)
+
+When `--daily` flag is present, execute the daily brief flow fully defined in `references/daily-brief.md`. Key differences vs default mode:
+
+- **Output**: `.local/report/YYMMDD_brief.md` (one per day, smart-update)
+- **Sources**: whiteboard/decision closure summaries + TODO deltas + modify_log + user handoff
+- **Sections**: 本日完成 / 進行中 / 待辦與阻塞 / 交接事項 / 本日決策與討論結論 / 作業記錄
+- **Format**: Teams-safe markdown subset with `- [ ]` checkboxes
+- **Triggers**: manual + auto-called from board closure (§B Step 3.5), decide closure (§C Step 6.6), and `/commit-push` Step 11
+- **Handoff**: prefer `@handoff:<name>` tags in TODO.md; fallback to AskUserQuestion on manual trigger only
+- **Integrity**: cross-check `git log` vs `.local/modify_log/` — commits without modify_log marked ⚠️
+- **Cross-day**: `/hello` Step 3.4 surfaces yesterday's unresolved handoffs and missing modify_logs
+
+Full rules, parser specs, edge cases: `references/daily-brief.md`. Template: `assets/brief-template.md`.
 
 ---
 
