@@ -173,6 +173,27 @@ Each time the user asks a follow-up or continues discussion:
    - Update "Last Updated" date
 3. Discussion direction shifts → add a new section, but keep the same document
 
+### Step 2.5: In-File Q&A Response (Strict trigger — both signals required)
+
+When the user both (1) modifies a pending/status item AND (2) adds a question / directive inside the section's blockquote, respond **embedded inside the same blockquote**, below the user's line. Do NOT answer via CLI only, and do NOT place response below the blockquote. Full spec: `references/claude-response-format.md`.
+
+Trigger condition (both must hold):
+- Item state changed (check/uncheck, move between pending/completed, etc.)
+- User added at least one blockquote line beyond the original note
+- If only one signal present → stay silent
+
+Short rule (Round 1):
+```markdown
+> 💡 initial note
+> <user's question>
+>
+> 📝 **Claude 回應（YYYY-MM-DD）— <one-line gist>**
+>
+> <response body, each line `> ` prefixed>
+```
+
+Round 2+ retroactively wraps Round 1 in `<details>` (still inside blockquote). Initial note line is never dynamically updated. Date from `date '+%Y-%m-%d'`. Preserved on closure.
+
 ### Step 3: Closure and Archival (Mandatory, Cannot Be Skipped)
 
 > **This step is mandatory.** When the user indicates the discussion is concluded, all sub-steps below **must be completed in the same reply**.
@@ -302,6 +323,7 @@ Generate structured markdown for the user to check options, which Claude then re
 
 - **First**: call `date '+%Y-%m-%d %H:%M'` to get authoritative time (see Common Rules)
 - Default location: `.local/docs/decisions/YYMMDD_<topic>_decision.md` (snake_case topic; `_decision` suffix recommended for new files. Legacy files without the suffix are still valid — do not rename existing files just to conform)
+- **Use template** `assets/decision-template.md` as the starting structure (sections, `**補充說明：**` blockquote with `💡 預填建議` prefix, Round 1 / Round 2 response example). Replace `{{placeholder}}` fields with topic-specific content. Template is generic — do not bake topic-specific text into the asset.
 
 Format specification:
 - Checkboxes `[ ]` / `[x]`
@@ -329,6 +351,28 @@ Please open the file and check the setting values for each item according to the
 Pre-filled values are recommended configurations based on current state; adjust as needed.
 When finished, reply "OK" or "Done", and I will read and implement.
 ```
+
+### Step 3.5: In-File Q&A Response (Strict trigger — both signals required)
+
+When the user both (1) checks an option AND (2) adds a question / directive line in `補充說明：`, respond **embedded inside the same `補充說明：` blockquote**, below the user's line. Do NOT answer via CLI only, and do NOT place response below the blockquote — it must be inside. Full spec: `references/claude-response-format.md`.
+
+Trigger condition (both must hold):
+- Section checkbox ticked `[x]` on any option
+- User added at least one line beyond the `💡 預填建議` prefill
+- If only one signal present → stay silent, no inline response
+
+Short rule (Round 1 — plain, not folded):
+```markdown
+**補充說明：**
+> 💡 預填建議：<original unchanged>
+> <user's question>
+>
+> 📝 **Claude 回應（YYYY-MM-DD）— <one-line gist>**
+>
+> <response body, each line prefixed with `> `>
+```
+
+Round 2+ retroactively wraps Round 1 in `<details>` (still inside blockquote). The `💡 預填建議` line is **never dynamically updated** — updated thinking goes into the response body only. Date from `date '+%Y-%m-%d'`. Preserved on closure (do not strip during Step 6 rename).
 
 ### Step 4: Read the Decisions
 

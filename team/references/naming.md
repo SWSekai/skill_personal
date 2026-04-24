@@ -98,7 +98,7 @@ for block in document.blocks:
 
 ### 5.1 插入位置
 - **append 於檔案末尾**（不覆蓋原 §1-§n 決策區）
-- 原決策文本保留完整 — 勾選痕跡、補充說明、Claude 回應（§6 之類）全部留存
+- 原決策文本保留完整 — 勾選痕跡、補充說明、Claude 回應 `<details>` toggle 區塊（見 `claude-response-format.md`）全部留存
 - 內嵌區塊以 `---` 分隔開於原文，清楚標示「此為結案摘要」
 
 ### 5.2 統一模板

@@ -44,7 +44,17 @@
 | `journal [view\|regen]` | 專案活文件（自動維護；手動查看或重建；2026-04-24 由 `living` 改名） | **自動 append**（board/decide closure）+ 手動 view/regen |
 | `follow-up <file>` | 接續既有 whiteboard / decision 檔（支援省略副檔名 + 前綴模糊匹配；`CLOSED_*` 自動過濾） | 手動 |
 
-> 詳細觸發條件、禁用情境、過渡流程、反例偵測見 CLAUDE.md §17.1~§17.1.6（2026-04-24 新增）。
+> 詳細觸發條件、禁用情境、過渡流程、反例偵測見 CLAUDE.md §17.1~§17.1.10（2026-04-24 新增）。
+
+### 檔內 Claude 回應三條核心規則（2026-04-24 第三版定稿）
+
+當使用者在 `decide` 或 `board` 檔的 `補充說明：` blockquote 留問題時，Claude 回應遵循三條核心規則（完整規範見 `references/claude-response-format.md`、模板見 `assets/decision-template.md`）：
+
+1. **回應嵌入 blockquote 內**：每行 `> ` 前綴，禁止置於 blockquote 下方另開 heading
+2. **`💡 預填建議` 不動態更新**：原始 prefill 永不變，修正想法寫進回應 body
+3. **Trigger 嚴格**：該區塊 checkbox 有勾選 **且** 補充說明有使用者新增行，雙訊號才觸發；僅一個訊號不回應
+
+Round 1 不摺疊，Round 2+ 把 Round 1 包 `<details>`（仍在 blockquote 內）、新 Round plain 置下，email-thread 風格。`CLOSED_` rename 時全部保留。
 
 ## 結案流程更新（2026-04-22）
 

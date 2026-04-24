@@ -47,3 +47,40 @@
 ## 備註
 
 （補充資訊、注意事項、相關文件連結）
+
+---
+
+## 範例：Claude 內嵌回應格式（當使用者於白板區塊留問題）
+
+若使用者於任一區塊 blockquote 追加問題 / 指令 / 質疑，且該 blockquote 所在項目已勾選或有狀態變更，Claude 回覆嵌入同一 blockquote 內，format 見 `references/claude-response-format.md`。
+
+三條核心規則：(1) 回應嵌入 blockquote、(2) 不更新 prefill、(3) 僅當項目有勾選或狀態改動 **且** 有新增使用者行才觸發。
+
+Round 1（第一輪，不摺疊）:
+```markdown
+> 💡 note / 初始描述
+> 使用者追問
+>
+> 📝 **Claude 回應（YYYY-MM-DD）— <一行結論>**
+>
+> <body>
+```
+
+Round 2+（再追問，前一輪摺疊）:
+```markdown
+> 💡 note / 初始描述（不動）
+> 使用者原始追問
+>
+> <details>
+> <summary>📝 Claude 回應（YYYY-MM-DD）— Round 1 結論</summary>
+>
+> Round 1 body
+>
+> </details>
+>
+> 使用者第二次追問
+>
+> 📝 **Claude 回應（YYYY-MM-DD）— Round 2 結論**
+>
+> Round 2 body
+```
