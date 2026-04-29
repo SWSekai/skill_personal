@@ -166,4 +166,16 @@ For the field/feature described in `$ARGUMENTS`, walk through every layer:
 
 ---
 
+## Cross-Skill References
+
+| Direction | Target | Trigger / Purpose |
+|---|---|---|
+| → Calls | None | Read-only investigation skill — no outbound calls |
+| ← Called by | `hooks/ask_info_router.cjs` | UserPromptSubmit hook auto-routes system-info questions to `/ask info` |
+| ↔ Shared | None | — |
+
+**Rename History (this skill only)**: `/ask report` subcommand migrated to `/team report --daily` on 2026-04-24. Global rename history: see `_bootstrap/RENAME_HISTORY.md`.
+
+---
+
 Arguments: $ARGUMENTS (the first token is the subcommand; the rest are arguments for that subcommand)

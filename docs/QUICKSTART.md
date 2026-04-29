@@ -38,12 +38,16 @@ cd /path/to/your-project
 
 | Skill | 指令 | 用途 |
 |---|---|---|
-| **build** | `/build <flow\|plan\|impl\|test\|commit\|quality\|log\|restart\|eval>` | 開發全流程 |
-| **team-office** | `/team <todo\|board\|decide\|notes>` | 互動協作 |
-| **setup** | `/skm <new\|sync\|pack\|update>` | Skill 管理（2026-04-24 由 `/skill` 改名，避免與內建 `/skills` 衝突） |
-| **ask** | `/ask <query\|trace\|report>` | 系統文件與報告 |
-| **context-guard** | `/context-guard` | Context Window 管理 |
-| **memory-portable** | `/teamry-portable` | Memory 跨專案攜帶 |
+| **build** | `/build <flow\|plan\|impl\|test\|quality\|review\|deploy>` | 開發全流程 |
+| **team** | `/team <todo\|board\|decide\|note\|handoff\|report\|journal\|follow-up>` | 互動協作（原 team-office） |
+| **skm** | `/skm <new\|sync\|pack\|update\|refactor>` | Skill 管理（2026-04-24 由 `/skill` 改名，避免與內建 `/skills` 衝突） |
+| **kb** | `/kb <add\|search\|extract>` | Knowledge Base 管理（2026-04-24 新增） |
+| **ask** | `/ask <info\|trace>` | 系統文件追蹤（report 已併入 `/team report`） |
+| **clean** | `/clean [check\|force]` | Context 清理（繼承 context-guard 功能） |
+| **memo** | `/memo` | Memory 跨專案攜帶（原 memory-portable） |
+| **commit-push** | `/commit-push [--meta] [--no-subagent]` | Commit & Push 主入口 |
+| **hello** | `/hello` | 對話初始化 + Skill 同步 + 工作狀態重建 |
+| **dispatch** | `/dispatch <task>` | 任務分派（Rule 18 model 三層分工） |
 
 ---
 
@@ -89,7 +93,7 @@ Sekai_workflow/ (專案內)       ← 通用模板本地副本
 輸入 `/ask report weekly`，Claude 從修改日誌生成簡報格式的週報。
 
 ### 「對話太長了，AI 開始忘東忘西」
-輸入 `/context-guard`，Claude 會整理摘要存檔，然後你輸入 `/clear` 釋放空間。下次開對話時自動恢復。
+輸入 `/clean`，Claude 會整理摘要存檔，然後執行 `/clear` 釋放空間。下次開對話時 UserPromptSubmit hook 自動恢復。
 
 ### 「有設計決策要跟 AI 討論」
 輸入 `/team decide 主題`，Claude 生成一份 Markdown 核取表，你勾選後回覆，Claude 按你的選擇實作。

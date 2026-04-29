@@ -838,9 +838,6 @@ When `--daily` flag is present, execute the daily report flow fully defined in `
 > - No function names / flag names / parameter values / decision-doc paths in body text (those belong in `modify_log` / appendix)
 > - Quantify with the team's KPI (e.g. `Recall 37.7→44.6% (+6.9 pp)`), not "大幅改善"
 > - Never mention Claude Code internals, model tiers, context modes, or flow interruptions
-> - **No AI–user dialogue or workflow meta-notes**: discussions between Claude and the user, tooling habits, prompt details, and process detours must not appear; the report reader is the supervisor
-> - **One sentence per entry**: each bullet states one outcome in one sentence; if detail is needed, use sub-bullets — never multi-sentence prose in the same bullet
-> - **`<br>` after `>` header lines followed by bullets**: append `<br>` after the `>` header line so Teams renders line breaks correctly
 > - Reading test: an outside reader grasps progress in under 60 seconds
 > This rule applies to **all** triggers — manual, board closure, decide closure, and `/commit-push` Step 11 auto-populate.
 
@@ -1020,6 +1017,26 @@ See `references/followup.md` §9 for: directory-as-argument, path traversal, mal
 - **Block-level closure respected**: both `✅` and `<!-- closed -->` markers skip blocks
 - **UI consistency**: all disambiguation uses AskUserQuestion (aligns with CLAUDE.md Rule 15)
 - **Reference-backed**: this section is the contract; `references/followup.md` is the implementation spec
+
+---
+
+## Cross-Skill References
+
+| Direction | Target | Trigger / Purpose |
+|---|---|---|
+| → Calls | `/team report --daily` (inline) | Auto-triggered on `/team decide` Step 6 / `/team board` Step 3 closure |
+| → Calls | `/kb extract` | Closure flows auto-extract technical content to handbook |
+| → Writes | `.local/report/YYMMDD_daily_report.md` | Daily Teams report |
+| → Writes | `.local/docs/decision/`, `.local/docs/whiteboard/` | Interactive markdown documents |
+| ← Called by | `/commit-push` Step 11 | Auto-appends commit to today's daily report |
+| ← Called by | `/hello` Step 3 | Reads CLOSED + open files to reconstruct work state |
+| ↔ Shared | `assets/decision-template.md` | Consumed by `/team decide`, also referenced by `/build plan` |
+| ↔ Shared | `references/naming.md` | YYMMDD filename spec used by all date-stamped artifact producers |
+| ↔ Shared | `references/daily-report.md` | Spec consumed by `/commit-push` Step 11 |
+| ↔ Shared | `references/four-tools-exclusivity.md` | TODO/board/decide/journal mutual-exclusion rules (Rule 17.1) |
+| ↔ Shared | `references/claude-response-format.md` | Inline response format for decide/board files |
+
+**Rename History (this skill only)**: skill name `team-office` → `team` (2026-04-24); subcommand `/team living` → `/team journal` (2026-04-24); `/ask report` migrated in as `/team report --daily` (2026-04-24); old `summary/` directory mechanism replaced by inline closure summary on 2026-04-22. Global rename history: see `_bootstrap/RENAME_HISTORY.md`.
 
 ---
 

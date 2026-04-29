@@ -84,4 +84,18 @@ A new project's `sp-init.bat` will automatically bring in these two — no manua
 
 ---
 
+## Cross-Skill References
+
+| Direction | Target | Trigger / Purpose |
+|---|---|---|
+| → Reads | `~/.claude/projects/<path>/memory/` | Source for memory archival to portable bag |
+| → Writes | `sekai-workflow/memory-portable/` | Cross-project portable memory store |
+| ← Called by | `/skm pack` | Pack flow archives memory into portable form |
+| ← Called by | `_bootstrap/sp-init.bat` Step 3 | New-project init auto-restores memory from portable store |
+| ↔ Shared | `manifest.json` `memory-portable` entry | Manifest tracks the memory archive |
+
+**Rename History (this skill only)**: skill name `memory-portable` → `memo` (2026-04-24). Global rename history: see `_bootstrap/RENAME_HISTORY.md`.
+
+---
+
 Arguments: $ARGUMENTS (optional — new project sp-init.bat triggers Step 3 automatically)

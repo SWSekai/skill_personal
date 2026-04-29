@@ -23,3 +23,12 @@
 - 還原時不覆蓋已存在的同名檔案（保留專案本地修改）
 - MEMORY.md 索引會自動生成/合併
 - 新增 memory 後記得 commit + push Sekai_workflow
+
+---
+
+## 相關 Skills 與檔案
+
+- **呼叫**：讀取 `~/.claude/projects/<path>/memory/`（memory 歸檔來源）、寫入 `sekai-workflow/memory-portable/`（跨專案攜帶儲存）
+- **被呼叫**：`/skm pack`（pack 流程歸檔 memory 至可攜形式）、`_bootstrap/sp-init.bat` Step 3（新專案 init 自動還原 memory）
+- **共用資源**：`manifest.json` 的 `memory-portable` 條目（manifest 追蹤 memory 歸檔）
+- **改名歷史（本 skill 自身）**：skill 名稱 `memory-portable` → `memo`（2026-04-24）；全域改名請見 `_bootstrap/RENAME_HISTORY.md`

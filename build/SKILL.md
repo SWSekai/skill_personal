@@ -579,4 +579,20 @@ The Skill body uses `model: sonnet`. Subcommands that need Opus in-depth analysi
 - **Sonnet**: multi-step execution, file read/write, medium-low complexity tasks
 - **Haiku**: structured text writing, template filling, log generation
 
+---
+
+## Cross-Skill References
+
+| Direction | Target | Trigger / Purpose |
+|---|---|---|
+| → Calls | `/commit-push` | `deploy` subcommand delegates commit phase |
+| → Calls | `/team decide` | `plan` subcommand opens decision tables for architectural choices |
+| ← Called by | None (user-initiated) | — |
+| ↔ Shared | `team/assets/decision-template.md` | Plan decisions reuse the same decision-table template |
+| ↔ Shared | `commit-push/references/commit-conventions.md` | Build deploy commits follow the same conventions |
+
+**Rename History (this skill only)**: subcommand set restructured 2026-04-24 (`commit` removed in favour of standalone `/commit-push`; `eval` → `deploy`). Global rename history: see `_bootstrap/RENAME_HISTORY.md`.
+
+---
+
 Arguments: $ARGUMENTS (the first token is the subcommand; the rest are arguments for that subcommand)

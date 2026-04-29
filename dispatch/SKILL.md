@@ -126,4 +126,19 @@ Forward the agent's reply to the user, prefixed with a one-line dispatch footer:
 - For Skills that have their own internal multi-tier dispatch (e.g. `/commit-push` Step 1 quality check), don't wrap them in `/dispatch` — they already do the right thing
 - For verification of which model is actually executing inside the sub-agent, instruct the sub-agent's prompt to begin its reply with `[model: <self-report>]` — Claude can self-identify
 
+---
+
+## Cross-Skill References
+
+| Direction | Target | Trigger / Purpose |
+|---|---|---|
+| → Calls | Agent tool | The actual model-switch mechanism — `/dispatch` only chooses tier and prompts |
+| ← Called by | None (user-initiated ad-hoc) | — |
+| ↔ Shared | `.local/model_dispatch.log` | Audit trail of every dispatch |
+| ↔ Shared | `hooks/log_agent_dispatch.cjs` | PreToolUse hook that writes the log entry on every Agent invocation |
+
+**Rename History (this skill only)**: None. Global rename history: see `_bootstrap/RENAME_HISTORY.md`.
+
+---
+
 Arguments: $ARGUMENTS

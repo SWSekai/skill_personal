@@ -57,3 +57,12 @@ build/
 | modify-log | `log` |
 | restart-volumn | `restart` |
 | restart-eval | `eval` |
+
+---
+
+## 相關 Skills 與檔案
+
+- **呼叫**：`/commit-push`（`deploy` 子指令委派 commit 階段）、`/team decide`（`plan` 子指令開啟決策表）
+- **被呼叫**：無（使用者主動觸發）
+- **共用資源**：`team/assets/decision-template.md`（plan 決策共用模板）、`commit-push/references/commit-conventions.md`（commit 規範）
+- **改名歷史（本 skill 自身）**：2026-04-24 子指令重整（移除 `commit` 改交 `/commit-push`、`eval` → `deploy`）；全域改名請見 `_bootstrap/RENAME_HISTORY.md`

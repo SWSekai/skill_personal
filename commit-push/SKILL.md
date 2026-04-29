@@ -418,12 +418,12 @@ If this change contains **non-obvious root causes, workarounds, or config differ
    - Does the config differ from docs / defaults?
    - Is it a workaround for a tool / platform limitation?
 
-2. **If yes**, update the corresponding `.local/docs/guides/<topic>.md`:
+2. **If yes**, update the corresponding `.local/docs/guide/<topic>.md`:
    - Add a troubleshooting / FAQ section
    - Format: **Symptom** → **Cause** → **Resolution** → **Notes**
-   - If no matching guide exists → create one under `.local/docs/guides/`
+   - If no matching guide exists → create one under `.local/docs/guide/`
 
-3. **Inform the user**: "This experience has been written into `.local/docs/guides/<topic>.md` and will be carried along when `/skm pack` runs."
+3. **Inform the user**: "This experience has been written into `.local/docs/guide/<topic>.md` and will be carried along when `/skm pack` runs."
 
 This ensures operational knowledge is deposited in portable documentation rather than left in conversation history.
 
@@ -432,7 +432,7 @@ This ensures operational knowledge is deposited in portable documentation rather
 ## Step 11: Auto-Append to Daily Report (Mandatory, silent)
 
 > **`--meta` mode**: skip this step entirely. Skill maintenance commits do not land in daily report (CLAUDE.md Rule 20).
-> ⚠️ **Audience rule (MANDATORY)**: the daily report is written for the user's supervisor, not as a dev diary. When populating §1 本日完成 / §5 本日決策 from this commit, follow `team/references/daily-report.md` §4.0 — outcomes first, no function names / parameter values / decision-doc paths in body text, quantify with KPI, never mention Claude internals. Commit message and modify_log may contain implementation detail; do NOT copy them verbatim into the daily report body. No AI–user discussions or workflow meta-notes. Each bullet: one sentence or sub-bullets only. After `>` header lines, add `<br>` before the following bullet list.
+> ⚠️ **Audience rule (MANDATORY)**: the daily report is written for the user's supervisor, not as a dev diary. When populating §1 本日完成 / §5 本日決策 from this commit, follow `team/references/daily-report.md` §4.0 — outcomes first, no function names / parameter values / decision-doc paths in body text, quantify with KPI, never mention Claude internals. Commit message and modify_log may contain implementation detail; do NOT copy them verbatim into the daily report body.
 
 Append this commit's record to today's daily report `.local/report/YYMMDD_daily_report.md` per `team/references/daily-report.md` §7.3. Every `/commit-push` run must land in the daily report so that daily work ledger is complete regardless of trigger count.
 
@@ -473,6 +473,23 @@ No user prompt, no handoff question. This is equivalent to calling `/team report
 - [ ] This commit's hash appears in §6 commit 記錄 table with ✅
 - [ ] Header "最後更新" timestamp advanced
 - [ ] §4 交接事項 content unchanged from previous state
+
+---
+
+## Cross-Skill References
+
+| Direction | Target | Trigger / Purpose |
+|---|---|---|
+| → Calls | `/build deploy --plan` | Step 8 service-restart evaluation |
+| → Calls | `/team report --daily` (inline) | Step 11 daily report auto-append |
+| → Calls | `/clean` flow | Step 9 context cleanup and summary save |
+| ← Called by | `/skm new` Step 10 | Auto-invokes `/commit-push --meta` for skill-creation commits |
+| ← Called by | `/skm update` Step 7 | Mirror commit to sekai-workflow after skill rule update |
+| ↔ Shared | `team/references/daily-report.md` | §4.0 audience rule, §7.3 commit-row append spec |
+| ↔ Shared | `team/assets/daily-report-template.md` | Daily report skeleton |
+| ↔ Shared | `references/commit-conventions.md` | 11 prefix conventions used by all commit-creating skills |
+
+**Rename History (this skill only)**: split out from earlier `/build commit` subcommand on 2026-04-24 (build no longer owns commit). Global rename history: see `_bootstrap/RENAME_HISTORY.md`.
 
 ---
 

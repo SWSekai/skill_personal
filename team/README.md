@@ -121,3 +121,12 @@ team/
 | tech-notes | `note`（原 `notes`） |
 | handoff | `handoff` |
 | `/ask report` | `report`（2026-04-17 搬入） |
+
+---
+
+## 相關 Skills 與檔案
+
+- **呼叫**：`/team report --daily`（自動觸發於 `/team decide` Step 6 / `/team board` Step 3 結案）、`/kb extract`（結案自動抽取通用技術內容）、寫入 `.local/report/YYMMDD_daily_report.md` 與 `.local/docs/decision/` `.local/docs/whiteboard/`
+- **被呼叫**：`/commit-push` Step 11（自動 append commit 至當日報告）、`/hello` Step 3（讀取 CLOSED 與 open 檔案重建工作狀態）
+- **共用資源**：`assets/decision-template.md`（`/team decide` 與 `/build plan` 共用）、`references/naming.md`（YYMMDD 檔名規範供所有日期戳產出者共用）、`references/daily-report.md`（被 `/commit-push` Step 11 引用）、`references/four-tools-exclusivity.md`（TODO/board/decide/journal 互斥規則）、`references/claude-response-format.md`（decide/board 內嵌回應格式）
+- **改名歷史（本 skill 自身）**：skill 名稱 `team-office` → `team`（2026-04-24）；子指令 `/team living` → `/team journal`（2026-04-24）；`/ask report` 移入為 `/team report --daily`（2026-04-24）；舊 `summary/` 目錄機制於 2026-04-22 由內嵌結案摘要取代；全域改名請見 `_bootstrap/RENAME_HISTORY.md`
