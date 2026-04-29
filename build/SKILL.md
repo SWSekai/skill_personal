@@ -429,7 +429,7 @@ Based on the scan results, list **items that may need syncing for this change bu
 
 ### Documentation-layer sync
 - [ ] READMEs for affected directories are updated
-- [ ] For new features → there is a corresponding .local/docs/guide/<topic>.md
+- [ ] For new features → there is a corresponding hanschen/docs/guides/<topic>.md
 ```
 
 ### Step 3: Interactive confirmation

@@ -12,7 +12,7 @@
 | Purpose | Long-cycle formal report (weekly / range) | Daily message pastable into Microsoft Teams |
 | Primary sources | `modify_log` | closure summaries (board + decide) + TODO deltas + `modify_log` + user handoff |
 | Time unit | Weekly / range | Today (default) / specified day / specified range |
-| Output file | `.local/report/YYMMDD_<scope>_report.md` | `.local/report/YYMMDD_daily_report.md` |
+| Output file | `hanschen/report/YYMMDD_<scope>_report.md` | `hanschen/report/YYMMDD_daily_report.md` |
 | Format | Table-heavy, formal | Teams-safe subset, plain bullets (`-`) |
 | Trigger | Manual | Manual + board closure auto + decide closure auto + `/commit-push` auto |
 | Update model | One-shot generation | Daily accumulator (smart merge each trigger) |
@@ -28,7 +28,7 @@ If both `weekly` and `--daily` appear, `--daily` wins (daily semantics override 
 
 ## 2. File Location and Naming
 
-- **Path**: `.local/report/YYMMDD_daily_report.md`
+- **Path**: `hanschen/report/YYMMDD_daily_report.md`
 - **One file per day**: same-day re-invocation → smart update (see §7), never a second file
 - **Cross-day separation**: filename `YYMMDD_` prefix naturally partitions history
 - **No auto-deletion**: yesterday's daily report and earlier are preserved as history (do not rename to `CLOSED_`; the `CLOSED_` prefix is reserved for board/decision files)
@@ -42,7 +42,7 @@ All sources merge into one daily daily report via smart update. Selected sources
 
 ### 3.1 Whiteboard Closure Summary (§2.1.a)
 
-For each `.local/docs/whiteboards/CLOSED_YYMMDD_*_board.md` within scope:
+For each `hanschen/docs/whiteboard/CLOSED_YYMMDD_*_board.md` within scope:
 
 1. Read the "# 結案摘要（Closure Summary）" block at file end
 2. Extract 「最終決策」 table → append to daily report's **「本日決策與討論結論」** section as one row per decision: `(topic) | (outcome) | [link to CLOSED file]`
@@ -50,7 +50,7 @@ For each `.local/docs/whiteboards/CLOSED_YYMMDD_*_board.md` within scope:
 
 ### 3.2 Decision Closure Summary (§2.1.b)
 
-For each `.local/docs/decisions/CLOSED_YYMMDD_*_decision.md` within scope:
+For each `hanschen/docs/decision/CLOSED_YYMMDD_*_decision.md` within scope:
 
 1. Read the inline "# 結案摘要（Closure Summary）" block at file end
 2. Extract 「最終決策（逐項目 §n.m）」 → append to daily report's **「本日決策與討論結論」** section
@@ -68,7 +68,7 @@ Scan TODO.md (resolve: `./TODO.md` project root → `.local/collab/TODO.md` lega
 
 ### 3.4 modify_log Summary (§2.1.d)
 
-For each `.local/modify_log/YYMMDD_*.md` within scope:
+For each `hanschen/modify_log/YYMMDD_*.md` within scope:
 
 1. Read "## 基本資訊" block → extract commit hash, 更動原因
 2. Read "# <Title>" → one-line summary
@@ -99,7 +99,7 @@ git log --since="YYYY-MM-DD 00:00" --until="YYYY-MM-DD 23:59" --pretty=format:"%
 ```
 
 For each commit:
-- Commit hash appears in any `.local/modify_log/` file content → mark ✅
+- Commit hash appears in any `hanschen/modify_log/` file content → mark ✅
 - Not found → mark ⚠️ **「modify_log 缺失，建議改走 /commit-push」**
 
 Append all commits (including missing-log ones) to **「作業記錄 → commit 記錄」** table. ⚠️ rows preserve order — do not drop.
@@ -223,7 +223,7 @@ In the header, append the latest triggering source:
 
 Inserted in `team/SKILL.md §B Step 3` after Step 3.4 (self-check). After living doc update completes:
 
-1. Detect date: if today has existing `.local/report/YYMMDD_daily_report.md` → smart-update §1/§3/§5/§6 from this closed whiteboard
+1. Detect date: if today has existing `hanschen/report/YYMMDD_daily_report.md` → smart-update §1/§3/§5/§6 from this closed whiteboard
 2. If no daily report yet today → create new daily report using template, fill §1/§5 from this closure, leave other sections to next trigger
 3. Silent mode: no handoff prompt, no user confirmation
 4. Append to trigger source tag
@@ -253,7 +253,7 @@ Inserted in `hello/SKILL.md` Step 3 (Restore Context) as sub-step 3.4 (new):
 
 ### 8.1 Detection logic
 1. Get today's date: `date '+%Y%m%d'` (convert to YYMMDD: last 6 chars)
-2. Glob `.local/report/*_daily report.md` → pick the latest by filename sort
+2. Glob `hanschen/report/*_daily report.md` → pick the latest by filename sort
 3. Compare latest daily report's YYMMDD vs today's YYMMDD:
 
 | Condition | Display |
@@ -268,7 +268,7 @@ Display block in status overview:
 
 ```
 ━━━ 跨日檢查 ━━━
-昨日 daily report：.local/report/YYMMDD_daily_report.md
+昨日 daily report：hanschen/report/YYMMDD_daily_report.md
   未處理交接：N 項（若 §4 非「無」）
   modify_log 缺失：M 筆（若 §6 有 ⚠️ 標記）
 今日 daily report：尚未建立（將於今日首次觸發時新建）

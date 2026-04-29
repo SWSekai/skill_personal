@@ -48,7 +48,7 @@ If a single commit contains BOTH project feature + skill maintenance changes:
 After commit with `--meta`, verify:
 ```bash
 ls modify_log/YYMMDD_*.md  # should NOT contain an entry for this commit
-grep "this commit hash" .local/report/YYMMDD_daily_report.md  # should be absent
+grep "this commit hash" hanschen/report/YYMMDD_daily_report.md  # should be absent
 git log -1 --format=%s  # should start with chore(skill): or docs(skill):
 ```
 

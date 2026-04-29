@@ -37,7 +37,7 @@ Heuristics: option description fits in 5 words → AskUserQuestion; needs impact
 
 ## 4. Rule 17.1.3 — board 3-Round Auto-Trigger
 
-Consultation / planning / troubleshooting conversations **with 3 rounds of back-and-forth without convergence** → auto-create `.local/docs/whiteboards/YYMMDD_<topic>_board.md`. 1-2 rounds with quick convergence → do not open whiteboard.
+Consultation / planning / troubleshooting conversations **with 3 rounds of back-and-forth without convergence** → auto-create `hanschen/docs/whiteboard/YYMMDD_<topic>_board.md`. 1-2 rounds with quick convergence → do not open whiteboard.
 
 ## 5. Rule 17.1.4 — Transition Flows
 

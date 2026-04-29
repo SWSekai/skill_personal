@@ -13,13 +13,13 @@
 
 ### 行為總覽
 1. 解析 `<file>` 引數（允許省略 `.md`、前綴模糊匹配）
-2. 於 `.local/docs/whiteboards/` 與 `.local/docs/decisions/` 下搜尋匹配檔（**過濾 `CLOSED_*`**）
+2. 於 `hanschen/docs/whiteboard/` 與 `hanschen/docs/decision/` 下搜尋匹配檔（**過濾 `CLOSED_*`**）
 3. 0 筆 / 1 筆 / 多筆 → 各自分支（見第 2 節）
 4. Read 目標檔 → 依類型分派至 §3 / §4 處理器
 5. 實作或推進單項 → 完成後結案
 
 ### 作用域
-- 僅限 `.local/docs/whiteboards/` 與 `.local/docs/decisions/` 兩目錄
+- 僅限 `hanschen/docs/whiteboard/` 與 `hanschen/docs/decision/` 兩目錄
 - 不含 `.local/docs/summary/`（summary 目錄已於 2026-04-22 廢棄；結案摘要改寫入 CLOSED_ 原檔末尾）
 - 不含 `.local/docs/tech-note/`、`.local/docs/handoff/`（非互動檔）
 
@@ -164,7 +164,7 @@ date '+%Y-%m-%d %H:%M'
 實作完成後強制走（依 SKILL.md §C.6 + naming.md §5 內嵌結案流程）：
 1. **Append 內嵌結案摘要**至原 decision 檔末尾（保留 §1-§n 勾選痕跡，格式見 `naming.md` §5.2）
 2. 原 decision 檔 rename 為 `CLOSED_YYMMDD_<topic>_decision.md`
-3. 更新 `.local/docs/living/PROJECT_JOURNAL.md` 索引欄（連結指向 `CLOSED_*_decision.md`）
+3. 更新 `hanschen/docs/living/PROJECT_JOURNAL.md` 索引欄（連結指向 `CLOSED_*_decision.md`）
 
 **不再寫獨立 summary 檔**：`.local/docs/summary/` 目錄已廢棄（2026-04-22）。
 

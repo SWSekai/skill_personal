@@ -140,7 +140,7 @@ If zero items added → note internally "無新項目" (TODO is already up to da
 Per `team/references/daily-report.md` §8, detect whether yesterday's daily report has unresolved carry-over.
 
 1. Compute today's `YYMMDD` from `date '+%y%m%d'`
-2. Glob `.local/report/*_daily_report.md` and pick the file with the highest YYMMDD prefix
+2. Glob `hanschen/report/*_daily_report.md` and pick the file with the highest YYMMDD prefix
 3. Branch:
 
 | Condition | Behavior |
@@ -153,7 +153,7 @@ Per `team/references/daily-report.md` §8, detect whether yesterday's daily repo
 
 ```
 ━━━ 跨日檢查 ━━━
-昨日報告：.local/report/YYMMDD_daily_report.md
+昨日報告：hanschen/report/YYMMDD_daily_report.md
   未處理交接：N 項（解析 §4 交接事項，非「無」即計數）
   modify_log 缺失：M 筆（§6 commit 記錄中標 ⚠️ 的 row 數）
 今日報告：尚未建立（將於今日首次觸發時新建）

@@ -7,12 +7,12 @@
 
 | 類型 | 目錄 | 檔名格式 | 範例 |
 |---|---|---|---|
-| whiteboard | `.local/docs/whiteboards/` | `YYMMDD_<topic>_board.md` | `260422_auth_refactor_board.md` |
-| decision | `.local/docs/decisions/` | `YYMMDD_<topic>_decision.md` | `260422_team_followup_decision.md` |
+| whiteboard | `hanschen/docs/whiteboard/` | `YYMMDD_<topic>_board.md` | `260422_auth_refactor_board.md` |
+| decision | `hanschen/docs/decision/` | `YYMMDD_<topic>_decision.md` | `260422_team_followup_decision.md` |
 | ~~summary~~ | ~~`.local/docs/summary/`~~ | ~~`YYMMDD_<topic>_summary.md`~~ | ⚠️ 廢棄（2026-04-22）結案摘要改 append 於 CLOSED_ 原檔末尾（見 §5） |
 | handoff | `.local/docs/handoff/` | `YYMMDD_handoff.md` | `260422_handoff.md` |
 | tech-note | `.local/docs/tech-note/` | `<topic-category>_<specific-topic>.md` | `sql_comments.md` |
-| report | `.local/report/` | 見 SKILL.md §F | — |
+| report | `hanschen/report/` | 見 SKILL.md §F | — |
 
 ### 原則
 - **YYMMDD 前綴建議**：年月日各兩碼（如 `260422` = 2026-04-22），跨檔排序天然成立。既有無前綴檔（例：`route-a-implementation-plan.md`）仍有效，不強制 rename
@@ -152,7 +152,7 @@ for block in document.blocks:
 1. 使用者確認實作完成（tool approval）
 2. **append** §5.2 模板區塊至原檔末尾（保留原 §1-§n 全文）
 3. `mv YYMMDD_<topic>_<type>.md CLOSED_YYMMDD_<topic>_<type>.md`
-4. 更新 `.local/docs/living/PROJECT_JOURNAL.md`：
+4. 更新 `hanschen/docs/living/PROJECT_JOURNAL.md`：
    - 決策紀錄表加一列，「來源文件」直接連 `CLOSED_*_decision.md`（**不再連 summary 檔，因為沒有**）
    - 若內嵌摘要有「🔖 保留候選」→ 同步 append 到 living doc 的「🔖 保留候選」表
 
