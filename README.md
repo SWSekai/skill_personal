@@ -4,6 +4,8 @@
 
 **English** · [繁體中文](./README.zh-TW.md) · [日本語](./README.ja.md)
 
+> ⚠️ **Renamed something?** The single source of truth for global rename history is [`_bootstrap/RENAME_HISTORY.md`](./_bootstrap/RENAME_HISTORY.md). When you spot an old name, run a global `grep` and clean it up per the checklist there. Per-skill `Cross-Skill References` sections in each `SKILL.md` / `README.md` only list that skill's own renames.
+
 ---
 
 ## What is this?

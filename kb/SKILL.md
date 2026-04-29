@@ -140,4 +140,18 @@ When answering a technical question (infrastructure, patterns, algorithms, backe
 
 ---
 
+## Cross-Skill References
+
+| Direction | Target | Trigger / Purpose |
+|---|---|---|
+| → Reads | `sekai-workflow/handbook/` | Search source for technical answers |
+| → Writes | `sekai-workflow/handbook/<category>/<topic>.md` | `/kb add` and `/kb extract` produce handbook entries |
+| ← Called by | `/team decide` Step 6 closure | Auto-extracts technical insights into handbook |
+| ← Called by | `/team board` Step 3 closure | Auto-extracts technical insights into handbook |
+| ↔ Shared | `handbook/_index.md` | Central category index, updated on every add/extract |
+
+**Rename History (this skill only)**: skill itself added 2026-04-24 (no prior name); the underlying `handbook/` directory was renamed from `knowledge_base/` on 2026-04-24. Global rename history: see `_bootstrap/RENAME_HISTORY.md`.
+
+---
+
 Arguments: $ARGUMENTS (first token is subcommand; the rest are topic/query/path)

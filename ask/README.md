@@ -45,3 +45,12 @@ ask/
 | sys-info | `info` |
 | trace-flow | `trace` |
 | ~~report~~ | 已搬移至 `/team report` |
+
+---
+
+## 相關 Skills 與檔案
+
+- **呼叫**：無（純讀取分析）
+- **被呼叫**：`hooks/ask_info_router.cjs`（UserPromptSubmit hook 自動路由系統資訊問題到 `/ask info`）
+- **共用資源**：無
+- **改名歷史（本 skill 自身）**：`/ask report` 子指令於 2026-04-24 移交至 `/team report --daily`；全域改名請見 `_bootstrap/RENAME_HISTORY.md`

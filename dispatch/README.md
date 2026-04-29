@@ -99,3 +99,12 @@ dispatch/
 | `/dispatch find all callers of deprecated parseRequest()` | sonnet · Explore |
 | `/dispatch design a migration plan for splitting the monolith db` | opus · Plan |
 | `/dispatch tweak the README wording --model haiku` | haiku（強制覆寫）· general-purpose |
+
+---
+
+## 相關 Skills 與檔案
+
+- **呼叫**：Agent tool（實際 model 切換機制；`/dispatch` 僅選層級與組裝 prompt）
+- **被呼叫**：無（使用者隨手觸發）
+- **共用資源**：`.local/model_dispatch.log`（每次派遣的稽核紀錄）、`hooks/log_agent_dispatch.cjs`（PreToolUse hook 寫入紀錄）
+- **改名歷史（本 skill 自身）**：無；全域改名請見 `_bootstrap/RENAME_HISTORY.md`

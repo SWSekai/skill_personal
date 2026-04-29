@@ -95,3 +95,12 @@ sekai-workflow/handbook/   ← 實際知識庫（跨專案共享）
 - **`/kb search`**：跨專案通用技術筆記（Docker、演算法、後端模式）→ 通用
 - 兩者互補：`/ask` 回答「這個專案怎麼做」；`/kb` 回答「一般而言怎麼做」
 - **`/team decide` / `/team board`** 結案時自動呼叫 `/kb extract`，確保通用內容不被遺忘於單一決策檔
+
+---
+
+## 相關 Skills 與檔案
+
+- **呼叫**：讀取 `sekai-workflow/handbook/`（搜尋技術答案）、寫入 `sekai-workflow/handbook/<category>/<topic>.md`
+- **被呼叫**：`/team decide` Step 6 結案、`/team board` Step 3 結案（自動抽取通用技術內容）
+- **共用資源**：`handbook/_index.md`（中央分類索引，每次 add/extract 更新）
+- **改名歷史（本 skill 自身）**：skill 本身於 2026-04-24 新增（無前名）；底層 `handbook/` 目錄於 2026-04-24 由 `knowledge_base/` 改名；全域改名請見 `_bootstrap/RENAME_HISTORY.md`

@@ -36,13 +36,13 @@
 | Skill | 子命令 / 步驟 | 觸發時機 | 檔名格式 | 存放位置 | 用途 |
 |---|---|---|---|---|---|
 | **commit-push** | Step 5 | commit 後（Haiku 內嵌）| `YYMMDD_<主題>.md` | `.local/modify_log/` | 修改日誌（格式對齊原版 +N -M）|
-| **context-guard** | 系統壓縮 / 手動 / 對話開始 | — | `YYMMDD_HHMM_<主題>.md` | `.local/context_summary/` | Context 工作狀態摘要 |
-| **context-guard** | 同上 | — | `current_topic.md` | `.local/context_summary/` | 當前工作主題（任務切換偵測）|
-| **ask** | `report` | 手動 `/ask report` | `YYMMDD_<type>_report.md` | `.local/report/` | 從 modify_log 統整的工作報告（簡報用）|
-| **team-office** | `todo` | 手動 `/team todo` | `TODO.md` | `.local/collab/` | AI 待辦事項清單 |
+| **clean** | 系統壓縮 / 手動 `/clean` / 對話開始 | — | `YYMMDD_HHMM_<主題>.md` | `.local/context_summary/` | Context 工作狀態摘要（繼承 context-guard 功能）|
+| **clean** | 同上 | — | `current_topic.md` | `.local/context_summary/` | 當前工作主題（任務切換偵測）|
+| **team** | `report` | 手動 `/team report` 或 commit-push Step 11 自動 | `YYMMDD_daily_report.md` | `.local/report/` | 每日 Teams 報告（原 `/ask report`） |
+| **team** | `todo` | 手動 `/team todo` | `TODO.md` | `.local/collab/` | AI 待辦事項清單（原 team-office）|
 | **build** | `impl` | 衍生任務時 | 追加至 TODO.md | `.local/collab/` | 從 impl 發現的衍生 TODO |
 | （使用者手動） | — | 需要時提供範例 | `<類別>/*.md` | `.local/samples/` | 使用者提供的參考樣本（格式模板、範例檔等）|
-| **setup** | `pack` | 手動 `/skm pack` | 打包結果 + `manifest.txt` | `.local/ai-context/` | AI 上下文打包（含 memory、guides、project-skills）|
+| **skm** | `pack` | 手動 `/skm pack` | 打包結果 + `manifest.txt` | `.local/bag/` | AI 上下文打包（含 memory、guides、project-skills）|
 
 ---
 
@@ -54,12 +54,12 @@
 
 ---
 
-## Skill / 設定檔（由 setup 管理）
+## Skill / 設定檔（由 skm 管理）
 
 | Skill | 觸發時機 | 產出 | 存放位置 | 用途 |
 |---|---|---|---|---|
-| **setup** | `sync` 或對話開始 | `SKILL.md` + `README.md` | `.claude/skills/<name>/` | 同步 sekai-workflow 至專案 |
-| **setup** | `new` | `SKILL.md` + `README.md` | `.claude/skills/<name>/` + `sekai-workflow/<name>/` | 建立新 Skill 定義 |
+| **skm** | `sync` 或 `/hello` Step 2 | `SKILL.md` + `README.md` | `.claude/skills/<name>/` | 同步 sekai-workflow 至專案 |
+| **skm** | `new` | `SKILL.md` + `README.md` | `.claude/skills/<name>/` + `sekai-workflow/<name>/` | 建立新 Skill 定義 |
 
 ---
 
@@ -89,12 +89,12 @@
 │       └── YYMMDD_ai-context/  #AI context bundle
 │
 ├── modify_log/                 ← commit-push Step 5（Haiku 內嵌產出）
-├── context_summary/            ← context-guard 摘要與 current_topic.md
-├── report/                     ← ask report
+├── context_summary/            ← clean（繼承 context-guard）摘要與 current_topic.md
+├── report/                     ← team report --daily
 ├── collab/
-│   └── TODO.md                 ← team-office todo + build impl 衍生任務
+│   └── TODO.md                 ← team todo + build impl 衍生任務
 ├── samples/                    ← 使用者提供的參考樣本（按需建立）
-└── ai-context/                 ← setup pack 打包結果（Skill 退出歸檔專用）
+└── bag/                        ← skm pack 打包結果（Skill 退出歸檔專用）
 ```
 
 ---

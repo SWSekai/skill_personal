@@ -1,6 +1,6 @@
 ---
 name: hello
-description: "Conversation initialization entry point — automatically pulls project + Skill updates, restores context, and displays status overview. Replaces the legacy auto-sync-on-conversation-start mechanism."
+description: "Conversation initialization entry point — pull updates → sync Skills → reconstruct work state (scan decision/whiteboard/context-summary → consolidate unfinished items into TODO) → status overview."
 model: sonnet
 effort: low
 argument-hint: ""
@@ -94,40 +94,48 @@ Skill sync:
 
 ---
 
-## Step 3: Restore Context
+## Step 3: Work State Reconstruction
 
-### 3.1 Read Latest context_summary
+**Core goal**: reconstruct unfinished work from all persistent artifacts of previous sessions and consolidate into TODO.md so the user can immediately continue from where they left off — especially after a weekend or multi-day gap.
 
-Scan `.local/context_summary/*.md` (excluding `current_topic.md`), sort by filename date, read the latest 1~2 files:
+### 3.1 Load Context Window
 
-- If summaries exist → display a condensed "last work summary" (3~5 lines)
-- If none → skip
+Scan `.local/context_summary/*.md` (excluding `current_topic.md`), sort by filename date, read the latest 1–2 files. Also read `.local/context_summary/current_topic.md` if it exists.
 
-### 3.2 Read current_topic
+From these summaries, extract **candidate unfinished items**: tasks marked as "in progress", "next steps", "TODO", or "未完成" in the summary text. Build an internal candidate list; do **not** output yet.
 
-Read `.local/context_summary/current_topic.md`:
+If no summaries exist → candidate list starts empty; continue to 3.2.
 
-- If exists → display "Current topic: <topic>"
-- If not → skip
+### 3.2 Scan Open Decision & Whiteboard Files
 
-### 3.3 Today's Actionable TODOs
+Glob the following, **excluding** files prefixed with `CLOSED_`:
+- `.local/docs/decision/*.md`
+- `.local/docs/whiteboard/*.md`
+
+For each open file:
+- Extract all unchecked `[ ]` Markdown task items
+- Label each with source file name and section reference (e.g., `§1.2`)
+
+Add labeled items to the candidate list. Do **not** output yet.
+
+### 3.3 Deduplicate Against TODO.md
 
 Read `.local/collab/TODO.md`:
+- If file does not exist → create it with basic scaffold (`## Pending\n\n## In Progress\n\n## Completed`) per CLAUDE.md Rule 17.1.8
+- For each candidate: fuzzy-match against existing **Pending** and **In Progress** entries
+- Mark as **SKIP** if already present; mark as **ADD** if new
 
-- Display **In Progress** items first (highest priority — already started)
-- Then top 3~5 **Pending** items as today's candidates
-- If none → skip
-- Output format:
+### 3.4 Consolidate into TODO.md
 
+For each item marked **ADD**, append to the `## Pending` section:
 ```
-今日可處理 TODO：
-  🔄 In Progress: <item>
-  ⬜ Pending: <item>
-  ⬜ Pending: <item>
-  （+ N 項，執行 /team todo 查看全部）
+- [ ] <item> *(來源: <source-file> <§ref>)*
 ```
+Use the Edit tool; never overwrite existing content.
 
-### 3.4 Daily Report Cross-Day Check
+If zero items added → note internally "無新項目" (TODO is already up to date); no error output.
+
+### 3.5 Daily Report Cross-Day Check
 
 Per `team/references/daily-report.md` §8, detect whether yesterday's daily report has unresolved carry-over.
 
@@ -152,9 +160,27 @@ Per `team/references/daily-report.md` §8, detect whether yesterday's daily repo
 ━━━━━━━━━━━━━━
 ```
 
-5. **No auto-rename, no auto-delete**: yesterday's daily report stays under its original `YYMMDD_daily_report.md` filename (do NOT apply `CLOSED_` — that prefix is reserved for decision/whiteboard closure). "Cleanup" is achieved by natural YYMMDD partition when today's first trigger creates a fresh file.
+5. **No auto-rename, no auto-delete**: yesterday's daily report stays under its original `YYMMDD_daily_report.md` filename (do NOT apply `CLOSED_`). Cleanup is achieved by natural YYMMDD partition when today's first trigger creates a fresh file.
 
 6. If the user wants to carry yesterday's handoff forward → prompt subtly: `如需延續昨日交接到今日，執行 /team report --daily 手動合併`. Do not auto-merge.
+
+### 3.6 Display Work Reconstruction Summary
+
+Output condensed reconstruction block after all writes are complete:
+
+```
+━━━ 工作狀態重建 ━━━
+掃描來源：context_summary（N 檔）/ 開放決策表（N 個）/ 開放白板（N 個）
+新整合至 TODO：N 項 ┃ 已略過重複：N 項
+━━━━━━━━━━━━━━━━━━━
+今日可處理：
+  🔄 In Progress: <item>
+  ⬜ Pending: <item>
+  ⬜ Pending: <item>
+  （+ N 項，執行 /team todo 查看全部）
+```
+
+If nothing was found or consolidated → output: `━━━ 工作狀態重建：TODO 已是最新，無新項目 ━━━`
 
 ---
 
@@ -199,10 +225,25 @@ docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Service}}" 2>/dev/n
 | Skill | Relationship |
 |---|---|
 | `/skm sync` | `/hello` Step 2 reuses sync logic; sync can still be invoked standalone for full sync (including conflict resolution) |
-| `/context-guard` | `/hello` Step 3 reads summaries produced by context-guard |
+| `/clean` | `/hello` Step 3 reads summaries produced by `/clean` (which inherited context-guard's responsibilities) |
 | `/team todo` | `/hello` Step 3 reads TODO status |
 | `/skm pack` | Mutually exclusive: after pack the environment is cleared, so /hello cannot run |
 | `/team handoff` | Complementary: the AI bundle produced by handoff can be manually loaded by the AI after `/hello` in a new conversation |
+
+---
+
+## Cross-Skill References
+
+| Direction | Target | Trigger / Purpose |
+|---|---|---|
+| → Calls | `/skm sync` (inline Flow 1) | Step 2 absorbed the original sync flow (remote pull + skill diff) |
+| → Reads | `.local/context_summary/`, `.local/docs/decision/`, `.local/docs/whiteboard/` | Step 3 work-state reconstruction |
+| → Writes | `.local/collab/TODO.md` | Step 3 consolidates open items into TODO Pending block |
+| ← Called by | None (user types `/hello` at conversation start) | — |
+| ↔ Shared | `team/TODO.md` schema | Reconstruction must match `/team todo` format |
+| ↔ Shared | `clean/` context_summary directory | Reads what `/clean` wrote in the previous session |
+
+**Rename History (this skill only)**: absorbed `/skm sync` Flow 1 on 2026-04-24 — remote sync moved from `/skm` into `/hello` Step 2. Global rename history: see `_bootstrap/RENAME_HISTORY.md`.
 
 ---
 
