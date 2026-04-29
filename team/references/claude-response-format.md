@@ -115,6 +115,8 @@ Follow-up parsers (`references/followup.md`) and daily-report extractors (`refer
 - ❌ Editing the user's blockquote lines to insert the answer
 - ❌ Using `**補充說明**:` with ASCII colon (must be `**補充說明：**` full-width colon)
 - ❌ Omitting `💡` / `📝` emoji prefixes
+- ❌ Writing `預填建議` outside `>` blockquote — icon alone is insufficient; the `>` callout provides the visual container that separates Claude's suggestion from surrounding text (icon for recognition, callout for readability)
+- ❌ Writing `補充說明：` content (user text, prefill, Claude responses) without `>` prefix — all content inside the 補充說明 block must stay inside the blockquote
 - ❌ Omitting date stamp in gist
 - ❌ Forgetting `> ` prefix on response body lines (breaks blockquote)
 
