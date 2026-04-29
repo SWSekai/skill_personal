@@ -48,8 +48,13 @@
 
 ### 檔內 Claude 回應三條核心規則（2026-04-24 第三版定稿）
 
-當使用者在 `decide` 或 `board` 檔的 `補充說明：` blockquote 留問題時，Claude 回應遵循三條核心規則（完整規範見 `references/claude-response-format.md`、模板見 `assets/decision-template.md`）：
+當使用者在 `decide` 或 `board` 檔的 `補充說明：` blockquote 留問題時，Claude 回應遵循核心規則（完整規範見 `references/claude-response-format.md`、模板見 `assets/decision-template.md`）：
 
+**視覺格式（強制）**：補充說明與預填建議一律使用 icon + `>` callout 格式：
+- 欄位標籤：`**補充說明：**`（粗體 + 全形冒號）
+- 預填建議行：`> 💡 預填建議：<內容>`（`>` callout + 💡 icon 前綴，icon 增加辨識度、callout 提升人性可視化）
+
+**三條回應核心規則**：
 1. **回應嵌入 blockquote 內**：每行 `> ` 前綴，禁止置於 blockquote 下方另開 heading
 2. **`💡 預填建議` 不動態更新**：原始 prefill 永不變，修正想法寫進回應 body
 3. **Trigger 嚴格**：該區塊 checkbox 有勾選 **且** 補充說明有使用者新增行，雙訊號才觸發；僅一個訊號不回應
