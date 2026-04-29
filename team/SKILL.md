@@ -49,6 +49,19 @@ All interactive output files follow the pattern `YYMMDD_<topic>_<type>.md` where
 - Parsers treat both markers as "skip this block"; Claude auto-adds `✅` if only `<!-- closed -->` is present (visual consistency)
 - Details in `references/naming.md` §3
 
+### AskUserQuestion — Adding "Defer Decision" Option (CLAUDE.md Rule 16)
+
+When designing AskUserQuestion options for decision questions, **proactively add** a "**暫不決定，記錄到 TODO/白板**" option when **any** of the following apply:
+
+1. The decision requires external confirmation (team / backend / supervisor) before proceeding
+2. The topic is a future feature not in the current implementation scope
+3. Conversation context shows the user has expressed a "not yet" preference
+
+When selected:
+- Task-nature decisions → append to `TODO.md` with the decided direction as a note
+- Design-discussion decisions → create or update `.local/docs/whiteboards/<topic>_board.md`
+- Option description format: `待 [對象] 確認後再排期` (name the specific blocker)
+
 ---
 
 ## A. `/team todo` — AI TODO Handling
