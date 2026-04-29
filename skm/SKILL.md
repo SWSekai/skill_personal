@@ -95,9 +95,10 @@ Format rules:
   | ← Called by | `<skill>` | <step or condition> |
   | ↔ Shared | `<file path>` | <purpose> |
 
-  **Rename History (this skill only)**: <list this skill's own renames; for global rename history see `_bootstrap/RENAME_HISTORY.md`>
+  **Rename History (this skill only, ≤ 90 days)**: <list only renames within last 90 days OR with active alias; for global rename history see `_bootstrap/RENAME_HISTORY.md`>
   ```
   If no cross-skill dependencies → fill cells with "None" but do NOT omit the section.
+  **Rename History expiry (Rule 24.3.1)**: omit this line entirely if (a) no rename within 90 days AND (b) no active alias remains.
 
 ### Step 3b: Evaluate Subdirectory Needs
 
@@ -122,9 +123,10 @@ Includes feature description, usage, Model info (model + effort + rationale), tr
 - **呼叫**：`<skill / subcommand>` — <觸發時機>
 - **被呼叫**：`<skill>` — <觸發步驟>
 - **共用資源**：`<file path>` — <用途>
-- **改名歷史（本 skill 自身）**：<列本 skill 的改名；全域改名見 `_bootstrap/RENAME_HISTORY.md`>
+- **改名歷史（本 skill 自身，90 天內或仍有 alias）**：<僅列 90 天內的改名或仍存在過渡 alias；全域改名見 `_bootstrap/RENAME_HISTORY.md`>
 ```
 無依賴時填「無」，禁止省略段落。
+**改名歷史條件式保留（Rule 24.3.1）**：若 (a) 90 天內無改名 **且** (b) 無現役 alias → 整行省略。
 
 ### Step 5: Update `.claude/skills/README.md`
 
