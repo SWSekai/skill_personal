@@ -26,6 +26,8 @@ type: feedback
 
 **How to apply:** 寫完方案後，立刻呼叫 AskUserQuestion 而非用文字問。操作類直接做。永遠不要在回應尾端放問句。
 
+**強制執行（Stop hook，可選配置）：** 部分專案配置了 `.claude/hooks/check_yn_question.cjs`，會掃描回應結尾的純文字 Y/N 問句並阻擋（feedback：「偵測到純文字 Y/N 問句（違反 Rule 15）」）。觸發後不要重試同一句型，立即改用 AskUserQuestion 或重述為陳述句。
+
 ---
 
 **AskUserQuestion 技術細節**（載入流程、參數 schema、設計規則、範例）：見 [`references/askuserquestion-tool.md`](../references/askuserquestion-tool.md)
