@@ -27,7 +27,7 @@
 
 | Topic | Category | 說明 | Added |
 |---|---|---|---|
-| *(目前尚無筆記，由 `/kb add` 填入)* | | | |
+| cicd-gitea-actions-yaml | _general | Gitea/GitHub Actions YAML 結構、Docker Build、K8s 部署、kubeconfig 注入、常見坑 | 2026-05-06 |
 
 ## 規則
 
