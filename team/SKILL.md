@@ -78,6 +78,24 @@ The project directory may live at any path on any machine. Only project-root-rel
 - Parsers treat both markers as "skip this block"; Claude auto-adds `✅` if only `<!-- closed -->` is present (visual consistency)
 - Details in `references/naming.md` §3
 
+### Markdown Callout / Blockquote Rules (Mandatory — PDF render compatibility)
+
+**Reason**: documents under `hanschen/docs/` are eventually exported to PDF for delivery. GFM-extended admonition syntax breaks in most PDF renderers, leaving raw `> [!NOTE]` text or hidden content.
+
+- ✅ **Allowed**: standard markdown blockquote `> text...` for emphasis, notes, supplementary说明
+- ❌ **Forbidden**: GFM admonition `> [!NOTE]` / `> [!WARNING]` / `> [!TIP]` / `> [!IMPORTANT]` / `> [!CAUTION]`
+- ❌ **Forbidden**: GitLab/Pandoc `:::note ... :::` / `::: warning ... :::` admonition blocks
+- ❌ **Forbidden**: Docusaurus / MkDocs `!!! note "title"` admonition syntax
+- ✅ **Replacement pattern**: use plain `> ` blockquote with bold prefix:
+
+  ```markdown
+  > **⚠️ 注意**：這段是注意事項
+  > **📌 重點**：這段是重點
+  > **💡 建議**：這段是建議
+  ```
+
+- Apply across all team subcommands (decide, board, journal, note, handoff, report) and any markdown written under `hanschen/docs/`
+
 ---
 
 ## A. `/team todo` — AI TODO Handling
@@ -357,7 +375,8 @@ Generate structured markdown for the user to check options, which Claude then re
 
 Format specification:
 - Checkboxes `[ ]` / `[x]`
-- **Pre-filled recommended values**: pre-check based on analysis results to reduce user burden
+- **[Mandatory] Operating instructions go FIRST** — the "操作指引 / Operating Instructions" block must appear **before §00**, not at the end of the file. Reason: user reads top-down and needs to know how to interact before encountering decision items. Violating this means the user discovers the workflow after already filling the table wrong.
+- **[Mandatory] Pre-filled `(Recommended)` markers on every single-select**: every single-select section must mark **at least one** option with `` `(Recommended)` `` suffix based on Claude's analysis. Multi-select sections may pre-check `[x]` on `★ 全部都做` if cost-free, or pre-check the recommended subset. Empty pre-fill (no `(Recommended)`, no `[x]`) is **forbidden** — it forces the user to make decisions without Claude's expert input, which defeats the purpose of having Claude pre-analyze. If Claude has no recommendation, state "Claude 無強烈建議" in the section's 補充說明 and still mark one safe-default option as `(Recommended)`.
 - **Current-state column**: show current actual state for easy comparison
 - **Continuous numbering**: global numbering across blocks (easy to reference verbally as "change item 17 to B")
 - **Categorized grouping**: related items grouped into the same block, blocks separated by `---`
