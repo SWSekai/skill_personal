@@ -38,6 +38,16 @@ Without arguments → ask the user to specify a subcommand.
 
 ---
 
+## Common Rules
+
+### Task list before multi-step work (CLAUDE.md Rule 17)
+
+- If the request involves **3 or more steps**, or the user provides **multiple requirements at once**, use `TaskCreate` to build a task list **before starting**
+- Single-step obvious tasks may proceed directly without a task list
+- Purpose: keeps progress visible and recoverable after a context reset
+
+---
+
 ## F. `/build all` — Full Flow Chain
 
 **Automatically chains** the six stages plan → impl → test → review → `/commit-push` → deploy, without needing to manually invoke the next step in between.
