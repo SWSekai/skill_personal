@@ -1,5 +1,7 @@
 # kb — 知識庫管理（Knowledge Base Manager）
 
+> **一行定位**：跨專案技術知識庫（Docker / K8s / 演算法 / 後端模式等通用筆記）。
+
 ## 功能說明
 
 維護 `sekai-workflow/handbook/` 作為**跨專案通用知識庫**，集中存放 Docker/K8s 模板、ETL 邏輯、常用算法最佳實踐、後端設計模式等可重複使用的技術筆記。目標：
@@ -14,6 +16,11 @@
 /kb <add|search|extract> [topic|query|source-path]
 /kb <query>              # 無子命令時視為 search
 ```
+
+## 最常見用法
+
+- `/kb search docker multi-stage` — 查通用技術筆記
+- `/kb add k8s-rolling-update` — 把這次學到的通用知識存進跨專案 handbook
 
 ## Model
 
@@ -91,9 +98,11 @@ sekai-workflow/handbook/   ← 實際知識庫（跨專案共享）
 
 ## 與其他 Skill 關係
 
-- **`/ask info`**：專案內的系統資訊追蹤（程式碼、架構）→ 專案專屬
+- **直接以對話問 Claude**：專案內的系統資訊查詢（「這個 API 怎麼設計的？」「auth 流程？」）→ 不需 skill 包裝（2026-05-06 起 `/ask info` 已移除）
+- **`/ask <field>`**：專案內**資料流追蹤**（逐層 UI → API → DB 與遺失風險）→ 結構化方法論
 - **`/kb search`**：跨專案通用技術筆記（Docker、演算法、後端模式）→ 通用
-- 兩者互補：`/ask` 回答「這個專案怎麼做」；`/kb` 回答「一般而言怎麼做」
+- 三者分工：對話問當下系統；`/ask` 走資料流；`/kb` 查通用技術
+- **`/team decide` / `/team board`** 結案時自動呼叫 `/kb extract`，確保通用內容不被遺忘於單一決策檔
 - **`/team decide` / `/team board`** 結案時自動呼叫 `/kb extract`，確保通用內容不被遺忘於單一決策檔
 
 ---

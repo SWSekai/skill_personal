@@ -67,8 +67,8 @@
 | create-skill → `/skm new` | sonnet | medium |
 | skill-sync → `/skm sync` | sonnet | medium |
 | pack → `/skm pack` | sonnet | low |
-| sys-info → `/ask info` | opus | medium |
-| trace-flow → `/ask trace` | opus | high |
+| ~~sys-info → `/ask info`~~ | — | 已移除（2026-05-06，改用對話／`/team note`／`/kb add`）|
+| trace-flow → `/ask <field>` | opus | high |
 | report → `/team report` | haiku | low |
 
 ---

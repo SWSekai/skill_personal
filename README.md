@@ -37,7 +37,7 @@ Nine command entry-points (all invoked via `/command`):
 | `/build <all\|plan\|do\|test\|check\|review\|deploy>` | End-to-end dev flow: analyze → design → implement → test → quality → review → deploy | You're about to build something |
 | `/commit-push [msg]` | Main commit entry — quality check → change log → README sync → commit → push → deploy eval → context cleanup | After a coherent chunk of work |
 | `/team <todo\|board\|decide\|note\|handoff\|report\|journal\|follow-up>` | Human-AI collaboration: todos, whiteboards, Markdown decision tables, tech notes, handoff docs, project journal | Planning / decision moments |
-| `/ask <info\|trace>` | Ask questions about the codebase / trace a field end-to-end through the stack | "How does X flow?" questions |
+| `/ask <field>` | Trace a field end-to-end through the stack with data-loss risk annotations (2026-05-06: `info` subcommand removed — use plain conversation for system-info questions) | "How does X flow?" questions |
 | `/skm <new\|sync\|pack\|update>` | Manage the Skill environment itself — create, sync with upstream, package for handoff. Renamed from `/skill` on 2026-04-24 to avoid conflict with built-in `/skills` dialog | Skill maintenance |
 | `/clean [check\|force]` | Context window hygiene — summarize, archive, `/clear`, auto-restore | When the chat gets long |
 | `/memo` | Carry feedback / preference memory across projects | Onboarding a new repo |

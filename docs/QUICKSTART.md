@@ -39,15 +39,13 @@ cd /path/to/your-project
 | Skill | 指令 | 用途 |
 |---|---|---|
 | **build** | `/build <flow\|plan\|impl\|test\|quality\|review\|deploy>` | 開發全流程 |
-| **team** | `/team <todo\|board\|decide\|note\|handoff\|report\|journal\|follow-up>` | 互動協作（原 team-office） |
-| **skm** | `/skm <new\|sync\|pack\|update\|refactor>` | Skill 管理（2026-04-24 由 `/skill` 改名，避免與內建 `/skills` 衝突） |
-| **kb** | `/kb <add\|search\|extract>` | Knowledge Base 管理（2026-04-24 新增） |
-| **ask** | `/ask <info\|trace>` | 系統文件追蹤（report 已併入 `/team report`） |
-| **clean** | `/clean [check\|force]` | Context 清理（繼承 context-guard 功能） |
-| **memo** | `/memo` | Memory 跨專案攜帶（原 memory-portable） |
-| **commit-push** | `/commit-push [--meta] [--no-subagent]` | Commit & Push 主入口 |
-| **hello** | `/hello` | 對話初始化 + Skill 同步 + 工作狀態重建 |
-| **dispatch** | `/dispatch <task>` | 任務分派（Rule 18 model 三層分工） |
+| **team** | `/team <todo\|board\|decide\|note\|handoff\|report\|journal\|follow-up>` | 互動協作（待辦、討論、決策、報告、交接）|
+| **skm** | `/skm <new\|sync\|pack\|update\|refactor>` | Skill 管理（原 `/skill`，2026-04-24 改名）|
+| **kb** | `/kb <add\|search\|extract>` | 跨專案技術知識庫管理 |
+| **ask** | `/ask <field>` | 資料流追蹤（2026-05-06 後 `info` 子指令移除）|
+| **clean** | `/clean [check\|force]` | Context 壓縮清理（AI 開始忘東西時使用）|
+| **memo** | `/memo` | Memory 跨專案攜帶 |
+| **dispatch** | `/dispatch <task>` | 依 Rule 18 選擇 model 層級並派遣任務 |
 
 ---
 
@@ -97,6 +95,21 @@ Sekai_workflow/ (專案內)       ← 通用模板本地副本
 
 ### 「有設計決策要跟 AI 討論」
 輸入 `/team decide 主題`，Claude 生成一份 Markdown 核取表，你勾選後回覆，Claude 按你的選擇實作。
+
+### 「我不確定要用哪個 Skill」
+
+| 我想做的事 | 用哪個 |
+|---|---|
+| 提交 code | `/commit-push` |
+| 開發新功能（規劃→實作）| `/build` |
+| 討論設計決策 | `/team decide` |
+| 記錄臨時 TODO | `/team todo` 或直接說「btw，要做 X」|
+| 查現在系統架構 | 直接以對話問 Claude（2026-05-06 後 `/ask info` 已移除） |
+| 追蹤一個欄位的資料流向 | `/ask <field>` |
+| 查跨專案技術知識 | `/kb search` |
+| 開始新對話 | `/hello` |
+| AI 快忘光了 | `/clean` |
+
 
 ---
 

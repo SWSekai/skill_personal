@@ -1,34 +1,43 @@
-# ask — 系統文件與資料流追蹤
+# ask — 資料流追蹤
+
+> **一行定位**：追蹤一個欄位／功能從前端到資料庫的完整路徑與遺失風險。
+
+> **2026-05-06 範圍縮減**：原 `info` 子指令與 `ask_info_router.cjs` UserPromptSubmit hook 已移除。系統資訊查詢請直接以對話形式問 Claude（不需 skill 包裝）；專案知識記錄請改用 `/team note`（專案本地）或 `/kb add`（跨專案）。`trace` 保留是因為含結構化追蹤方法論，純對話無法等價取代。
 
 ## 功能說明
 
-整合系統資訊查詢與文件管理、端到端資料流追蹤兩項職能。
-
-> **2026-04-17 調整**：原 `report` 子命令已搬移至 `/team report`（工作報告屬於協作產出，不是文件查詢）。
+對指定欄位或功能進行 **end-to-end** 逐層追蹤（UI → API → 服務層 → 儲存層 → 處理層），輸出每一跳的檔案／行號／變數名／轉換／預設值／資料遺失風險，最後給出「能否可靠傳遞」的判定。
 
 ## 使用方式
 
 ```
-/ask <info|trace> [args...]
+/ask <欄位名或功能描述>
 ```
+
+範例：`/ask user_id`、`/ask "登入後的 session token"`
+
+## 最常見用法
+
+`/ask user_id` — 追蹤 user_id 欄位從前端表單到資料庫，找出哪一層可能遺失或預設值不一致。
 
 ## Model
 
-- **建議 model**: `opus`
-- **Effort**: `medium`
-- **理由**: 需要跨檔分析、使用 Agent 子代理進行深度追蹤
+- **建議 model**：`opus`
+- **Effort**：`medium`
+- **理由**：跨檔分析、Agent 子代理深度追蹤，需 thinking 能力
 
 ## 觸發條件
 
-- `info`：詢問系統問題時自動觸發 / 手動
-- `trace`：手動呼叫
+僅手動呼叫（2026-05-06 起不再有 hook 自動路由）
 
 ## 執行流程
 
-| 子命令 | 用途 |
+| 步驟 | 內容 |
 |---|---|
-| `info [topic]` | 系統資訊查詢與文件管理（搜尋 → 擴充 → 新建） |
-| `trace <field>` | 端到端資料流追蹤（UI → API → DB → Processing） |
+| 1. 理解架構 | 讀 `docker-compose.yml` / `package.json` / 根 README，識別分層與序列化邊界 |
+| 2. 逐層追蹤 | Frontend → API → Service → Storage 每層走過 |
+| 3. 紀錄每跳 | 檔案:行號 / 變數名 / 轉換 / 預設 / 風險 |
+| 4. 輸出表格 | 完整資料流表格 + 「能否可靠傳遞」結論 |
 
 ## 目錄結構
 
@@ -38,19 +47,17 @@ ask/
 └── README.md
 ```
 
-## 整合來源
-
-| 原 Skill / 子命令 | 對應子命令 |
-|---|---|
-| sys-info | `info` |
-| trace-flow | `trace` |
-| ~~report~~ | 已搬移至 `/team report` |
+無 `references/` 或 `assets/`（追蹤方法論已內嵌於 SKILL.md）。
 
 ---
 
 ## 相關 Skills 與檔案
 
-- **呼叫**：無（純讀取分析）
-- **被呼叫**：`hooks/ask_info_router.cjs`（UserPromptSubmit hook 自動路由系統資訊問題到 `/ask info`）
+- **呼叫**：無（純讀取分析，不寫檔）
+- **被呼叫**：無（2026-05-06 後使用者主動觸發；原 `ask_info_router.cjs` 自動路由 hook 已移除）
 - **共用資源**：無
-- **改名歷史（本 skill 自身）**：`/ask report` 子指令於 2026-04-24 移交至 `/team report --daily`；全域改名請見 `_bootstrap/RENAME_HISTORY.md`
+- **改名歷史（本 skill 自身，90 天內）**：
+  - 2026-04-24：`/ask report` 子指令移交至 `/team report --daily`
+  - 2026-05-06：`/ask info` 子指令 + 對應 hook 移除（Plan A — info 與純對話功能重複；專案知識改走 `/team note` 或 `/kb add`）
+
+全域改名歷史見 `_bootstrap/RENAME_HISTORY.md`。

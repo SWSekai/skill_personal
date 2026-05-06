@@ -91,7 +91,9 @@
 - 觸發 `/skm sync` 執行遠端同步流程
 
 ### 13. 資訊查詢時主動建立文件
-- 被詢問系統架構、功能、資料流等問題時，自動觸發 `/ask info`
+- 系統架構／功能查詢 → 直接以對話回答（2026-05-06 起 `/ask info` 與對應 hook 已移除）
+- 知識記錄 → 專案專屬走 `/team note`（`.hanschen/docs/guides/`）；跨專案通用走 `/kb add`（`sekai-workflow/handbook/`）
+- 資料流追蹤 → `/ask <field>`（保留結構化方法論）
 
 ### 15. Y/N 確認一律由 Tool Confirmation UI 處理（最高優先級）
 - 所有只需 Y/N 回答的操作，**直接執行對應 tool call**，讓使用者透過 tool 權限介面（approve/deny）決定
