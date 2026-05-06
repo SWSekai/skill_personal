@@ -452,6 +452,20 @@ Round 2+ retroactively wraps Round 1 in `<details>` (still inside blockquote). T
 
 **Append first, rename second, update living third** (aligned with CLAUDE.md Rule 17):
 
+#### 6.0 Implementation Diff vs Original §n.m Selections (Mandatory)
+
+Step 5.3 catches **missing** items; this step catches **deviation** — when implementation pivoted to a different option mid-flight (e.g., a constraint discovered during Step 5 forced switching from §1.1.a to §1.1.b).
+
+Procedure:
+1. List the actual change set (diff vs pre-Step-5 state)
+2. For each §n.m block, compare the original `[x]` selection against what was actually implemented
+3. Classify each item:
+   - **Match** → no action
+   - **Deviation** → record actual outcome + reason in the upcoming inline summary's 「最終決策（逐項目 §n.m）」 row's 「備註」 column (format: `原選 X → 實作 Y，因 <reason>`)
+   - **Partial** (some sub-items skipped) → note in the 「未解決遺留項」 section
+
+Why mandatory: `PROJECT_JOURNAL.md` row built in Step 6.4 extracts its 「採納選項摘要」 from this inline summary, so the summary is the **single source of truth** for journal accuracy. A deviation captured only in commit messages but not here yields a journal row that contradicts the codebase — and journal manual edit is forbidden (anti-pattern §G); only `regen` rebuilds from CLOSED files.
+
 #### 6.1 Append Inline Closure Summary (Mandatory)
 
 Append the closure summary block to the **end of the existing decision file** (preserving all original §1-§n decision content, checkmarks, supplementary notes, and any Claude response blocks). Format per `references/naming.md` §5.2:
@@ -511,6 +525,7 @@ After renaming, immediately update `hanschen/docs/living/PROJECT_JOURNAL.md`:
 #### 6.5 Self-Check (Mandatory)
 
 After Step 6 completes, confirm:
+- [ ] **Step 6.0 deviation check executed**: any §n.m item where implementation pivoted from the original `[x]` selection has been recorded in the inline summary's 「備註」 column with `原選 X → 實作 Y，因 <reason>` format (no silent deviation reaches `PROJECT_JOURNAL.md`)
 - [ ] Inline closure summary has been appended to the end of `YYMMDD_<topic>_decision.md` (before rename)
 - [ ] Inline summary includes: background, decision table (per §n.m item), change list, preserved candidates (if any non-single-path), leftover items
 - [ ] `hanschen/docs/decision/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`

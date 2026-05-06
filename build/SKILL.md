@@ -212,7 +212,7 @@ For each step:
 
 6. **Derived tasks**: if additional work is discovered during implementation:
    - Within the scope of this feature → add a new step at the end of the plan document
-   - Out of scope → add to `.local/collab/TODO.md` (tagged `derived from: <feature>`)
+   - Out of scope → add to `TODO.md` at project root (tagged `derived from: <feature>`)
 
 ### Step 3: Implementation complete
 

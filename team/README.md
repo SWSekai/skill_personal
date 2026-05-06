@@ -73,6 +73,7 @@ Round 1 不摺疊，Round 2+ 把 Round 1 包 `<details>`（仍在 blockquote 內
 5. **更新每日報告**（Step 3.5，2026-04-24 新增）：`hanschen/report/YYMMDD_daily_report.md` 的決策與完成區塊
 
 ### 決策表結案（`/team decide` Step 6）
+0. **實作 vs §n.m 偏離比對**（Step 6.0）：將實作 diff 與原 §n.m 勾選逐項比對；偏離項在內嵌摘要的 「備註」 欄記錄 `原選 X → 實作 Y，因 <reason>`，避免 PROJECT_JOURNAL 條目與實作脫節（Step 5.3 只抓「漏項」，本步抓「偏離」）
 1. 於原檔末尾 **append 內嵌結案摘要**（2026-04-22 改版：取代獨立 summary 檔）
 2. **更名**：`decision/YYMMDD_<topic>_decision.md` → `decision/CLOSED_YYMMDD_<topic>_decision.md`
 3. **更新活文件**（`hanschen/docs/living/PROJECT_JOURNAL.md`）
@@ -96,7 +97,7 @@ team/
 │   └── daily-report.md           ← /team report --daily 每日 Teams 報告完整規格（資料源、格式、觸發、跨日）
 └── assets/
     ├── collab-template.md       ← 決策表初始模板
-    ├── whiteboard-template.md   ← 白板初始模板
+    ├── board-template.md   ← 白板初始模板
     └── daily-report-template.md        ← 每日 Teams 報告模板
 ```
 

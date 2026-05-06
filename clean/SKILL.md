@@ -41,6 +41,13 @@ Argument handling:
 
 ### Step 2: Record Current Work State
 
+**Pre-write cleanup (mandatory)**: before creating the new summary, delete all existing `*.md` files in `.local/context_summary/` except `current_topic.md` and `resumption_prompt.md`. Only one summary file may exist at a time to prevent context pollution.
+
+```bash
+ls .local/context_summary/*.md 2>/dev/null | grep -v -E "(current_topic|resumption_prompt)\.md"
+# delete each listed file
+```
+
 Create summary in `.local/context_summary/` (create directory if not exists):
 
 **Filename format**: `YYMMDD_HHMM_TopicDescription.md`
