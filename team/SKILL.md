@@ -136,7 +136,7 @@ Ask all questions at once. If the user replies "you decide", judge based on the 
    ## In Progress
    - [~] description — processing (YYYY-MM-DD HH:MM)
    ```
-2. Do the actual work (read code, modify, follow project conventions)
+2. Do the actual work (read code, modify, follow project conventions); for multi-step items, **append a progress note to the In Progress entry after each sub-step** (not batched at the end) — this is the VSCode crash-recovery anchor: if the IDE crashes, the next `/hello` shows exactly where execution was interrupted
 3. Derived tasks → automatically add to Pending, tag with `(derived from: ...)`
 4. Blocked → pause, explain reason, move back to Pending and tag as blocker
 
