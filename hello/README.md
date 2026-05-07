@@ -51,7 +51,7 @@ hello/
 
 ## 相關 Skills 與檔案
 
-- **呼叫**：`/skm sync` Flow 1（Step 2 內嵌：遠端拉取 + skill diff）、讀取 `.local/context_summary/` 與 `.local/docs/decision/` `.local/docs/whiteboard/`、寫入 `.local/collab/TODO.md`
+- **呼叫**：`/skm sync` Flow 1（Step 2 內嵌：遠端拉取 + skill diff）、讀取 `.local/context_summary/` 與 `.local/docs/decision/` `.local/docs/board/`、寫入 `.local/collab/TODO.md`
 - **被呼叫**：無（使用者於對話開始輸入 `/hello`）
 - **共用資源**：`team/TODO.md` schema（重建內容須符合 `/team todo` 格式）、`clean/` 的 context_summary 目錄（讀取上次 session 寫入的摘要）
 - **改名歷史（本 skill 自身）**：2026-04-24 吸收 `/skm sync` Flow 1（遠端同步從 `/skm` 移入 `/hello` Step 2）；全域改名請見 `_bootstrap/RENAME_HISTORY.md`

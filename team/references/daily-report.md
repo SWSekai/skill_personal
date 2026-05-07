@@ -42,7 +42,7 @@ All sources merge into one daily daily report via smart update. Selected sources
 
 ### 3.1 Whiteboard Closure Summary (§2.1.a)
 
-For each `.hanschen/docs/whiteboard/CLOSED_YYMMDD_*_board.md` within scope:
+For each `.hanschen/docs/board/CLOSED_YYMMDD_*_board.md` within scope:
 
 1. Read the "# 結案摘要（Closure Summary）" block at file end
 2. Extract 「最終決策」 table → append to daily report's **「本日決策與討論結論」** section as one row per decision: `(topic) | (outcome) | [link to CLOSED file]`

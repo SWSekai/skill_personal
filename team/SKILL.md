@@ -50,7 +50,7 @@ All sequential / cross-machine documents live under `.hanschen/` at the project 
 **Shared paths (under `.hanschen/`)**:
 - `.hanschen/docs/decision/` — decision tables
 - `.hanschen/docs/living/PROJECT_JOURNAL.md` — project journal
-- `.hanschen/docs/whiteboard/` — whiteboards (active + CLOSED_*)
+- `.hanschen/docs/board/` — whiteboards (active + CLOSED_*)
 - `.hanschen/docs/guides/` — project-specific troubleshooting / config notes
 - `.hanschen/modify_log/` — modify logs
 - `.hanschen/report/` — daily reports
@@ -184,7 +184,7 @@ For consultation, planning, and troubleshooting conversations, create a continuo
 **Auto-trigger** (tightened 2026-04-24 per Rule 17.1.3):
 - Consultation / planning / troubleshooting conversation, AND
 - **3 rounds of back-and-forth without convergence** (no clear TODO, no decide opened, no final answer)
-- → auto-create `.hanschen/docs/whiteboard/YYMMDD_<topic>_board.md`
+- → auto-create `.hanschen/docs/board/YYMMDD_<topic>_board.md`
 
 1-2 rounds with quick convergence → inline answer, do NOT open whiteboard.
 
@@ -198,7 +198,7 @@ For consultation, planning, and troubleshooting conversations, create a continuo
 ### Step 1: Create the Whiteboard
 
 - **First**: call `date '+%Y-%m-%d %H:%M'` to get authoritative time (see Common Rules)
-- Path: `.hanschen/docs/whiteboard/YYMMDD_<topic>_board.md` (snake_case topic; `_board` suffix recommended for new files but legacy files without the suffix are still valid)
+- Path: `.hanschen/docs/board/YYMMDD_<topic>_board.md` (snake_case topic; `_board` suffix recommended for new files but legacy files without the suffix are still valid)
 - Same topic on the same day → update the existing file, do not create another
 - Structural principles:
   - **Pending**: pure checkbox list, see at a glance what remains
@@ -250,9 +250,9 @@ Round 2+ retroactively wraps Round 1 in `<details>` (still inside blockquote). I
 
 1. Update the document header status to **Completed** or **Paused**
 2. Rename the file by prepending `CLOSED_` to the filename:
-   - Before: `.hanschen/docs/whiteboard/YYMMDD_<topic>_board.md`
-   - After: `.hanschen/docs/whiteboard/CLOSED_YYMMDD_<topic>_board.md`
-   - Use: `mv .hanschen/docs/whiteboard/YYMMDD_<topic>_board.md .hanschen/docs/whiteboard/CLOSED_YYMMDD_<topic>_board.md`
+   - Before: `.hanschen/docs/board/YYMMDD_<topic>_board.md`
+   - After: `.hanschen/docs/board/CLOSED_YYMMDD_<topic>_board.md`
+   - Use: `mv .hanschen/docs/board/YYMMDD_<topic>_board.md .hanschen/docs/board/CLOSED_YYMMDD_<topic>_board.md`
 
 #### 3.2 Append Inline Closure Summary (Mandatory, Unified Template)
 
@@ -993,7 +993,7 @@ Called internally after `/team board` Step 3.2. Input: the renamed whiteboard fi
    - Date (from file or closure summary)
    - Topic (from filename or whiteboard title)
    - Key outcomes (1–2 sentences condensed from "Key Outcomes" bullet points)
-   - Link: `[CLOSED_YYMMDD_topic.md](.hanschen/docs/whiteboard/CLOSED_YYMMDD_topic.md)`
+   - Link: `[CLOSED_YYMMDD_topic.md](.hanschen/docs/board/CLOSED_YYMMDD_topic.md)`
 3. If the whiteboard's "決策紀錄" table has entries → also append each to "決策紀錄" table
 4. Update "最後更新" timestamp
 
@@ -1011,7 +1011,7 @@ Called internally after `/team decide` Step 6.4. Input: the renamed decision fil
 
 For `/team journal regen`:
 1. Clear the rows from all three tables (keep headers and template structure)
-2. Scan all `CLOSED_*` files in `.hanschen/docs/whiteboard/` and `.hanschen/docs/decision/`
+2. Scan all `CLOSED_*` files in `.hanschen/docs/board/` and `.hanschen/docs/decision/`
 3. For each CLOSED file, parse the **inline closure summary block** at its end
 4. Rebuild the three tables chronologically by date
 5. Report: "Rebuilt from N whiteboard sessions, M decisions"
@@ -1044,7 +1044,7 @@ Filename accepts: full name, no-extension form, or prefix (e.g. `260422_team` ma
 ### Step 1: Parse argument + locate file
 
 1. Apply matching strategy (see `references/followup.md` §2)
-2. Search scope: `.hanschen/docs/whiteboard/` + `.hanschen/docs/decision/`
+2. Search scope: `.hanschen/docs/board/` + `.hanschen/docs/decision/`
 3. **Filter out `CLOSED_*` files silently** at candidate listing stage
 4. Exact-typed `CLOSED_xxx` → special-case message "file is closed, see summary at …"
 5. Zero matches → list nearest 3 candidates via AskUserQuestion
@@ -1056,7 +1056,7 @@ Detected via filename suffix (`_board` vs `_decision`) with directory as fallbac
 
 | Type | Handler | Reference |
 |---|---|---|
-| `_board.md` in `.hanschen/docs/whiteboard/` | whiteboard follow-up handler | `references/followup.md` §4 |
+| `_board.md` in `.hanschen/docs/board/` | whiteboard follow-up handler | `references/followup.md` §4 |
 | `_decision.md` in `.hanschen/docs/decision/` | decision follow-up handler | `references/followup.md` §3 |
 
 ### Step 3: Parse (skip closed blocks)
@@ -1103,10 +1103,37 @@ Synchronize the project's `.hanschen/` shared documents with the project remote.
 
 | Usage | Behavior |
 |---|---|
-| `/team sync` | Full flow: history eval → fetch → status → pull/push if needed |
+| `/team sync` | Full flow: pre-sync lightweight check → history eval → fetch → status → pull/push if needed |
 | `/team sync --auto-migrate` | Apply all pending refactor migrations from history without prompting |
 | `/team sync --prune-history` | Remove expired (>90d) entries from `.hanschen/.history/refactor.jsonl` |
 | `/team sync --skip-history` | Skip Step 0 (history eval), do git ops only |
+| `/team sync --audit` | **Audit-only mode**: comprehensive document architecture audit (no git ops); writes report to `.hanschen/.history/audit_YYMMDD.md` |
+| `/team sync --skip-precheck` | Skip Step 0.1 (pre-sync lightweight check) |
+
+### Step 0.1: Pre-Sync Lightweight Check (Mandatory unless `--skip-precheck`)
+
+> Per CLAUDE.md Rule 25 (`.hanschen/` vs `.local/` boundary). Aborts sync only on critical violations; warnings pass through with hint to run `--audit`.
+
+Quick scans (target ≤5s):
+
+| Check | Severity | Detection |
+|---|---|---|
+| `.local/report/`, `.local/modify_log/`, `.local/docs/decision/`, `.local/docs/board/`, `.local/docs/living/`, `.local/docs/handoff/`, `.local/docs/guides/` | Warning | Any of these exist with files → boundary violation per Rule 25 |
+| `.hanschen/docs/decision/`, `.hanschen/docs/board/`, `.hanschen/docs/living/` | Warning | Required subdirectory missing |
+| `.hanschen/.history/refactor.jsonl` | Critical | Missing → cannot evaluate Step 0 |
+| `.hanschen/` directory itself | Critical | Missing entirely → user should run `/skm refactor` |
+
+Output:
+```
+Pre-sync check (Rule 25 boundary):
+  ⚠ .local/report/ has 1 file (should be in .hanschen/report/)
+  ⚠ .hanschen/docs/board/ missing
+  ✓ All other checks passed
+  → Hint: run `/team sync --audit` for full report
+```
+
+- **Critical** → abort sync, list issues, suggest `/skm refactor` or manual fix
+- **Warning** → proceed with sync; print hint to use `--audit` for resolution
 
 ### Step 0: Refactor History Evaluation (Mandatory unless `--skip-history`)
 
@@ -1185,12 +1212,63 @@ If pushing to a protected branch → suggest creating a personal branch first.
   .hanschen/ files: 14 (12 docs + 2 history)
 ```
 
+### `--audit` Mode (On-Demand Comprehensive Audit)
+
+Skip all git ops; emit a structured architecture audit to `.hanschen/.history/audit_YYMMDD.md`. Designed for periodic deep-check; lighter day-to-day pass uses Step 0.1 above.
+
+**Five audit dimensions**:
+
+| § | Check | Detection |
+|---|---|---|
+| §1 | `.local/` boundary residue (Rule 25) | Files exist under `.local/{report, modify_log, docs/decision, docs/board, docs/living, docs/handoff, docs/guides}/` |
+| §2 | `.hanschen/docs/` required subdirectories | `decision/`, `board/`, `living/` exist (others optional) |
+| §3 | `.hanschen/modify_log/` ↔ git log consistency | For each commit in `git log --since=30d`: a matching modify_log entry should exist (cross-ref by short_hash) |
+| §4 | `.local/context_summary/` staleness | Files with `mtime > 14d` flagged for cleanup |
+| §5 | `.hanschen/.history/refactor.jsonl` integrity | Each entry: `from` either non-existent (migrated) or has files needing migration; report counts |
+
+**Report format** (`.hanschen/.history/audit_YYMMDD.md`):
+
+```markdown
+# Document Architecture Audit — YYYY-MM-DD
+
+## §1 .local/ Boundary Residue (Rule 25)
+- ⚠ .local/report/ : 1 file (260506_daily_report.md)
+- ✓ all other paths clean
+
+## §2 .hanschen/docs/ Required Subdirectories
+- ✓ decision/ exists (9 files: 3 active, 6 CLOSED)
+- ✓ board/ exists (0 files; placeholder only)
+- ✓ living/ exists (1 file)
+
+## §3 modify_log ↔ git log Consistency (last 30 days)
+- ✓ ff1bb49: 260507_hanschen_dotprefix_path_rewrite.md
+- ⚠ 1b414b2: no matching modify_log entry
+
+## §4 .local/context_summary/ Staleness (>14 days)
+- ⚠ 260417_xxx.md (mtime: 2026-04-17, 20 days old)
+
+## §5 refactor.jsonl Migration Status
+- ✓ 2026-04-29 .local/{shared} → .hanschen/{shared} : fully migrated
+
+---
+
+## Action Items
+- [ ] Move .local/report/* to .hanschen/report/ (or delete if duplicates)
+- [ ] Add modify_log for commit 1b414b2 OR mark as legacy
+- [ ] Clean .local/context_summary/260417_xxx.md (>14d)
+```
+
+**Reporter does NOT mutate**; it only reports. User runs `/team sync --auto-migrate` (Step 0) for path migrations or manually handles the rest.
+
+**Cadence recommendation**: weekly, or after major restructuring.
+
 ### Edge Cases
 
 - **No `.hanschen/` directory** → suggest `/skm refactor` to migrate from `.local/`
 - **No `.history/` directory** → create empty `.hanschen/.history/refactor.jsonl`; skip Step 0
 - **No git remote** → run Step 0 only; warn that push/pull skipped
 - **Detached HEAD** → abort; user must checkout a branch first
+- **`--audit` with no `.hanschen/.history/`** → create directory, write report there
 
 ### Design Principles
 
@@ -1198,6 +1276,7 @@ If pushing to a protected branch → suggest creating a personal branch first.
 - **History-driven migration**: §03.A 完全二分原則靠 history 做跨機器一致性，不在 skill 層 if/else
 - **User-controlled push**: privacy check is manual (multi-person sensitive project context)
 - **Compatible with `/commit-push`**: regular code commits still go through `/commit-push`; this subcommand is **only** for `.hanschen/`-scoped sync
+- **Audit reports never mutate**: `--audit` is read-only; user decides when to act on findings (via `--auto-migrate` or manual cleanup)
 
 ---
 

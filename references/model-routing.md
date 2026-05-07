@@ -61,7 +61,7 @@
 | restart-volumn → `/build restart` | haiku | low |
 | restart-eval → `/build eval` | haiku | low |
 | todo → `/team todo` | sonnet | medium |
-| whiteboard → `/team board` | sonnet | medium |
+| board → `/team board` | sonnet | medium |
 | md-collab → `/team decide` | sonnet | medium |
 | tech-notes → `/team note` | sonnet | medium |
 | create-skill → `/skm new` | sonnet | medium |

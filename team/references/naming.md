@@ -7,7 +7,7 @@
 
 | 類型 | 目錄 | 檔名格式 | 範例 |
 |---|---|---|---|
-| whiteboard | `.hanschen/docs/whiteboard/` | `YYMMDD_<topic>_board.md` | `260422_auth_refactor_board.md` |
+| whiteboard | `.hanschen/docs/board/` | `YYMMDD_<topic>_board.md` | `260422_auth_refactor_board.md` |
 | decision | `.hanschen/docs/decision/` | `YYMMDD_<topic>_decision.md` | `260422_team_followup_decision.md` |
 | ~~summary~~ | ~~`.local/docs/summary/`~~ | ~~`YYMMDD_<topic>_summary.md`~~ | ⚠️ 廢棄（2026-04-22）結案摘要改 append 於 CLOSED_ 原檔末尾（見 §5） |
 | handoff | `.local/docs/handoff/` | `YYMMDD_handoff.md` | `260422_handoff.md` |

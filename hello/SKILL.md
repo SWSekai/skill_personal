@@ -110,7 +110,7 @@ If no summaries exist → candidate list starts empty; continue to 3.2.
 
 Glob the following, **excluding** files prefixed with `CLOSED_`:
 - `.local/docs/decision/*.md`
-- `.local/docs/whiteboard/*.md`
+- `.local/docs/board/*.md`
 
 For each open file:
 - Extract all unchecked `[ ]` Markdown task items
@@ -237,7 +237,7 @@ docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Service}}" 2>/dev/n
 | Direction | Target | Trigger / Purpose |
 |---|---|---|
 | → Calls | `/skm sync` (inline Flow 1) | Step 2 absorbed the original sync flow (remote pull + skill diff) |
-| → Reads | `.local/context_summary/`, `.local/docs/decision/`, `.local/docs/whiteboard/` | Step 3 work-state reconstruction |
+| → Reads | `.local/context_summary/`, `.local/docs/decision/`, `.local/docs/board/` | Step 3 work-state reconstruction |
 | → Writes | `.local/collab/TODO.md` | Step 3 consolidates open items into TODO Pending block |
 | ← Called by | None (user types `/hello` at conversation start) | — |
 | ↔ Shared | `team/TODO.md` schema | Reconstruction must match `/team todo` format |

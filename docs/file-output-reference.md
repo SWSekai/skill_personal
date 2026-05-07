@@ -24,7 +24,7 @@
 | **build** | `plan` | 方案設計完成 | `YYMMDD_<feature>.md` | `.local/docs/plan/` | 實作方案文件（含 checkbox 步驟清單）|
 | **team-office** | `decide` | 手動觸發 | `<topic>.md` | `.local/docs/decision/` | 互動式決策表（執行後刪除，摘要留 summary）|
 | **team-office** | `decide` Step 6 | 決策執行完成 | `YYMMDD_<topic>_summary.md` | `.local/docs/summary/` | 決策摘要（永久保留，含非單一路線的保留候選）|
-| **team-office** | `board` | 手動觸發 | `YYMMDD_<topic>.md` | `.local/docs/whiteboard/` | 白板討論紀錄（不刪除）|
+| **team-office** | `board` | 手動觸發 | `YYMMDD_<topic>.md` | `.local/docs/board/` | 白板討論紀錄（不刪除）|
 | **team-office** | `notes` | 手動觸發 | `<topic>.md` | `.local/docs/tech-note/` | 技術問答結構化筆記 |
 | **commit-push** | Step 10 | commit 後若含踩坑經驗 | `<topic>.md` | `.local/docs/guide/` | 實戰經驗指南（症狀→原因→解法→注意事項）|
 | **ask** | `query` | 自動（查詢時）/ 手動 | `<topic_description>.md` | `.local/docs/knowledge/` | 系統知識庫（架構、資料流、設定）|

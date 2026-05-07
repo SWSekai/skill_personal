@@ -34,6 +34,7 @@
 | 2026-04-24 | `knowledge_base/` | `handbook/` | 跨專案技術手冊目錄 | bootstrap 腳本 SKIP_DIRS、`kb` skill、`manifest.json` | 2026-07-23 |
 | — | `context-guard` (獨立 skill) | 合併入 `/clean` | Context 清理流程 | `clean/SKILL.md`、`hello/SKILL.md`、`commit-push/SKILL.md` Step 9、所有引用 `context_summary/` 的 skill | 改名日期不詳，下次檢查時補 |
 | — | `/ask report` | `/team report` | 工作報告子指令遷移 | `ask/SKILL.md`、`team/SKILL.md` §F | 改名日期不詳，下次檢查時補 |
+| 2026-05-07 | `.hanschen/docs/whiteboard/` | `.hanschen/docs/board/` | board 文件路徑（與 `_board.md` 檔尾、`/team board` 子指令一致）| `team/{SKILL,README}.md`、references/{naming,followup,daily-report,four-tools-exclusivity}.md、`hello/{SKILL,README}.md`、`skm/SKILL.md`、`docs/file-output-reference.md`、`README.md`、`_bootstrap/templates/CLAUDE.md.template`、`manifest.json`、CLAUDE.md、`.hanschen/.history/README.md`、`.hanschen/docs/living/PROJECT_JOURNAL.md` | 2026-08-05 |
 
 ---
 
