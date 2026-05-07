@@ -229,6 +229,7 @@ EOF
 
 > **`--meta` mode**: skip this step entirely. Skill maintenance commits do not generate modify logs (CLAUDE.md Rule 20).
 > **`--no-subagent` mode**: main Sonnet session writes the log inline using the same 5.1–5.4 format (no Haiku Agent spawn).
+> **Doc-only auto-skip (2026-05-07 added)**: if `git diff --name-only HEAD~1` returns **only** documentation paths (`*.md`, `.hanschen/docs/`, `.hanschen/report/`, `.hanschen/modify_log/`, `.claude/skills/`, `.sekai-workflow/`, `README*`, `CLAUDE.md`, `TODO.md`), automatically skip this step. Rationale: modify_log is for source/script/config/Dockerfile/dependency changes that may require container restart or impact assessment; pure documentation-level commits (README sync, decision/board/journal updates, report writing, skill maintenance) have no such concern, and forcing a log adds noise. **Trigger**: any path matching `src/`, `scripts/`, `pyproject.toml`, `requirements.txt`, `Dockerfile`, `.dockerignore`, `*.py`, `*.js`, `*.ts`, `*.sh`, `*.cjs` in the diff → log required (mixed commits still require log).
 
 **Default**: invoke a Haiku subtask via the Agent tool to generate the log (structured text-writing attribute).
 
