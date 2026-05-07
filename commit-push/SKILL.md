@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(ls *), Ba
 
 # /commit-push — Complete Commit and Push Flow
 
-Execute the following steps in order. **Do not skip steps** (unless `--meta` flag skips designated steps). This Skill is the **primary commit entry point**, complementing other `/build` subcommands (flow / plan / impl / test / quality / log / review / deploy).
+Execute the following steps in order. **Do not skip steps** (unless `--meta` flag skips designated steps). This Skill is the **sole and mandatory commit entry point** (CLAUDE.md Rule 3: bare `git commit` is prohibited; all commits must go through this flow), complementing other `/build` subcommands (flow / plan / impl / test / quality / log / review / deploy).
 
 **Model Division of Labor (aligned with CLAUDE.md Rule 18)**:
 - The main flow is executed by **Sonnet** (standard development tasks, file read/write, git operations)
