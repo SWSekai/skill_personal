@@ -21,7 +21,7 @@ Integrates four responsibilities: create-skill, skill-sync, pack, and user-confi
 | `/skm sync` | Remote sync + rule evaluation | skill-sync |
 | `/skm pack` | Project packaging (clean up skill environment) | pack |
 | `/skm update [hint]` | User-confirmed skill improvement capture (replaces CLAUDE.md Rule 8 auto-inference for deliberate cases) | — (2026-04-17 added) |
-| `/skm refactor [topic]` | Initiate cross-project structural refactor (path migration, skill rename, redirect) — writes `hanschen/.history/refactor.jsonl` for `/team sync` propagation | — (2026-04-29 added) |
+| `/skm refactor [topic]` | Initiate cross-project structural refactor (path migration, skill rename, redirect) — writes `.hanschen/.history/refactor.jsonl` for `/team sync` propagation | — (2026-04-29 added) |
 
 When no argument is provided, ask the user to specify a subcommand.
 
@@ -237,7 +237,7 @@ After Flow 1 completes, **scan `.local/` for drift against the newly-synced Skil
 **Scan items** (report, do not auto-delete):
 
 1. **Legacy singular/plural directories** — e.g. `modify_logs/` when skills use `modify_log/`, `whiteboards/` vs `whiteboard/`. List any `.local/<dir>` or `.local/docs/<dir>` not referenced by any synced SKILL.md.
-2. **Renamed subcommand artifacts** — e.g. if `/team living` renamed to `/team journal`, check whether `hanschen/docs/living/` needs redirect / alias.
+2. **Renamed subcommand artifacts** — e.g. if `/team living` renamed to `/team journal`, check whether `.hanschen/docs/living/` needs redirect / alias.
 3. **Orphan directories** — directories under `.local/` with no SKILL.md reference (grep `.local/<name>` across all `.claude/skills/**/*.md`). Classify as: likely-obsolete / project-specific / needs-user-judgment.
 4. **Filename convention drift** — files in `decisions/` without `_decision.md` suffix, in `whiteboards/` without `_board.md` suffix, etc. Report count, do not rename (existing files per `team/references/naming.md` remain valid).
 5. **Path-expectation mismatches** — e.g. Skill expects `.local/collab/TODO.md` but project keeps `./TODO.md`. Check config-flexible paths (see `team/SKILL.md` §A location resolution).
@@ -595,13 +595,13 @@ CLAUDE.md: updated / no change
 
 ## E. `/skm refactor` — Cross-Project Structural Refactor Initiation
 
-Initiate a structural refactor (path migration, skill rename, workflow redirect) and record it in `hanschen/.history/refactor.jsonl` so other machines / projects can pick it up via `/team sync` Step 0.
+Initiate a structural refactor (path migration, skill rename, workflow redirect) and record it in `.hanschen/.history/refactor.jsonl` so other machines / projects can pick it up via `/team sync` Step 0.
 
 ### Why This Subcommand Exists
 
-Per CLOSED_260429_hanschen_dir_governance_decision.md §03.A (strict separation of `hanschen/` vs `.local/`), the codebase does not use runtime fallback. Cross-machine consistency relies on:
+Per CLOSED_260429_hanschen_dir_governance_decision.md §03.A (strict separation of `.hanschen/` vs `.local/`), the codebase does not use runtime fallback. Cross-machine consistency relies on:
 
-- **`/skm refactor`** — initiator: writes refactor intent to `hanschen/.history/refactor.jsonl`
+- **`/skm refactor`** — initiator: writes refactor intent to `.hanschen/.history/refactor.jsonl`
 - **`/team sync` Step 0** — receiver: reads history, prompts to apply pending migrations on each machine
 
 This subcommand is the entry for the "initiator" half.
@@ -632,13 +632,13 @@ For the chosen refactor type:
 
 ### Step 3: Write Refactor Record
 
-Append to `hanschen/.history/refactor.jsonl`:
+Append to `.hanschen/.history/refactor.jsonl`:
 
 ```json
 {"date":"YYYY-MM-DD","type":"path_migration","from":"<old>","to":"<new>","scope":"all|<skill>","decision":"CLOSED_*.md (if linked)","ttl_days":90,"note":"<optional>"}
 ```
 
-If `hanschen/.history/` does not exist → create it. If `refactor.jsonl` does not exist → create with this entry.
+If `.hanschen/.history/` does not exist → create it. If `refactor.jsonl` does not exist → create with this entry.
 
 ### Step 4: Apply Locally
 
@@ -666,14 +666,14 @@ Skill / workflow refactors are meta-level. Default to `/commit-push --meta`:
 
 Print:
 ```
-✓ Refactor recorded: hanschen/.history/refactor.jsonl
+✓ Refactor recorded: .hanschen/.history/refactor.jsonl
   Other machines / projects will detect this on next /team sync.
   Auto-apply available: /team sync --auto-migrate
 ```
 
 ### Step 8: Self-Check
 
-- [ ] `hanschen/.history/refactor.jsonl` contains new entry
+- [ ] `.hanschen/.history/refactor.jsonl` contains new entry
 - [ ] Affected `.claude/skills/` files updated
 - [ ] `.sekai-workflow/` mirror updated (if general refactor)
 - [ ] `CLAUDE.md` updated (if cross-project rule)
@@ -684,7 +684,7 @@ Print:
 - **Append-only history** — never delete entries; expired entries (>90d) marked but kept for audit
 - **Two-phase migration** — initiator (this subcommand) records intent; receivers (`/team sync`) apply per-project
 - **Decision-traceable** — each refactor record links to a CLOSED_*.md decision when available
-- **No runtime fallback** — `hanschen/` and `.local/` are strictly separated (per §03.A); migration consistency is enforced through this history mechanism, not skill-layer if/else
+- **No runtime fallback** — `.hanschen/` and `.local/` are strictly separated (per §03.A); migration consistency is enforced through this history mechanism, not skill-layer if/else
 
 ---
 

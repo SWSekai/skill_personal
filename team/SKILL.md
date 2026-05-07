@@ -23,7 +23,7 @@ Integrates seven collaboration modes that interact with the user. The first argu
 | `/team report [scope]` | Generate work reports from modify logs | report (moved from `/ask`) |
 | `/team journal [view\|regen]` | Living document — accumulates outcomes from all board/decide closures | living (new) |
 | `/team follow-up <file>` | Resume processing of an existing whiteboard / decision file | follow-up (new) |
-| `/team sync` | Sync `hanschen/` shared docs repo with remote (cross-machine continuity) | sync (new) |
+| `/team sync` | Sync `.hanschen/` shared docs repo with remote (cross-machine continuity) | sync (new) |
 
 When no argument is provided, ask the user to specify a subcommand.
 
@@ -45,18 +45,18 @@ All interactive output files follow the pattern `YYMMDD_<topic>_<type>.md` where
 
 ### Shared Docs Path Resolution (Mandatory)
 
-All sequential / cross-machine documents live under `hanschen/` at the project root, **same level as `.sekai-workflow/`**. Per decision §01.B (CLOSED_260429_hanschen_dir_governance_decision.md), `hanschen/` is **tracked by the project's git** (not gitignored, not a separate repo). The user manually decides which `hanschen/` content to push to public branches when the project is multi-person sensitive.
+All sequential / cross-machine documents live under `.hanschen/` at the project root, **same level as `.sekai-workflow/`**. Per decision §01.B (CLOSED_260429_hanschen_dir_governance_decision.md), `.hanschen/` is **tracked by the project's git** (not gitignored, not a separate repo). The user manually decides which `.hanschen/` content to push to public branches when the project is multi-person sensitive.
 
-**Shared paths (under `hanschen/`)**:
-- `hanschen/docs/decision/` — decision tables
-- `hanschen/docs/living/PROJECT_JOURNAL.md` — project journal
-- `hanschen/docs/whiteboard/` — whiteboards (active + CLOSED_*)
-- `hanschen/docs/guides/` — project-specific troubleshooting / config notes
-- `hanschen/modify_log/` — modify logs
-- `hanschen/report/` — daily reports
-- `hanschen/.history/refactor.jsonl` — major refactor record (90-day TTL, see `/team sync` Step 0)
+**Shared paths (under `.hanschen/`)**:
+- `.hanschen/docs/decision/` — decision tables
+- `.hanschen/docs/living/PROJECT_JOURNAL.md` — project journal
+- `.hanschen/docs/whiteboard/` — whiteboards (active + CLOSED_*)
+- `.hanschen/docs/guides/` — project-specific troubleshooting / config notes
+- `.hanschen/modify_log/` — modify logs
+- `.hanschen/report/` — daily reports
+- `.hanschen/.history/refactor.jsonl` — major refactor record (90-day TTL, see `/team sync` Step 0)
 
-**Strict separation principle (per §03.A)**: `hanschen/` and `.local/` are mutually exclusive. Do **not** fall back between them. Migration consistency across projects is handled by `hanschen/.history/refactor.jsonl` + `/team sync` (read history, evaluate current state, prompt to migrate).
+**Strict separation principle (per §03.A)**: `.hanschen/` and `.local/` are mutually exclusive. Do **not** fall back between them. Migration consistency across projects is handled by `.hanschen/.history/refactor.jsonl` + `/team sync` (read history, evaluate current state, prompt to migrate).
 
 **Local-only paths (under `.local/`, never cross-machine)**:
 - `.local/context_summary/` — Claude context summaries (machine state)
@@ -65,8 +65,8 @@ All sequential / cross-machine documents live under `hanschen/` at the project r
 - `.local/bag/` — `/skm pack` output
 
 **Cross-project knowledge (under `sekai-workflow/handbook/`, via /kb)**:
-- General technical notes (Docker, K8s, algorithms, backend patterns) → `/kb add` writes to `sekai-workflow/handbook/`, **not** `hanschen/`
-- Project-specific guides stay in `hanschen/docs/guides/`
+- General technical notes (Docker, K8s, algorithms, backend patterns) → `/kb add` writes to `sekai-workflow/handbook/`, **not** `.hanschen/`
+- Project-specific guides stay in `.hanschen/docs/guides/`
 
 **Why relative path is mandatory**:
 The project directory may live at any path on any machine. Only project-root-relative paths work cross-machine. Never write absolute paths like `D:/hanschen/...` or `/home/user/...` into skills.
@@ -80,7 +80,7 @@ The project directory may live at any path on any machine. Only project-root-rel
 
 ### Markdown Callout / Blockquote Rules (Mandatory — PDF render compatibility)
 
-**Reason**: documents under `hanschen/docs/` are eventually exported to PDF for delivery. GFM-extended admonition syntax breaks in most PDF renderers, leaving raw `> [!NOTE]` text or hidden content.
+**Reason**: documents under `.hanschen/docs/` are eventually exported to PDF for delivery. GFM-extended admonition syntax breaks in most PDF renderers, leaving raw `> [!NOTE]` text or hidden content.
 
 - ✅ **Allowed**: standard markdown blockquote `> text...` for emphasis, notes, supplementary说明
 - ❌ **Forbidden**: GFM admonition `> [!NOTE]` / `> [!WARNING]` / `> [!TIP]` / `> [!IMPORTANT]` / `> [!CAUTION]`
@@ -94,7 +94,7 @@ The project directory may live at any path on any machine. Only project-root-rel
   > **💡 建議**：這段是建議
   ```
 
-- Apply across all team subcommands (decide, board, journal, note, handoff, report) and any markdown written under `hanschen/docs/`
+- Apply across all team subcommands (decide, board, journal, note, handoff, report) and any markdown written under `.hanschen/docs/`
 
 ---
 
@@ -184,7 +184,7 @@ For consultation, planning, and troubleshooting conversations, create a continuo
 **Auto-trigger** (tightened 2026-04-24 per Rule 17.1.3):
 - Consultation / planning / troubleshooting conversation, AND
 - **3 rounds of back-and-forth without convergence** (no clear TODO, no decide opened, no final answer)
-- → auto-create `hanschen/docs/whiteboard/YYMMDD_<topic>_board.md`
+- → auto-create `.hanschen/docs/whiteboard/YYMMDD_<topic>_board.md`
 
 1-2 rounds with quick convergence → inline answer, do NOT open whiteboard.
 
@@ -198,7 +198,7 @@ For consultation, planning, and troubleshooting conversations, create a continuo
 ### Step 1: Create the Whiteboard
 
 - **First**: call `date '+%Y-%m-%d %H:%M'` to get authoritative time (see Common Rules)
-- Path: `hanschen/docs/whiteboard/YYMMDD_<topic>_board.md` (snake_case topic; `_board` suffix recommended for new files but legacy files without the suffix are still valid)
+- Path: `.hanschen/docs/whiteboard/YYMMDD_<topic>_board.md` (snake_case topic; `_board` suffix recommended for new files but legacy files without the suffix are still valid)
 - Same topic on the same day → update the existing file, do not create another
 - Structural principles:
   - **Pending**: pure checkbox list, see at a glance what remains
@@ -250,9 +250,9 @@ Round 2+ retroactively wraps Round 1 in `<details>` (still inside blockquote). I
 
 1. Update the document header status to **Completed** or **Paused**
 2. Rename the file by prepending `CLOSED_` to the filename:
-   - Before: `hanschen/docs/whiteboard/YYMMDD_<topic>_board.md`
-   - After: `hanschen/docs/whiteboard/CLOSED_YYMMDD_<topic>_board.md`
-   - Use: `mv hanschen/docs/whiteboard/YYMMDD_<topic>_board.md hanschen/docs/whiteboard/CLOSED_YYMMDD_<topic>_board.md`
+   - Before: `.hanschen/docs/whiteboard/YYMMDD_<topic>_board.md`
+   - After: `.hanschen/docs/whiteboard/CLOSED_YYMMDD_<topic>_board.md`
+   - Use: `mv .hanschen/docs/whiteboard/YYMMDD_<topic>_board.md .hanschen/docs/whiteboard/CLOSED_YYMMDD_<topic>_board.md`
 
 #### 3.2 Append Inline Closure Summary (Mandatory, Unified Template)
 
@@ -291,7 +291,7 @@ Whiteboard's key-outcomes / decisions-made / unresolved items map to the unified
 
 #### 3.3 Update Living Document (Mandatory)
 
-After writing the closure summary, immediately update the project living document (`hanschen/docs/living/PROJECT_JOURNAL.md`):
+After writing the closure summary, immediately update the project living document (`.hanschen/docs/living/PROJECT_JOURNAL.md`):
 - If the file does not exist, initialize it first (see Section G Step 1)
 - Append a new row to the "討論成果" table: date, topic, 1–2 sentence outcome summary, link to renamed file
 - If the whiteboard's decision log contains entries → also append to the "決策紀錄" table
@@ -301,7 +301,7 @@ After writing the closure summary, immediately update the project living documen
 - [ ] File renamed with `CLOSED_` prefix
 - [ ] "最後更新" date in the document updated
 - [ ] Closure summary section appended
-- [ ] Living document (`hanschen/docs/living/PROJECT_JOURNAL.md`) updated
+- [ ] Living document (`.hanschen/docs/living/PROJECT_JOURNAL.md`) updated
 - [ ] **Leftover items from closure summary appended to `TODO.md` Pending** with `(from CLOSED_*_board.md)` tag (2026-04-24 expanded per Rule 17.1.4: whiteboard unresolved items auto-append to prevent forgetting after CLOSED archival)
 - [ ] Daily report updated (Step 3.5)
 - [ ] Contains reusable experience → evaluate writing it into a guide (same as `/build commit` Step 9)
@@ -311,7 +311,7 @@ After writing the closure summary, immediately update the project living documen
 
 After Step 3.3 living doc update, invoke `/team report --daily` flow inline (per `references/daily-report.md` §7.1):
 
-1. Target: `hanschen/report/YYMMDD_daily_report.md` (today's date from `date '+%y%m%d'`)
+1. Target: `.hanschen/report/YYMMDD_daily_report.md` (today's date from `date '+%y%m%d'`)
 2. Read this closed whiteboard's inline closure summary
 3. Extract 「最終決策」 table → append to daily report's **「本日決策與討論結論」** section (one row per decision)
 4. Extract 「背景」/「變更清單」 → append one-line entry to **「本日完成」**
@@ -370,7 +370,7 @@ Generate structured markdown for the user to check options, which Claude then re
 ### Step 2: Generate Interactive Markdown
 
 - **First**: call `date '+%Y-%m-%d %H:%M'` to get authoritative time (see Common Rules)
-- Default location: `hanschen/docs/decision/YYMMDD_<topic>_decision.md` (snake_case topic; `_decision` suffix recommended for new files. Legacy files without the suffix are still valid — do not rename existing files just to conform)
+- Default location: `.hanschen/docs/decision/YYMMDD_<topic>_decision.md` (snake_case topic; `_decision` suffix recommended for new files. Legacy files without the suffix are still valid — do not rename existing files just to conform)
 - **Use template** `assets/decision-template.md` as the starting structure (sections, `**補充說明：**` blockquote with `💡 預填建議` prefix, Round 1 / Round 2 response example). Replace `{{placeholder}}` fields with topic-specific content. Template is generic — do not bake topic-specific text into the asset.
 
 Format specification:
@@ -509,14 +509,14 @@ For each decision block:
 
 #### 6.3 Rename the Decision File (Mandatory)
 
-- **Proactively rename** `hanschen/docs/decision/YYMMDD_<topic>_decision.md` → `hanschen/docs/decision/CLOSED_YYMMDD_<topic>_decision.md`
-  - Use: `mv hanschen/docs/decision/YYMMDD_<topic>_decision.md hanschen/docs/decision/CLOSED_YYMMDD_<topic>_decision.md`
+- **Proactively rename** `.hanschen/docs/decision/YYMMDD_<topic>_decision.md` → `.hanschen/docs/decision/CLOSED_YYMMDD_<topic>_decision.md`
+  - Use: `mv .hanschen/docs/decision/YYMMDD_<topic>_decision.md .hanschen/docs/decision/CLOSED_YYMMDD_<topic>_decision.md`
 - The `CLOSED_` prefix indicates the decision process is complete; the inline summary (appended in 6.1) is the authoritative record
 - If the user explicitly says "delete the decision record" → delete instead and note it in the reply
 
 #### 6.4 Update Living Document (Mandatory, Cannot Be Skipped)
 
-After renaming, immediately update `hanschen/docs/living/PROJECT_JOURNAL.md`:
+After renaming, immediately update `.hanschen/docs/living/PROJECT_JOURNAL.md`:
 - If the file does not exist, initialize it first (see Section G Step 1)
 - Append new row to "決策紀錄" table: date, topic, adopted options summary (1 line), link to `CLOSED_YYMMDD_<topic>_decision.md` (the **only** source file now — no separate summary file exists)
 - If the inline summary contains "🔖 保留候選" → append each to living doc's "🔖 保留候選" table
@@ -528,8 +528,8 @@ After Step 6 completes, confirm:
 - [ ] **Step 6.0 deviation check executed**: any §n.m item where implementation pivoted from the original `[x]` selection has been recorded in the inline summary's 「備註」 column with `原選 X → 實作 Y，因 <reason>` format (no silent deviation reaches `PROJECT_JOURNAL.md`)
 - [ ] Inline closure summary has been appended to the end of `YYMMDD_<topic>_decision.md` (before rename)
 - [ ] Inline summary includes: background, decision table (per §n.m item), change list, preserved candidates (if any non-single-path), leftover items
-- [ ] `hanschen/docs/decision/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`
-- [ ] `hanschen/docs/living/PROJECT_JOURNAL.md` has been updated with this decision's entries (link → `CLOSED_*_decision.md`)
+- [ ] `.hanschen/docs/decision/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`
+- [ ] `.hanschen/docs/living/PROJECT_JOURNAL.md` has been updated with this decision's entries (link → `CLOSED_*_decision.md`)
 - [ ] **No** `.local/docs/summary/` file has been created (directory was removed 2026-04-22; writing there is a violation)
 - [ ] **Leftover items from closure summary appended to `TODO.md` Pending** with `(from CLOSED_*_decision.md)` tag (2026-04-24 expanded per Rule 17.1.4: previously only 實作項 appended; now 遺留項 also auto-append to prevent forgetting after CLOSED archival)
 - [ ] Daily report updated (Step 6.6)
@@ -539,7 +539,7 @@ After Step 6 completes, confirm:
 
 After Step 6.4 living doc update, invoke `/team report --daily` flow inline (per `references/daily-report.md` §7.2):
 
-1. Target: `hanschen/report/YYMMDD_daily_report.md` (today's date from `date '+%y%m%d'`)
+1. Target: `.hanschen/report/YYMMDD_daily_report.md` (today's date from `date '+%y%m%d'`)
 2. Read this closed decision file's inline closure summary (at file end)
 3. Extract 「最終決策（逐項目 §n.m）」 table → append to daily report's **「本日決策與討論結論」** — collapse §n.m sub-items into one summary row
 4. Extract 「變更清單」 → append entries to **「本日完成」** (one line per file change topic)
@@ -561,11 +561,11 @@ Parser rules: `references/daily-report.md` §9.1 (closure block detection), §9.
 
 ## D. `/team note` — Tech Notes Organization
 
-> **2026-04-29 redirect (per decision §02)**: Tech notes are **cross-project general knowledge** — they belong to `sekai-workflow/handbook/` managed by `/kb`, not project-local `hanschen/` or `.local/`.
+> **2026-04-29 redirect (per decision §02)**: Tech notes are **cross-project general knowledge** — they belong to `sekai-workflow/handbook/` managed by `/kb`, not project-local `.hanschen/` or `.local/`.
 >
 > When `/team note <topic>` is invoked → **forward to `/kb add <topic>`** (write to handbook). The legacy local-tech-note flow below is retained only for reference; new content must go through `/kb`.
 >
-> Project-specific troubleshooting (e.g., "this repo's HoughCircles OOM fix") goes to `hanschen/docs/guides/` instead — not tech-note, not handbook.
+> Project-specific troubleshooting (e.g., "this repo's HoughCircles OOM fix") goes to `.hanschen/docs/guides/` instead — not tech-note, not handbook.
 
 ### Legacy flow (deprecated path — for reference only)
 
@@ -656,15 +656,15 @@ Read the following information sources in parallel:
 | Information | Source | Purpose |
 |---|---|---|
 | Project overview | `CLAUDE.md` / root `README.md` | Human §A / AI bundle |
-| Recent work | `hanschen/modify_log/*.md` (most recent 10~20) | Human §B |
+| Recent work | `.hanschen/modify_log/*.md` (most recent 10~20) | Human §B |
 | Pending items | `./TODO.md` (project root) or `.local/collab/TODO.md` | Human §C |
 | Plans in progress | `.local/docs/plan/*.md` (unfinished steps) | Human §C |
-| Risk records | "Potential risks" sections in `hanschen/modify_log/` | Human §D |
+| Risk records | "Potential risks" sections in `.hanschen/modify_log/` | Human §D |
 | Environment architecture | `docker-compose.yml` / `.env` / config | Human §E / AI bundle |
 | Git status | `git status` / `git log origin..HEAD` / `git branch` | Human §F |
 | Decision history | `.local/docs/summary/*.md` | AI bundle |
 | Memory | `~/.claude/projects/<proj>/memory/*.md` | AI bundle |
-| Experience guides | `hanschen/docs/guides/*.md` | AI bundle |
+| Experience guides | `.hanschen/docs/guides/*.md` | AI bundle |
 | Context summaries | Latest in `.local/context_summary/` | AI bundle |
 
 ### Step 2: Generate Human Handoff Document (`YYMMDD_handoff.md`)
@@ -751,8 +751,8 @@ YYMMDD_ai-context/
 ├── project-summary.md         ← AI-only summary (template below)
 ├── memory/                    ← Memory snapshot (*.md)
 ├── decision-history/          ← Copy of .local/docs/summary/*.md
-├── guides/                    ← Copy of hanschen/docs/guides/*.md
-├── recent-modify-logs/        ← Most recent 10 from hanschen/modify_log/
+├── guides/                    ← Copy of .hanschen/docs/guides/*.md
+├── recent-modify-logs/        ← Most recent 10 from .hanschen/modify_log/
 ├── todo-snapshot.md           ← Copy of ./TODO.md (or .local/collab/TODO.md if that's where project keeps it)
 └── context-snapshot.md        ← Latest summary from .local/context_summary/
 ```
@@ -831,7 +831,7 @@ If `--daily` is present, branch to the daily report flow (`references/daily-repo
 - `weekly` → past 7 days (filter by date prefix in filename)
 - `YYMMDD YYMMDD` → specified range
 
-Source: `hanschen/modify_log/`
+Source: `.hanschen/modify_log/`
 
 ### Step 2: Read and analyze
 
@@ -880,7 +880,7 @@ Read each modify log within the scope and extract:
 
 ### Step 4: Output
 
-Write to `hanschen/report/`.
+Write to `.hanschen/report/`.
 
 ### Writing Principles
 
@@ -895,13 +895,13 @@ Write to `hanschen/report/`.
 
 When `--daily` flag is present, execute the daily report flow fully defined in `references/daily-report.md`. Key differences vs default mode:
 
-- **Output**: `hanschen/report/YYMMDD_daily_report.md` (one per day, smart-update)
+- **Output**: `.hanschen/report/YYMMDD_daily_report.md` (one per day, smart-update)
 - **Sources**: whiteboard/decision closure summaries + TODO deltas + modify_log + user handoff
 - **Sections**: 本日完成 / 進行中 / 待辦與阻塞 / 交接事項 / 本日決策與討論結論 / 作業記錄
 - **Format**: Teams-safe markdown subset with `- [ ]` checkboxes
 - **Triggers**: manual + auto-called from board closure (§B Step 3.5), decide closure (§C Step 6.6), and `/commit-push` Step 11
 - **Handoff**: prefer `@handoff:<name>` tags in TODO.md; fallback to AskUserQuestion on manual trigger only
-- **Integrity**: cross-check `git log` vs `hanschen/modify_log/` — commits without modify_log marked ⚠️
+- **Integrity**: cross-check `git log` vs `.hanschen/modify_log/` — commits without modify_log marked ⚠️
 - **Cross-day**: `/hello` Step 3.4 surfaces yesterday's unresolved handoffs and missing modify_logs
 
 > ⚠️ **MANDATORY — Audience & Writing Style** (see `references/daily-report.md` §4.0):
@@ -939,7 +939,7 @@ Maintain a single, continuously updated project-level document that accumulates 
 
 ### Document Location
 
-`hanschen/docs/living/PROJECT_JOURNAL.md`
+`.hanschen/docs/living/PROJECT_JOURNAL.md`
 
 One file per project; entries are append-only (never overwrite existing rows).
 
@@ -953,7 +953,7 @@ One file per project; entries are append-only (never overwrite existing rows).
 
 ### Step 1: Initialize (First-Time Only)
 
-If `hanschen/docs/living/PROJECT_JOURNAL.md` does not exist, create the directory and initialize the file:
+If `.hanschen/docs/living/PROJECT_JOURNAL.md` does not exist, create the directory and initialize the file:
 
 ```markdown
 # 專案活文件（Project Journal）
@@ -993,7 +993,7 @@ Called internally after `/team board` Step 3.2. Input: the renamed whiteboard fi
    - Date (from file or closure summary)
    - Topic (from filename or whiteboard title)
    - Key outcomes (1–2 sentences condensed from "Key Outcomes" bullet points)
-   - Link: `[CLOSED_YYMMDD_topic.md](hanschen/docs/whiteboard/CLOSED_YYMMDD_topic.md)`
+   - Link: `[CLOSED_YYMMDD_topic.md](.hanschen/docs/whiteboard/CLOSED_YYMMDD_topic.md)`
 3. If the whiteboard's "決策紀錄" table has entries → also append each to "決策紀錄" table
 4. Update "最後更新" timestamp
 
@@ -1011,7 +1011,7 @@ Called internally after `/team decide` Step 6.4. Input: the renamed decision fil
 
 For `/team journal regen`:
 1. Clear the rows from all three tables (keep headers and template structure)
-2. Scan all `CLOSED_*` files in `hanschen/docs/whiteboard/` and `hanschen/docs/decision/`
+2. Scan all `CLOSED_*` files in `.hanschen/docs/whiteboard/` and `.hanschen/docs/decision/`
 3. For each CLOSED file, parse the **inline closure summary block** at its end
 4. Rebuild the three tables chronologically by date
 5. Report: "Rebuilt from N whiteboard sessions, M decisions"
@@ -1044,7 +1044,7 @@ Filename accepts: full name, no-extension form, or prefix (e.g. `260422_team` ma
 ### Step 1: Parse argument + locate file
 
 1. Apply matching strategy (see `references/followup.md` §2)
-2. Search scope: `hanschen/docs/whiteboard/` + `hanschen/docs/decision/`
+2. Search scope: `.hanschen/docs/whiteboard/` + `.hanschen/docs/decision/`
 3. **Filter out `CLOSED_*` files silently** at candidate listing stage
 4. Exact-typed `CLOSED_xxx` → special-case message "file is closed, see summary at …"
 5. Zero matches → list nearest 3 candidates via AskUserQuestion
@@ -1056,8 +1056,8 @@ Detected via filename suffix (`_board` vs `_decision`) with directory as fallbac
 
 | Type | Handler | Reference |
 |---|---|---|
-| `_board.md` in `hanschen/docs/whiteboard/` | whiteboard follow-up handler | `references/followup.md` §4 |
-| `_decision.md` in `hanschen/docs/decision/` | decision follow-up handler | `references/followup.md` §3 |
+| `_board.md` in `.hanschen/docs/whiteboard/` | whiteboard follow-up handler | `references/followup.md` §4 |
+| `_decision.md` in `.hanschen/docs/decision/` | decision follow-up handler | `references/followup.md` §3 |
 
 ### Step 3: Parse (skip closed blocks)
 
@@ -1097,7 +1097,7 @@ See `references/followup.md` §9 for: directory-as-argument, path traversal, mal
 
 ## I. `/team sync` — Cross-Machine Shared Docs Sync
 
-Synchronize the project's `hanschen/` shared documents with the project remote. Per decision §01.B, `hanschen/` is tracked by the project's git, so this subcommand is a thin wrapper around standard git operations focused on `hanschen/`-only changes, plus the **Refactor History Evaluation** mechanism (§03 in CLOSED_260429_hanschen_dir_governance_decision.md).
+Synchronize the project's `.hanschen/` shared documents with the project remote. Per decision §01.B, `.hanschen/` is tracked by the project's git, so this subcommand is a thin wrapper around standard git operations focused on `.hanschen/`-only changes, plus the **Refactor History Evaluation** mechanism (§03 in CLOSED_260429_hanschen_dir_governance_decision.md).
 
 ### Triggers
 
@@ -1105,12 +1105,12 @@ Synchronize the project's `hanschen/` shared documents with the project remote. 
 |---|---|
 | `/team sync` | Full flow: history eval → fetch → status → pull/push if needed |
 | `/team sync --auto-migrate` | Apply all pending refactor migrations from history without prompting |
-| `/team sync --prune-history` | Remove expired (>90d) entries from `hanschen/.history/refactor.jsonl` |
+| `/team sync --prune-history` | Remove expired (>90d) entries from `.hanschen/.history/refactor.jsonl` |
 | `/team sync --skip-history` | Skip Step 0 (history eval), do git ops only |
 
 ### Step 0: Refactor History Evaluation (Mandatory unless `--skip-history`)
 
-1. Read `hanschen/.history/refactor.jsonl` — each line is a JSONL record:
+1. Read `.hanschen/.history/refactor.jsonl` — each line is a JSONL record:
    ```json
    {"date":"YYYY-MM-DD","type":"path_migration|skill_rename|skill_redirect","from":"...","to":"...","scope":"all|<skill>","decision":"CLOSED_*.md","ttl_days":90}
    ```
@@ -1121,9 +1121,9 @@ Synchronize the project's `hanschen/` shared documents with the project remote. 
 3. Report summary:
    ```
    Refactor history (3 active, 1 expired):
-     - 2026-04-29 path_migration .local/{shared} → hanschen/{shared}
+     - 2026-04-29 path_migration .local/{shared} → .hanschen/{shared}
        └─ 0 files in old location ✓ (already migrated)
-     - 2026-04-29 path_migration .local/docs/guides → hanschen/docs/guides
+     - 2026-04-29 path_migration .local/docs/guides → .hanschen/docs/guides
        └─ 2 files in old location ⚠ → run migration?
    ```
 4. With `--auto-migrate`, execute moves; otherwise AskUserQuestion per pending item.
@@ -1132,9 +1132,9 @@ Synchronize the project's `hanschen/` shared documents with the project remote. 
 
 ```bash
 git fetch origin
-git status hanschen/    # only hanschen/ changes
-git log --oneline origin/$(git rev-parse --abbrev-ref HEAD)..HEAD -- hanschen/
-git log --oneline HEAD..origin/$(git rev-parse --abbrev-ref HEAD) -- hanschen/
+git status .hanschen/    # only .hanschen/ changes
+git log --oneline origin/$(git rev-parse --abbrev-ref HEAD)..HEAD -- .hanschen/
+git log --oneline HEAD..origin/$(git rev-parse --abbrev-ref HEAD) -- .hanschen/
 ```
 
 Classify state:
@@ -1142,7 +1142,7 @@ Classify state:
 - **Local-only**: local commits ahead → push (Step 3)
 - **Remote-only**: remote commits ahead → pull (Step 2)
 - **Diverged**: both → rebase (Step 2 with `--rebase`)
-- **Uncommitted local**: working tree has unstaged `hanschen/` changes → stage + commit first (Step 2.5)
+- **Uncommitted local**: working tree has unstaged `.hanschen/` changes → stage + commit first (Step 2.5)
 
 ### Step 2: Pull (if remote has new commits)
 
@@ -1150,15 +1150,15 @@ Classify state:
 git pull --rebase origin $(git rev-parse --abbrev-ref HEAD)
 ```
 
-If conflict involves files outside `hanschen/` → abort and notify user (this subcommand is `hanschen/`-scoped).
-If conflict inside `hanschen/` → list conflicting files via AskUserQuestion: "ours" (this machine) / "theirs" (remote) / manual.
+If conflict involves files outside `.hanschen/` → abort and notify user (this subcommand is `.hanschen/`-scoped).
+If conflict inside `.hanschen/` → list conflicting files via AskUserQuestion: "ours" (this machine) / "theirs" (remote) / manual.
 
-### Step 2.5: Stage + Commit Uncommitted hanschen/ Changes
+### Step 2.5: Stage + Commit Uncommitted .hanschen/ Changes
 
-If `git status hanschen/` shows changes:
+If `git status .hanschen/` shows changes:
 
 ```bash
-git add hanschen/
+git add .hanschen/
 git commit -m "docs(hanschen): sync $(date '+%Y-%m-%d %H:%M')"
 ```
 
@@ -1171,7 +1171,7 @@ git push origin $(git rev-parse --abbrev-ref HEAD)
 ```
 
 ⚠️ **Privacy reminder for multi-person sensitive projects** (per §01.B 補充說明):
-> Before push, verify `hanschen/` content does not contain personal-only notes that should not enter the public branch. The user manually filters at this point.
+> Before push, verify `.hanschen/` content does not contain personal-only notes that should not enter the public branch. The user manually filters at this point.
 
 If pushing to a protected branch → suggest creating a personal branch first.
 
@@ -1182,22 +1182,22 @@ If pushing to a protected branch → suggest creating a personal branch first.
   history: 3 active records, 0 pending migration
   fetched: 0 new commits on origin
   pushed:  1 commit (docs(hanschen): sync 2026-04-29 14:30)
-  hanschen/ files: 14 (12 docs + 2 history)
+  .hanschen/ files: 14 (12 docs + 2 history)
 ```
 
 ### Edge Cases
 
-- **No `hanschen/` directory** → suggest `/skm refactor` to migrate from `.local/`
-- **No `.history/` directory** → create empty `hanschen/.history/refactor.jsonl`; skip Step 0
+- **No `.hanschen/` directory** → suggest `/skm refactor` to migrate from `.local/`
+- **No `.history/` directory** → create empty `.hanschen/.history/refactor.jsonl`; skip Step 0
 - **No git remote** → run Step 0 only; warn that push/pull skipped
 - **Detached HEAD** → abort; user must checkout a branch first
 
 ### Design Principles
 
-- **Scoped to `hanschen/`**: never touches code, never affects project's main commits
+- **Scoped to `.hanschen/`**: never touches code, never affects project's main commits
 - **History-driven migration**: §03.A 完全二分原則靠 history 做跨機器一致性，不在 skill 層 if/else
 - **User-controlled push**: privacy check is manual (multi-person sensitive project context)
-- **Compatible with `/commit-push`**: regular code commits still go through `/commit-push`; this subcommand is **only** for `hanschen/`-scoped sync
+- **Compatible with `/commit-push`**: regular code commits still go through `/commit-push`; this subcommand is **only** for `.hanschen/`-scoped sync
 
 ---
 
