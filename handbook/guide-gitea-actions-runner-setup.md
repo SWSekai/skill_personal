@@ -281,7 +281,7 @@ After=network.target docker.service
 
 [Service]
 Type=simple
-User=z30
+User=<RUNNER_USER>
 WorkingDirectory=/home/<RUNNER_USER>
 ExecStart=/usr/local/bin/act_runner daemon
 Restart=always
