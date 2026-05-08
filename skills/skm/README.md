@@ -10,8 +10,14 @@
 ## 使用方式
 
 ```
-/skm <new|sync|pack|update|refactor> [args...]
+/skm <new|sync|pack|update|refactor> [--no-subagent] [args...]
 ```
+
+### Flag
+
+| Flag | 用途 |
+|---|---|
+| `--no-subagent` | 1M context 模式：所有 Agent 子任務改為主 session 內嵌執行（適用於 Opus 4.7 1M context 未啟用 `/extra-usage`，或需要單一 transcript 完整稽核軌跡時）；對齊 CLAUDE.md Rule 26 跨 skill 標準 |
 
 ## Model
 

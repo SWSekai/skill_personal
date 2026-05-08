@@ -1,9 +1,9 @@
 ---
 name: build
-description: "One-stop entry for the full development flow: requirement analysis → solution design → implementation → testing → quality check → review → deploy. Commit & push is handled by the standalone `/commit-push`. Subcommand routing: flow / plan / impl / test / quality / review / deploy."
+description: "One-stop entry for the full development flow: requirement analysis → solution design → implementation → testing → quality check → review → deploy. Commit & push is handled by the standalone `/commit-push`. Subcommand routing: all / plan / do / test / check / review / deploy. Supports --no-subagent flag for 1M-context / sub-agent-avoidance runs."
 model: sonnet
 effort: medium
-argument-hint: "<flow|plan|impl|test|quality|review|deploy> [args...]"
+argument-hint: "<all|plan|do|test|check|review|deploy> [--no-subagent] [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *), Bash(ls *), Bash(date *), Bash(sleep *), Bash(mkdir *), Bash(npm *), Bash(npx *), Bash(pytest *), Bash(python *)
 ---
 
@@ -35,6 +35,27 @@ Covers the complete development lifecycle from requirement analysis to deploymen
 Without arguments → ask the user to specify a subcommand.
 
 **Commit & push**: use `/commit-push` (a standalone Skill that includes quality check / change log / README / commit / push / deploy --plan / context cleanup).
+
+---
+
+## `--no-subagent` Flag (1M Context / Sub-agent Avoidance Mode)
+
+When `$ARGUMENTS` contains `--no-subagent`, **all Agent dispatches across every subcommand run inline in the main session** — no `Agent` tool invocations are made. The main Sonnet session performs the work directly using the same checklist.
+
+**Subcommand impact**:
+- `/build plan`: Opus deep planning subtask → inline (main Sonnet drafts the plan with same structure)
+- `/build check`: Opus quality audit subtask → inline (main Sonnet performs the 1.1–1.7 checklist directly)
+- `/build all`: chains plan + do + test + review + commit-push + deploy; each Agent-using stage runs inline
+- `/build do`, `/build test`, `/build review`, `/build deploy`: predominantly already inline; flag is a safety guard
+
+**When to use**:
+- Current session runs in **Opus 4.7 1M context** mode without `/extra-usage` enabled — sub-agent spawn hits the API gateway's extra-usage wall and halts the flow mid-run. Detection hint: model id suffix `[1m]`, or a prior run aborted with `API Error: Extra usage is required for 1M context`.
+- User wants a single-transcript audit trail (all reasoning visible in main session, not buried in sub-agent logs).
+- Debugging a Skill behavior and need step-by-step visibility of plan / audit decisions.
+
+**Trade-off**: default mode optimises for model specialisation (Opus depth on plan / quality); inline mode trades that for reliability under 1M-gate / visibility. The Sonnet main session is still fully capable of both duties. See CLAUDE.md Rule 26 for the cross-skill standard.
+
+**Combinable with `/build all`**: `/build all --no-subagent <feature>` — full flow without sub-agents at any stage; the chained `/commit-push` step inherits the flag automatically.
 
 ---
 
@@ -93,6 +114,8 @@ Without arguments → ask the user to specify a subcommand.
 When receiving a feature request, **design the complete solution first and implement only after confirmation** (aligned with CLAUDE.md core rules).
 
 This subcommand falls under "assessment / planning / architectural decision" attributes; it is recommended to invoke an Opus subtask via the Agent tool (aligned with CLAUDE.md rule 18).
+
+> **`--no-subagent` mode**: main Sonnet session drafts the plan inline using the same Step 1–4 structure (no Opus Agent spawn). See `## --no-subagent Flag` section above.
 
 ### Step 1: Requirement understanding
 
@@ -314,6 +337,8 @@ Based on the plan document (if it exists) or the current change, generate a chec
 
 Standalone entry point for in-depth quality audit. **Recommended to invoke an Opus subtask via the Agent tool** (aligned with CLAUDE.md rule 18; quality analysis is an assessment / thinking attribute).
 
+> **`--no-subagent` mode**: main Sonnet session performs the audit inline using the same checklist (no Opus Agent spawn). Aligned with `/commit-push --no-subagent` Step 1 behavior.
+
 `/commit-push` Step 1 embeds similar logic; this standalone entry serves the scenario "I don't want to run the full commit flow, just a quality scan."
 
 ### 1. Scan items
@@ -439,7 +464,7 @@ Based on the scan results, list **items that may need syncing for this change bu
 
 ### Documentation-layer sync
 - [ ] READMEs for affected directories are updated
-- [ ] For new features → there is a corresponding .hanschen/docs/guides/<topic>.md
+- [ ] For new features → there is a corresponding .hanschen/guides/<topic>.md
 ```
 
 ### Step 3: Interactive confirmation

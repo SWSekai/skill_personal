@@ -1,9 +1,9 @@
 ---
 name: skm
-description: "Skill Management — one-stop entry for Skill environment management: create new Skill, remote sync, project packaging, user-confirmed skill improvements. Subcommand routing: new / sync / pack / update. Renamed from /skill on 2026-04-24 to avoid confusion with Claude Code's built-in /skills dialog."
+description: "Skill Management — one-stop entry for Skill environment management: create new Skill, remote sync, project packaging, user-confirmed skill improvements. Subcommand routing: new / sync / pack / update / refactor. Supports --no-subagent flag for 1M-context / sub-agent-avoidance runs. Renamed from /skill on 2026-04-24 to avoid confusion with Claude Code's built-in /skills dialog."
 model: sonnet
 effort: medium
-argument-hint: "<new|sync|pack|update|refactor> [args...]"
+argument-hint: "<new|sync|pack|update|refactor> [--no-subagent] [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(mkdir *), Bash(date *), Bash(cp *), Bash(bash *), Bash(cat *)
 ---
 
@@ -24,6 +24,26 @@ Integrates four responsibilities: create-skill, skill-sync, pack, and user-confi
 | `/skm refactor [topic]` | Initiate cross-project structural refactor (path migration, skill rename, redirect) — writes `.hanschen/.history/refactor.jsonl` for `/team sync` propagation | — (2026-04-29 added) |
 
 When no argument is provided, ask the user to specify a subcommand.
+
+---
+
+## `--no-subagent` Flag (1M Context / Sub-agent Avoidance Mode)
+
+When `$ARGUMENTS` contains `--no-subagent`, **all Agent dispatches across every subcommand run inline in the main session** — no `Agent` tool invocations are made. The main Sonnet session performs the work directly using the same logic.
+
+**Subcommand impact**:
+- `/skm new`: README.md drafting (rare Haiku spawn) → inline write
+- `/skm sync`: shell automation already inline; flag is a no-op safety guard
+- `/skm pack`: Phase 1 audit / Phase 4 cleanup → inline (no sub-agent for analysis)
+- `/skm update`: diff drafting + mirror copy → inline (no sub-agent for cross-file analysis)
+- `/skm refactor`: preservation analysis classification → inline (no Opus sub-agent)
+
+**When to use**:
+- Current session runs in **Opus 4.7 1M context** mode without `/extra-usage` enabled — sub-agent spawn hits the API gateway's extra-usage wall and halts the flow mid-run. Detection hint: model id suffix `[1m]`, or a prior run aborted with `API Error: Extra usage is required for 1M context`.
+- User wants a single-transcript audit trail (all reasoning visible in main session, not buried in sub-agent logs).
+- Debugging a Skill behavior and need step-by-step visibility.
+
+**Trade-off**: default mode optimises for model specialisation (Opus depth on analysis); inline mode trades that for reliability under 1M-gate / visibility. See CLAUDE.md Rule 26 for the cross-skill standard.
 
 ---
 
@@ -237,7 +257,7 @@ After Flow 1 completes, **scan `.local/` for drift against the newly-synced Skil
 **Scan items** (report, do not auto-delete):
 
 1. **Legacy singular/plural directories** — e.g. `modify_logs/` when skills use `modify_log/`, `whiteboards/` vs `whiteboard/`. List any `.local/<dir>` or `.local/docs/<dir>` not referenced by any synced SKILL.md.
-2. **Renamed subcommand artifacts** — e.g. if `/team living` renamed to `/team journal`, check whether `.hanschen/docs/living/` needs redirect / alias.
+2. **Renamed subcommand artifacts** — e.g. if `/team living` renamed to `/team journal`, check whether `.hanschen/journal/` needs redirect / alias.
 3. **Orphan directories** — directories under `.local/` with no SKILL.md reference (grep `.local/<name>` across all `.claude/skills/**/*.md`). Classify as: likely-obsolete / project-specific / needs-user-judgment.
 4. **Filename convention drift** — files in `decisions/` without `_decision.md` suffix, in `whiteboards/` without `_board.md` suffix, etc. Report count, do not rename (existing files per `team/references/naming.md` remain valid).
 5. **Path-expectation mismatches** — e.g. Skill expects `.local/collab/TODO.md` but project keeps `./TODO.md`. Check config-flexible paths (see `team/SKILL.md` §A location resolution).

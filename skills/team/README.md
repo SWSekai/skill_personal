@@ -14,8 +14,14 @@
 ## 使用方式
 
 ```
-/team <todo|board|decide|note|handoff|report|journal|follow-up> [args...]
+/team <todo|board|decide|note|handoff|report|journal|follow-up|sync> [--no-subagent] [args...]
 ```
+
+### Flag
+
+| Flag | 用途 |
+|---|---|
+| `--no-subagent` | 1M context 模式：所有 Agent 子任務（含 `report --daily` Haiku、`handoff` Opus、decide/board 結案摘要 Opus）改為主 session 內嵌執行；對齊 CLAUDE.md Rule 26 跨 skill 標準 |
 
 ## Model
 
@@ -69,17 +75,17 @@ Round 1 不摺疊，Round 2+ 把 Round 1 包 `<details>`（仍在 blockquote 內
 1. 更新文件狀態（Completed / Paused）
 2. **更名**：`YYMMDD_topic.md` → `CLOSED_YYMMDD_topic.md`
 3. **新增結案摘要章節**：包含關鍵成果、決策紀錄、未解決事項
-4. **更新活文件**（`.hanschen/docs/living/PROJECT_JOURNAL.md`）
+4. **更新活文件**（`.hanschen/journal/PROJECT_JOURNAL.md`）
 5. **更新每日報告**（Step 3.5，2026-04-24 新增）：`.hanschen/report/YYMMDD_daily_report.md` 的決策與完成區塊
 
 ### 決策表結案（`/team decide` Step 6）
 0. **實作 vs §n.m 偏離比對**（Step 6.0）：將實作 diff 與原 §n.m 勾選逐項比對；偏離項在內嵌摘要的 「備註」 欄記錄 `原選 X → 實作 Y，因 <reason>`，避免 PROJECT_JOURNAL 條目與實作脫節（Step 5.3 只抓「漏項」，本步抓「偏離」）
 1. 於原檔末尾 **append 內嵌結案摘要**（2026-04-22 改版：取代獨立 summary 檔）
 2. **更名**：`decision/YYMMDD_<topic>_decision.md` → `decision/CLOSED_YYMMDD_<topic>_decision.md`
-3. **更新活文件**（`.hanschen/docs/living/PROJECT_JOURNAL.md`）
+3. **更新活文件**（`.hanschen/journal/PROJECT_JOURNAL.md`）
 4. **更新每日報告**（Step 6.6，2026-04-24 新增）：`.hanschen/report/YYMMDD_daily_report.md` 的決策與完成區塊
 
-### 專案活文件（`.hanschen/docs/living/PROJECT_JOURNAL.md`）
+### 專案活文件（`.hanschen/journal/PROJECT_JOURNAL.md`）
 - 三個表格：決策紀錄 / 討論成果 / 🔖 保留候選
 - 僅追加，不刪除（永久歷史紀錄）
 - 每筆紀錄連結至對應的 `CLOSED_*` 來源文件
@@ -127,7 +133,7 @@ team/
 
 ## 相關 Skills 與檔案
 
-- **呼叫**：`/team report --daily`（自動觸發於 `/team decide` Step 6 / `/team board` Step 3 結案）、`/kb extract`（結案自動抽取通用技術內容）、寫入 `.local/report/YYMMDD_daily_report.md` 與 `.local/docs/decision/` `.local/docs/board/`
+- **呼叫**：`/team report --daily`（自動觸發於 `/team decide` Step 6 / `/team board` Step 3 結案）、`/kb extract`（結案自動抽取通用技術內容）、寫入 `.hanschen/report/YYMMDD_daily_report.md` 與 `.hanschen/decision/` `.hanschen/board/`
 - **被呼叫**：`/commit-push` Step 11（自動 append commit 至當日報告）、`/hello` Step 3（讀取 CLOSED 與 open 檔案重建工作狀態）
 - **共用資源**：`assets/decision-template.md`（`/team decide` 與 `/build plan` 共用）、`references/naming.md`（YYMMDD 檔名規範供所有日期戳產出者共用）、`references/daily-report.md`（被 `/commit-push` Step 11 引用）、`references/four-tools-exclusivity.md`（TODO/board/decide/journal 互斥規則）、`references/claude-response-format.md`（decide/board 內嵌回應格式）
 - **改名歷史（本 skill 自身）**：skill 名稱 `team-office` → `team`（2026-04-24）；子指令 `/team living` → `/team journal`（2026-04-24）；`/ask report` 移入為 `/team report --daily`（2026-04-24）；舊 `summary/` 目錄機制於 2026-04-22 由內嵌結案摘要取代；全域改名請見 `_bootstrap/RENAME_HISTORY.md`

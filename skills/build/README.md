@@ -7,8 +7,14 @@
 ## 使用方式
 
 ```
-/build <flow|plan|impl|test|commit|quality|log|restart|eval> [args...]
+/build <all|plan|do|test|check|review|deploy> [--no-subagent] [args...]
 ```
+
+### Flag
+
+| Flag | 用途 |
+|---|---|
+| `--no-subagent` | 1M context 模式：所有 Agent 子任務改為主 session 內嵌執行（適用於 Opus 4.7 1M context 未啟用 `/extra-usage`，或需要單一 transcript 完整稽核軌跡時）；可與 `/build all` 結合，串接的 `/commit-push` 自動繼承此 flag。對齊 CLAUDE.md Rule 26 跨 skill 標準 |
 
 ## Model
 
@@ -24,15 +30,15 @@
 
 | 子命令 | 用途 |
 |---|---|
-| `flow <feature>` | 全流程串接：plan → impl → test → commit |
-| `plan <feature>` | 需求分析 + 方案設計 + 步驟拆解 |
-| `impl [plan-ref]` | 按方案逐步實作 |
-| `test [scope]` | 測試驗證 |
-| `commit [msg]` | 完整提交流程（品質 → 日誌 → README → commit → push → 重啟評估） |
-| `quality [files]` | 獨立品質審計 |
-| `log [topic]` | 建立 / 更新本地修改日誌 |
-| `restart [services]` | 容器重啟與自動修復 |
-| `eval [range]` | 重啟評估（不執行） |
+| `all <feature>` | 全流程串接：plan → do → test → review → `/commit-push` → deploy |
+| `plan <feature>` | 需求分析 + 方案設計 + 步驟拆解（產出計畫文件至 `.local/docs/plan/`）|
+| `do [plan-ref]` | 按方案逐步實作，自動檢查進度，偵測偏差 |
+| `test [scope]` | 測試驗證：自動跑測試 + 手動 checklist + 邊界案例 |
+| `check [files...]` | 獨立品質審計（亦內嵌於 `/commit-push` Step 1）|
+| `review` | commit 前最終手動確認 checklist（建議大改動時使用）|
+| `deploy [--plan\|--run] [services...]` | 重啟評估 + 執行（預設先 `--plan` 列出計畫，再執行）|
+
+> **commit & push**：使用獨立的 `/commit-push`（包含品質檢查 / 修改日誌 / README / commit / push / deploy --plan / context 清理）。原 `/build commit`、`/build log`、`/build restart`、`/build eval` 已重整至 `/commit-push` 與 `/build deploy`。
 
 ## 目錄結構
 

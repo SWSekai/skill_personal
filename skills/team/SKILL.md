@@ -1,10 +1,10 @@
 ---
 name: team
-description: "One-stop entry for interactive collaboration: AI TODO handling, live whiteboard, Markdown interactive decision tables, tech notes, handoff documents, work reports, and project journal maintenance. Subcommand routing: todo / board / decide / note / handoff / report / journal (renamed from living on 2026-04-24) / follow-up."
+description: "One-stop entry for interactive collaboration: AI TODO handling, live whiteboard, Markdown interactive decision tables, tech notes, handoff documents, work reports, and project journal maintenance. Subcommand routing: todo / board / decide / note / handoff / report / journal (renamed from living on 2026-04-24) / follow-up / sync. Supports --no-subagent flag for 1M-context / sub-agent-avoidance runs."
 model: sonnet
 effort: medium
-argument-hint: "<todo|board|decide|note|handoff|report|journal|follow-up|sync> [args...]"
-allowed-tools: Read, Write, Edit, Glob, Grep, AskUserQuestion, Bash(git *), Bash(ls *), Bash(date *), Bash(mkdir *), Bash(mv *)
+argument-hint: "<todo|board|decide|note|handoff|report|journal|follow-up|sync> [--no-subagent] [args...]"
+allowed-tools: Read, Write, Edit, Glob, Grep, Agent, AskUserQuestion, Bash(git *), Bash(ls *), Bash(date *), Bash(mkdir *), Bash(mv *)
 ---
 
 # /team — Interactive Collaboration Merged Skill
@@ -29,6 +29,26 @@ When no argument is provided, ask the user to specify a subcommand.
 
 ---
 
+## `--no-subagent` Flag (1M Context / Sub-agent Avoidance Mode)
+
+When `$ARGUMENTS` contains `--no-subagent`, **all Agent dispatches across every subcommand run inline in the main session** — no `Agent` tool invocations are made. The main Sonnet session performs the work directly using the same logic.
+
+**Subcommand impact**:
+- `/team report --daily`: Haiku structured output Agent → inline (main Sonnet writes report directly)
+- `/team decide`: closure summary drafting via Opus Agent (when invoked) → inline (main Sonnet drafts summary)
+- `/team board`: closure summary drafting via Opus Agent (when invoked) → inline
+- `/team handoff`: AI context bundle generation → inline
+- `/team todo` / `journal` / `note` / `follow-up` / `sync`: predominantly already inline; flag is a safety guard
+
+**When to use**:
+- Current session runs in **Opus 4.7 1M context** mode without `/extra-usage` enabled — sub-agent spawn hits the API gateway's extra-usage wall and halts the flow mid-run. Detection hint: model id suffix `[1m]`, or a prior run aborted with `API Error: Extra usage is required for 1M context`.
+- User wants a single-transcript audit trail (all reasoning visible in main session, not buried in sub-agent logs).
+- Debugging closure summary or report generation behavior.
+
+**Trade-off**: default mode optimises for model specialisation (Haiku brevity on report, Opus depth on closure summary); inline mode trades that for reliability under 1M-gate / visibility. See CLAUDE.md Rule 26 for the cross-skill standard.
+
+---
+
 ## Common Rules (Apply to All Subcommands)
 
 ### Time Sampling (Mandatory)
@@ -48,10 +68,10 @@ All interactive output files follow the pattern `YYMMDD_<topic>_<type>.md` where
 All sequential / cross-machine documents live under `.hanschen/` at the project root, **same level as `.sekai-workflow/`**. Per decision §01.B (CLOSED_260429_hanschen_dir_governance_decision.md), `.hanschen/` is **tracked by the project's git** (not gitignored, not a separate repo). The user manually decides which `.hanschen/` content to push to public branches when the project is multi-person sensitive.
 
 **Shared paths (under `.hanschen/`)**:
-- `.hanschen/docs/decision/` — decision tables
-- `.hanschen/docs/living/PROJECT_JOURNAL.md` — project journal
-- `.hanschen/docs/board/` — whiteboards (active + CLOSED_*)
-- `.hanschen/docs/guides/` — project-specific troubleshooting / config notes
+- `.hanschen/decision/` — decision tables
+- `.hanschen/journal/PROJECT_JOURNAL.md` — project journal
+- `.hanschen/board/` — whiteboards (active + CLOSED_*)
+- `.hanschen/guides/` — project-specific troubleshooting / config notes
 - `.hanschen/modify_log/` — modify logs
 - `.hanschen/report/` — daily reports
 - `.hanschen/.history/refactor.jsonl` — major refactor record (90-day TTL, see `/team sync` Step 0)
@@ -66,7 +86,7 @@ All sequential / cross-machine documents live under `.hanschen/` at the project 
 
 **Cross-project knowledge (under `sekai-workflow/handbook/`, via /kb)**:
 - General technical notes (Docker, K8s, algorithms, backend patterns) → `/kb add` writes to `sekai-workflow/handbook/`, **not** `.hanschen/`
-- Project-specific guides stay in `.hanschen/docs/guides/`
+- Project-specific guides stay in `.hanschen/guides/`
 
 **Why relative path is mandatory**:
 The project directory may live at any path on any machine. Only project-root-relative paths work cross-machine. Never write absolute paths like `D:/hanschen/...` or `/home/user/...` into skills.
@@ -80,7 +100,7 @@ The project directory may live at any path on any machine. Only project-root-rel
 
 ### Markdown Callout / Blockquote Rules (Mandatory — PDF render compatibility)
 
-**Reason**: documents under `.hanschen/docs/` are eventually exported to PDF for delivery. GFM-extended admonition syntax breaks in most PDF renderers, leaving raw `> [!NOTE]` text or hidden content.
+**Reason**: documents under `.hanschen/` (decision/, board/, journal/, guides/, handoff/) are eventually exported to PDF for delivery. GFM-extended admonition syntax breaks in most PDF renderers, leaving raw `> [!NOTE]` text or hidden content.
 
 - ✅ **Allowed**: standard markdown blockquote `> text...` for emphasis, notes, supplementary说明
 - ❌ **Forbidden**: GFM admonition `> [!NOTE]` / `> [!WARNING]` / `> [!TIP]` / `> [!IMPORTANT]` / `> [!CAUTION]`
@@ -94,7 +114,7 @@ The project directory may live at any path on any machine. Only project-root-rel
   > **💡 建議**：這段是建議
   ```
 
-- Apply across all team subcommands (decide, board, journal, note, handoff, report) and any markdown written under `.hanschen/docs/`
+- Apply across all team subcommands (decide, board, journal, note, handoff, report) and any markdown written under `.hanschen/`
 
 ---
 
@@ -184,7 +204,7 @@ For consultation, planning, and troubleshooting conversations, create a continuo
 **Auto-trigger** (tightened 2026-04-24 per Rule 17.1.3):
 - Consultation / planning / troubleshooting conversation, AND
 - **3 rounds of back-and-forth without convergence** (no clear TODO, no decide opened, no final answer)
-- → auto-create `.hanschen/docs/board/YYMMDD_<topic>_board.md`
+- → auto-create `.hanschen/board/YYMMDD_<topic>_board.md`
 
 1-2 rounds with quick convergence → inline answer, do NOT open whiteboard.
 
@@ -198,7 +218,7 @@ For consultation, planning, and troubleshooting conversations, create a continuo
 ### Step 1: Create the Whiteboard
 
 - **First**: call `date '+%Y-%m-%d %H:%M'` to get authoritative time (see Common Rules)
-- Path: `.hanschen/docs/board/YYMMDD_<topic>_board.md` (snake_case topic; `_board` suffix recommended for new files but legacy files without the suffix are still valid)
+- Path: `.hanschen/board/YYMMDD_<topic>_board.md` (snake_case topic; `_board` suffix recommended for new files but legacy files without the suffix are still valid)
 - Same topic on the same day → update the existing file, do not create another
 - Structural principles:
   - **Pending**: pure checkbox list, see at a glance what remains
@@ -250,9 +270,9 @@ Round 2+ retroactively wraps Round 1 in `<details>` (still inside blockquote). I
 
 1. Update the document header status to **Completed** or **Paused**
 2. Rename the file by prepending `CLOSED_` to the filename:
-   - Before: `.hanschen/docs/board/YYMMDD_<topic>_board.md`
-   - After: `.hanschen/docs/board/CLOSED_YYMMDD_<topic>_board.md`
-   - Use: `mv .hanschen/docs/board/YYMMDD_<topic>_board.md .hanschen/docs/board/CLOSED_YYMMDD_<topic>_board.md`
+   - Before: `.hanschen/board/YYMMDD_<topic>_board.md`
+   - After: `.hanschen/board/CLOSED_YYMMDD_<topic>_board.md`
+   - Use: `mv .hanschen/board/YYMMDD_<topic>_board.md .hanschen/board/CLOSED_YYMMDD_<topic>_board.md`
 
 #### 3.2 Append Inline Closure Summary (Mandatory, Unified Template)
 
@@ -291,7 +311,7 @@ Whiteboard's key-outcomes / decisions-made / unresolved items map to the unified
 
 #### 3.3 Update Living Document (Mandatory)
 
-After writing the closure summary, immediately update the project living document (`.hanschen/docs/living/PROJECT_JOURNAL.md`):
+After writing the closure summary, immediately update the project living document (`.hanschen/journal/PROJECT_JOURNAL.md`):
 - If the file does not exist, initialize it first (see Section G Step 1)
 - Append a new row to the "討論成果" table: date, topic, 1–2 sentence outcome summary, link to renamed file
 - If the whiteboard's decision log contains entries → also append to the "決策紀錄" table
@@ -301,7 +321,7 @@ After writing the closure summary, immediately update the project living documen
 - [ ] File renamed with `CLOSED_` prefix
 - [ ] "最後更新" date in the document updated
 - [ ] Closure summary section appended
-- [ ] Living document (`.hanschen/docs/living/PROJECT_JOURNAL.md`) updated
+- [ ] Living document (`.hanschen/journal/PROJECT_JOURNAL.md`) updated
 - [ ] **Leftover items from closure summary appended to `TODO.md` Pending** with `(from CLOSED_*_board.md)` tag (2026-04-24 expanded per Rule 17.1.4: whiteboard unresolved items auto-append to prevent forgetting after CLOSED archival)
 - [ ] Daily report updated (Step 3.5)
 - [ ] Contains reusable experience → evaluate writing it into a guide (same as `/build commit` Step 9)
@@ -370,7 +390,7 @@ Generate structured markdown for the user to check options, which Claude then re
 ### Step 2: Generate Interactive Markdown
 
 - **First**: call `date '+%Y-%m-%d %H:%M'` to get authoritative time (see Common Rules)
-- Default location: `.hanschen/docs/decision/YYMMDD_<topic>_decision.md` (snake_case topic; `_decision` suffix recommended for new files. Legacy files without the suffix are still valid — do not rename existing files just to conform)
+- Default location: `.hanschen/decision/YYMMDD_<topic>_decision.md` (snake_case topic; `_decision` suffix recommended for new files. Legacy files without the suffix are still valid — do not rename existing files just to conform)
 - **Use template** `assets/decision-template.md` as the starting structure (sections, `**補充說明：**` blockquote with `💡 預填建議` prefix, Round 1 / Round 2 response example). Replace `{{placeholder}}` fields with topic-specific content. Template is generic — do not bake topic-specific text into the asset.
 
 Format specification:
@@ -509,14 +529,14 @@ For each decision block:
 
 #### 6.3 Rename the Decision File (Mandatory)
 
-- **Proactively rename** `.hanschen/docs/decision/YYMMDD_<topic>_decision.md` → `.hanschen/docs/decision/CLOSED_YYMMDD_<topic>_decision.md`
-  - Use: `mv .hanschen/docs/decision/YYMMDD_<topic>_decision.md .hanschen/docs/decision/CLOSED_YYMMDD_<topic>_decision.md`
+- **Proactively rename** `.hanschen/decision/YYMMDD_<topic>_decision.md` → `.hanschen/decision/CLOSED_YYMMDD_<topic>_decision.md`
+  - Use: `mv .hanschen/decision/YYMMDD_<topic>_decision.md .hanschen/decision/CLOSED_YYMMDD_<topic>_decision.md`
 - The `CLOSED_` prefix indicates the decision process is complete; the inline summary (appended in 6.1) is the authoritative record
 - If the user explicitly says "delete the decision record" → delete instead and note it in the reply
 
 #### 6.4 Update Living Document (Mandatory, Cannot Be Skipped)
 
-After renaming, immediately update `.hanschen/docs/living/PROJECT_JOURNAL.md`:
+After renaming, immediately update `.hanschen/journal/PROJECT_JOURNAL.md`:
 - If the file does not exist, initialize it first (see Section G Step 1)
 - Append new row to "決策紀錄" table: date, topic, adopted options summary (1 line), link to `CLOSED_YYMMDD_<topic>_decision.md` (the **only** source file now — no separate summary file exists)
 - If the inline summary contains "🔖 保留候選" → append each to living doc's "🔖 保留候選" table
@@ -528,8 +548,8 @@ After Step 6 completes, confirm:
 - [ ] **Step 6.0 deviation check executed**: any §n.m item where implementation pivoted from the original `[x]` selection has been recorded in the inline summary's 「備註」 column with `原選 X → 實作 Y，因 <reason>` format (no silent deviation reaches `PROJECT_JOURNAL.md`)
 - [ ] Inline closure summary has been appended to the end of `YYMMDD_<topic>_decision.md` (before rename)
 - [ ] Inline summary includes: background, decision table (per §n.m item), change list, preserved candidates (if any non-single-path), leftover items
-- [ ] `.hanschen/docs/decision/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`
-- [ ] `.hanschen/docs/living/PROJECT_JOURNAL.md` has been updated with this decision's entries (link → `CLOSED_*_decision.md`)
+- [ ] `.hanschen/decision/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`
+- [ ] `.hanschen/journal/PROJECT_JOURNAL.md` has been updated with this decision's entries (link → `CLOSED_*_decision.md`)
 - [ ] **No** `.local/docs/summary/` file has been created (directory was removed 2026-04-22; writing there is a violation)
 - [ ] **Leftover items from closure summary appended to `TODO.md` Pending** with `(from CLOSED_*_decision.md)` tag (2026-04-24 expanded per Rule 17.1.4: previously only 實作項 appended; now 遺留項 also auto-append to prevent forgetting after CLOSED archival)
 - [ ] Daily report updated (Step 6.6)
@@ -565,7 +585,7 @@ Parser rules: `references/daily-report.md` §9.1 (closure block detection), §9.
 >
 > When `/team note <topic>` is invoked → **forward to `/kb add <topic>`** (write to handbook). The legacy local-tech-note flow below is retained only for reference; new content must go through `/kb`.
 >
-> Project-specific troubleshooting (e.g., "this repo's HoughCircles OOM fix") goes to `.hanschen/docs/guides/` instead — not tech-note, not handbook.
+> Project-specific troubleshooting (e.g., "this repo's HoughCircles OOM fix") goes to `.hanschen/guides/` instead — not tech-note, not handbook.
 
 ### Legacy flow (deprecated path — for reference only)
 
@@ -632,6 +652,8 @@ Before leaving (off-duty, vacation, project handover, environment switch), produ
 
 **This subcommand has an "evaluation / summarization / risk" nature, and it is recommended to invoke an Opus subtask via the Agent tool** (aligned with CLAUDE.md Rule 18).
 
+> **`--no-subagent` mode**: main Sonnet session generates the handoff document and AI context bundle inline using the same checklist (no Opus Agent spawn). See `## --no-subagent Flag` section above.
+
 ### `/skm pack` vs `/team handoff` Differences
 
 | Aspect | `/skm pack` | `/team handoff` |
@@ -639,14 +661,14 @@ Before leaving (off-duty, vacation, project handover, environment switch), produ
 | Purpose | Skill exit archival | Handoff / environment transition |
 | Environment | **Clear** .claude/skills/ + Sekai_workflow/ + CLAUDE.md | **Preserve**, environment untouched |
 | Output target | Machine (restore manifest) | Human (handoff doc) + AI (context bundle) |
-| Output location | `.local/ai-context/` | `.local/docs/handoff/` or `docs/handoff/` (`--share`) |
+| Output location | `.local/ai-context/` | `.hanschen/handoff/` or `docs/handoff/` (`--share`) |
 | Use timing | Project end, long-term archival | Weekend off-duty, vacation, colleague takeover, switching dev machines |
 
 ### Triggers
 
 | Usage | Behavior |
 |---|---|
-| `/team handoff` | Output to `.local/docs/handoff/` (local-only) |
+| `/team handoff` | Output to `.hanschen/handoff/` (local-only) |
 | `/team handoff --share` | Output to `docs/handoff/` (under version control, colleagues can pull) |
 
 ### Step 1: Collect Project State
@@ -664,7 +686,7 @@ Read the following information sources in parallel:
 | Git status | `git status` / `git log origin..HEAD` / `git branch` | Human §F |
 | Decision history | `.local/docs/summary/*.md` | AI bundle |
 | Memory | `~/.claude/projects/<proj>/memory/*.md` | AI bundle |
-| Experience guides | `.hanschen/docs/guides/*.md` | AI bundle |
+| Experience guides | `.hanschen/guides/*.md` | AI bundle |
 | Context summaries | Latest in `.local/context_summary/` | AI bundle |
 
 ### Step 2: Generate Human Handoff Document (`YYMMDD_handoff.md`)
@@ -751,7 +773,7 @@ YYMMDD_ai-context/
 ├── project-summary.md         ← AI-only summary (template below)
 ├── memory/                    ← Memory snapshot (*.md)
 ├── decision-history/          ← Copy of .local/docs/summary/*.md
-├── guides/                    ← Copy of .hanschen/docs/guides/*.md
+├── guides/                    ← Copy of .hanschen/guides/*.md
 ├── recent-modify-logs/        ← Most recent 10 from .hanschen/modify_log/
 ├── todo-snapshot.md           ← Copy of ./TODO.md (or .local/collab/TODO.md if that's where project keeps it)
 └── context-snapshot.md        ← Latest summary from .local/context_summary/
@@ -790,7 +812,7 @@ YYMMDD_ai-context/
 ### Step 4: Output and Confirmation
 
 1. Write the human handoff document:
-   - Default: `.local/docs/handoff/YYMMDD_handoff.md`
+   - Default: `.hanschen/handoff/YYMMDD_handoff.md`
    - `--share`: `docs/handoff/YYMMDD_handoff.md`
 2. Write the AI context bundle to `YYMMDD_ai-context/` in the same directory
 3. Inform the user of both output paths
@@ -939,7 +961,7 @@ Maintain a single, continuously updated project-level document that accumulates 
 
 ### Document Location
 
-`.hanschen/docs/living/PROJECT_JOURNAL.md`
+`.hanschen/journal/PROJECT_JOURNAL.md`
 
 One file per project; entries are append-only (never overwrite existing rows).
 
@@ -953,7 +975,7 @@ One file per project; entries are append-only (never overwrite existing rows).
 
 ### Step 1: Initialize (First-Time Only)
 
-If `.hanschen/docs/living/PROJECT_JOURNAL.md` does not exist, create the directory and initialize the file:
+If `.hanschen/journal/PROJECT_JOURNAL.md` does not exist, create the directory and initialize the file:
 
 ```markdown
 # 專案活文件（Project Journal）
@@ -993,7 +1015,7 @@ Called internally after `/team board` Step 3.2. Input: the renamed whiteboard fi
    - Date (from file or closure summary)
    - Topic (from filename or whiteboard title)
    - Key outcomes (1–2 sentences condensed from "Key Outcomes" bullet points)
-   - Link: `[CLOSED_YYMMDD_topic.md](.hanschen/docs/board/CLOSED_YYMMDD_topic.md)`
+   - Link: `[CLOSED_YYMMDD_topic.md](.hanschen/board/CLOSED_YYMMDD_topic.md)`
 3. If the whiteboard's "決策紀錄" table has entries → also append each to "決策紀錄" table
 4. Update "最後更新" timestamp
 
@@ -1011,7 +1033,7 @@ Called internally after `/team decide` Step 6.4. Input: the renamed decision fil
 
 For `/team journal regen`:
 1. Clear the rows from all three tables (keep headers and template structure)
-2. Scan all `CLOSED_*` files in `.hanschen/docs/board/` and `.hanschen/docs/decision/`
+2. Scan all `CLOSED_*` files in `.hanschen/board/` and `.hanschen/decision/`
 3. For each CLOSED file, parse the **inline closure summary block** at its end
 4. Rebuild the three tables chronologically by date
 5. Report: "Rebuilt from N whiteboard sessions, M decisions"
@@ -1044,7 +1066,7 @@ Filename accepts: full name, no-extension form, or prefix (e.g. `260422_team` ma
 ### Step 1: Parse argument + locate file
 
 1. Apply matching strategy (see `references/followup.md` §2)
-2. Search scope: `.hanschen/docs/board/` + `.hanschen/docs/decision/`
+2. Search scope: `.hanschen/board/` + `.hanschen/decision/`
 3. **Filter out `CLOSED_*` files silently** at candidate listing stage
 4. Exact-typed `CLOSED_xxx` → special-case message "file is closed, see summary at …"
 5. Zero matches → list nearest 3 candidates via AskUserQuestion
@@ -1056,8 +1078,8 @@ Detected via filename suffix (`_board` vs `_decision`) with directory as fallbac
 
 | Type | Handler | Reference |
 |---|---|---|
-| `_board.md` in `.hanschen/docs/board/` | whiteboard follow-up handler | `references/followup.md` §4 |
-| `_decision.md` in `.hanschen/docs/decision/` | decision follow-up handler | `references/followup.md` §3 |
+| `_board.md` in `.hanschen/board/` | whiteboard follow-up handler | `references/followup.md` §4 |
+| `_decision.md` in `.hanschen/decision/` | decision follow-up handler | `references/followup.md` §3 |
 
 ### Step 3: Parse (skip closed blocks)
 
@@ -1118,16 +1140,16 @@ Quick scans (target ≤5s):
 
 | Check | Severity | Detection |
 |---|---|---|
-| `.local/report/`, `.local/modify_log/`, `.local/docs/decision/`, `.local/docs/board/`, `.local/docs/living/`, `.local/docs/handoff/`, `.local/docs/guides/` | Warning | Any of these exist with files → boundary violation per Rule 25 |
-| `.hanschen/docs/decision/`, `.hanschen/docs/board/`, `.hanschen/docs/living/` | Warning | Required subdirectory missing |
+| `.hanschen/report/`, `.hanschen/modify_log/`, `.hanschen/decision/`, `.hanschen/board/`, `.hanschen/journal/`, `.hanschen/handoff/`, `.hanschen/guides/` | Warning | Any of these exist with files → boundary violation per Rule 25 |
+| `.hanschen/decision/`, `.hanschen/board/`, `.hanschen/journal/` | Warning | Required subdirectory missing |
 | `.hanschen/.history/refactor.jsonl` | Critical | Missing → cannot evaluate Step 0 |
 | `.hanschen/` directory itself | Critical | Missing entirely → user should run `/skm refactor` |
 
 Output:
 ```
 Pre-sync check (Rule 25 boundary):
-  ⚠ .local/report/ has 1 file (should be in .hanschen/report/)
-  ⚠ .hanschen/docs/board/ missing
+  ⚠ .hanschen/report/ has 1 file (should be in .hanschen/report/)
+  ⚠ .hanschen/board/ missing
   ✓ All other checks passed
   → Hint: run `/team sync --audit` for full report
 ```
@@ -1150,7 +1172,7 @@ Pre-sync check (Rule 25 boundary):
    Refactor history (3 active, 1 expired):
      - 2026-04-29 path_migration .local/{shared} → .hanschen/{shared}
        └─ 0 files in old location ✓ (already migrated)
-     - 2026-04-29 path_migration .local/docs/guides → .hanschen/docs/guides
+     - 2026-05-08 path_migration .hanschen/docs/{board,decision,living,guides,handoff} → .hanschen/{board,decision,journal,guides,handoff}
        └─ 2 files in old location ⚠ → run migration?
    ```
 4. With `--auto-migrate`, execute moves; otherwise AskUserQuestion per pending item.
@@ -1221,7 +1243,8 @@ Skip all git ops; emit a structured architecture audit to `.hanschen/.history/au
 | § | Check | Detection |
 |---|---|---|
 | §1 | `.local/` boundary residue (Rule 25) | Files exist under `.local/{report, modify_log, docs/decision, docs/board, docs/living, docs/handoff, docs/guides}/` |
-| §2 | `.hanschen/docs/` required subdirectories | `decision/`, `board/`, `living/` exist (others optional) |
+| §1b | `.hanschen/docs/` legacy residue (post-2026-05-08 flatten) | Files exist under `.hanschen/docs/{board,decision,living,guides,handoff}/` (should now be flattened to `.hanschen/{board,decision,journal,guides,handoff}/`) |
+| §2 | `.hanschen/` required subdirectories | `decision/`, `board/`, `journal/` exist (others optional) |
 | §3 | `.hanschen/modify_log/` ↔ git log consistency | For each commit in `git log --since=30d`: a matching modify_log entry should exist (cross-ref by short_hash) |
 | §4 | `.local/context_summary/` staleness | Files with `mtime > 14d` flagged for cleanup |
 | §5 | `.hanschen/.history/refactor.jsonl` integrity | Each entry: `from` either non-existent (migrated) or has files needing migration; report counts |
@@ -1232,13 +1255,13 @@ Skip all git ops; emit a structured architecture audit to `.hanschen/.history/au
 # Document Architecture Audit — YYYY-MM-DD
 
 ## §1 .local/ Boundary Residue (Rule 25)
-- ⚠ .local/report/ : 1 file (260506_daily_report.md)
+- ⚠ .hanschen/report/ : 1 file (260506_daily_report.md)
 - ✓ all other paths clean
 
-## §2 .hanschen/docs/ Required Subdirectories
-- ✓ decision/ exists (9 files: 3 active, 6 CLOSED)
+## §2 .hanschen/ Required Subdirectories
+- ✓ decision/ exists (11 files: 3 active, 8 CLOSED)
 - ✓ board/ exists (0 files; placeholder only)
-- ✓ living/ exists (1 file)
+- ✓ journal/ exists (1 file)
 
 ## §3 modify_log ↔ git log Consistency (last 30 days)
 - ✓ ff1bb49: 260507_hanschen_dotprefix_path_rewrite.md
@@ -1253,7 +1276,7 @@ Skip all git ops; emit a structured architecture audit to `.hanschen/.history/au
 ---
 
 ## Action Items
-- [ ] Move .local/report/* to .hanschen/report/ (or delete if duplicates)
+- [ ] Move .hanschen/report/* to .hanschen/report/ (or delete if duplicates)
 - [ ] Add modify_log for commit 1b414b2 OR mark as legacy
 - [ ] Clean .local/context_summary/260417_xxx.md (>14d)
 ```
