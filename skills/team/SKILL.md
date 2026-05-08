@@ -203,7 +203,7 @@ For consultation, planning, and troubleshooting conversations, create a continuo
 - Structural principles:
   - **Pending**: pure checkbox list, see at a glance what remains
   - **Operation steps**: specific approaches numbered with § corresponding to pending items
-  - **Completed**: one concise line per item; completed operation steps are removed at the same time
+  - **Completed**: one concise line per item in format `YYYY-MM-DD HH:MM — task summary`; completed operation steps are removed at the same time
 
 Initial templates can reference past whiteboards or be self-designed (no external assets needed).
 

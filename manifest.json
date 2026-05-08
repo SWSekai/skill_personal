@@ -9,12 +9,44 @@
       "name": "build",
       "command": "/build",
       "description": "開發全流程一站式入口：需求分析 → 方案設計 → 實作 → 測試 → 品質檢查 → review → deploy。Commit 推送走獨立 /commit-push。",
-      "subcommands": ["all", "plan", "do", "test", "check", "review", "deploy"],
+      "subcommands": [
+        "all",
+        "plan",
+        "do",
+        "test",
+        "check",
+        "review",
+        "deploy"
+      ],
       "model": "sonnet",
       "trigger": "手動呼叫",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash(git *)", "Bash(docker *)", "Bash(ls *)", "Bash(date *)", "Bash(sleep *)", "Bash(mkdir *)", "Bash(npm *)", "Bash(npx *)", "Bash(pytest *)", "Bash(python *)"],
-      "files": ["build/SKILL.md", "build/README.md"],
-      "merged_from": ["quality-check", "restart-volumn", "restart-eval"],
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Agent",
+        "Bash(git *)",
+        "Bash(docker *)",
+        "Bash(ls *)",
+        "Bash(date *)",
+        "Bash(sleep *)",
+        "Bash(mkdir *)",
+        "Bash(npm *)",
+        "Bash(npx *)",
+        "Bash(pytest *)",
+        "Bash(python *)"
+      ],
+      "files": [
+        "skills/build/SKILL.md",
+        "skills/build/README.md"
+      ],
+      "merged_from": [
+        "quality-check",
+        "restart-volumn",
+        "restart-eval"
+      ],
       "subcommand_models": {
         "plan": "opus",
         "check": "opus",
@@ -29,34 +61,122 @@
       "name": "team",
       "command": "/team",
       "description": "互動協作一站式入口：AI TODO 處理、即時白板、Markdown 互動式決策表、技術筆記、交接文件、工作報告（含 --daily 每日 Teams 日報模式）、journal（原 living，2026-04-24 改名）、follow-up",
-      "subcommands": ["todo", "board", "decide", "note", "handoff", "report", "journal", "follow-up"],
+      "subcommands": [
+        "todo",
+        "board",
+        "decide",
+        "note",
+        "handoff",
+        "report",
+        "journal",
+        "follow-up"
+      ],
       "model": "sonnet",
       "trigger": "手動呼叫 / board 自動觸發 / report --daily 由 board Step 3.5 + decide Step 6.6 + commit-push Step 11 自動呼叫",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(mkdir *)", "Bash(mv *)"],
-      "files": ["team/SKILL.md", "team/README.md", "team/references/interaction-modes.md", "team/references/naming.md", "team/references/followup.md", "team/references/daily-report.md", "team/assets/collab-template.md", "team/assets/board-template.md", "team/assets/daily-report-template.md"],
-      "merged_from": ["todo", "whiteboard", "md-collab", "tech-notes", "handoff", "report"]
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Bash(git *)",
+        "Bash(ls *)",
+        "Bash(date *)",
+        "Bash(mkdir *)",
+        "Bash(mv *)"
+      ],
+      "files": [
+        "skills/team/SKILL.md",
+        "skills/team/README.md",
+        "skills/team/references/interaction-modes.md",
+        "skills/team/references/naming.md",
+        "skills/team/references/followup.md",
+        "skills/team/references/daily-report.md",
+        "skills/team/assets/collab-template.md",
+        "skills/team/assets/board-template.md",
+        "skills/team/assets/daily-report-template.md"
+      ],
+      "merged_from": [
+        "todo",
+        "whiteboard",
+        "md-collab",
+        "tech-notes",
+        "handoff",
+        "report"
+      ]
     },
     {
       "name": "skm",
       "command": "/skm",
       "description": "Skill Management 一站式入口（2026-04-24 由 /skill 改名，避免與 Claude Code 內建 /skills 對話框混淆）：建立新 Skill、遠端同步、專案打包、使用者確認式 Skill 改進捕捉",
-      "subcommands": ["new", "sync", "pack", "update"],
+      "subcommands": [
+        "new",
+        "sync",
+        "pack",
+        "update"
+      ],
       "model": "sonnet",
       "trigger": "手動呼叫 / sync 對話開始自動",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(ls *)", "Bash(mkdir *)", "Bash(date *)", "Bash(cp *)", "Bash(bash *)", "Bash(cat *)"],
-      "files": ["skm/SKILL.md", "skm/README.md", "skm/references/model-selection-guide.md", "skm/references/evaluation-decision-tree.md", "skm/references/version-control-boundaries.md", "skm/assets/SKILL.md.template", "skm/assets/README.md.template"],
-      "merged_from": ["create-skill", "skill-sync", "pack"]
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Bash(git *)",
+        "Bash(ls *)",
+        "Bash(mkdir *)",
+        "Bash(date *)",
+        "Bash(cp *)",
+        "Bash(bash *)",
+        "Bash(cat *)"
+      ],
+      "files": [
+        "skills/skm/SKILL.md",
+        "skills/skm/README.md",
+        "skills/skm/references/model-selection-guide.md",
+        "skills/skm/references/evaluation-decision-tree.md",
+        "skills/skm/references/version-control-boundaries.md",
+        "skills/skm/assets/SKILL.md.template",
+        "skills/skm/assets/README.md.template"
+      ],
+      "merged_from": [
+        "create-skill",
+        "skill-sync",
+        "pack"
+      ]
     },
     {
       "name": "ask",
       "command": "/ask",
       "description": "系統文件與資料流追蹤：系統資訊查詢、資料流追蹤（原 report 子命令已搬至 /team report）",
-      "subcommands": ["info", "trace"],
+      "subcommands": [
+        "info",
+        "trace"
+      ],
       "model": "opus",
       "trigger": "info 自動 / 其餘手動",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash(ls *)", "Bash(find *)", "Bash(git log*)", "Bash(git diff*)", "Bash(date *)"],
-      "files": ["ask/SKILL.md", "ask/README.md"],
-      "merged_from": ["sys-info", "trace-flow"]
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Agent",
+        "Bash(ls *)",
+        "Bash(find *)",
+        "Bash(git log*)",
+        "Bash(git diff*)",
+        "Bash(date *)"
+      ],
+      "files": [
+        "skills/ask/SKILL.md",
+        "skills/ask/README.md"
+      ],
+      "merged_from": [
+        "sys-info",
+        "trace-flow"
+      ]
     },
     {
       "name": "clean",
@@ -64,9 +184,26 @@
       "description": "Context 清理入口：繼承 context-guard 所有功能，清理舊摘要後執行 /clear，Stop hook 偵測舊摘要自動提醒",
       "model": "sonnet",
       "trigger": "系統壓縮通知 / 手動 / 對話開始 / Stop hook 提醒",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(rm *)", "Bash(mkdir *)", "Bash(git status*)", "Bash(git log*)", "Bash(date *)"],
-      "files": ["clean/SKILL.md", "clean/README.md"],
-      "merged_from": ["context-guard"]
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Bash(ls *)",
+        "Bash(rm *)",
+        "Bash(mkdir *)",
+        "Bash(git status*)",
+        "Bash(git log*)",
+        "Bash(date *)"
+      ],
+      "files": [
+        "skills/clean/SKILL.md",
+        "skills/clean/README.md"
+      ],
+      "merged_from": [
+        "context-guard"
+      ]
     },
     {
       "name": "memo",
@@ -74,8 +211,20 @@
       "description": "Memory 跨專案攜帶：feedback/user memory 隨 Sekai_workflow git 攜帶",
       "model": "sonnet",
       "trigger": "手動 / sp-init.bat 還原 / sp-pack.sh 回寫",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(ls *)", "Bash(cp *)", "Bash(git *)"],
-      "files": ["memo/SKILL.md", "memo/README.md"]
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Bash(ls *)",
+        "Bash(cp *)",
+        "Bash(git *)"
+      ],
+      "files": [
+        "skills/memo/SKILL.md",
+        "skills/memo/README.md"
+      ]
     },
     {
       "name": "dispatch",
@@ -83,19 +232,46 @@
       "description": "任務分派路由：依 CLAUDE.md Rule 18 啟發法選 model 層級，透過 Agent 工具產生真實切換並寫入 .local/model_dispatch.log",
       "model": "haiku",
       "trigger": "手動呼叫 /dispatch <task>",
-      "allowed_tools": ["Agent", "Read", "Bash(date *)", "Bash(mkdir *)", "Bash(cat *)"],
-      "files": ["dispatch/SKILL.md", "dispatch/README.md"],
+      "allowed_tools": [
+        "Agent",
+        "Read",
+        "Bash(date *)",
+        "Bash(mkdir *)",
+        "Bash(cat *)"
+      ],
+      "files": [
+        "skills/dispatch/SKILL.md",
+        "skills/dispatch/README.md"
+      ],
       "companion_hook": "hooks/log_agent_dispatch.cjs"
     },
     {
       "name": "kb",
       "command": "/kb",
       "description": "Knowledge Base 管理：維護 sekai-workflow/handbook/ 跨專案工程手冊（Docker/K8s/ETL/算法/後端），add/search/extract 三子命令 + 自動抽取與提問增強",
-      "subcommands": ["add", "search", "extract"],
+      "subcommands": [
+        "add",
+        "search",
+        "extract"
+      ],
       "model": "sonnet",
       "trigger": "手動呼叫 / /team 結案自動抽取 / 技術提問自動查詢",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(git *)", "Bash(mkdir *)", "Bash(ls *)", "Bash(date *)"],
-      "files": ["kb/SKILL.md", "kb/README.md", "kb/assets/kb-doc-template.md"],
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Bash(git *)",
+        "Bash(mkdir *)",
+        "Bash(ls *)",
+        "Bash(date *)"
+      ],
+      "files": [
+        "skills/kb/SKILL.md",
+        "skills/kb/README.md",
+        "skills/kb/assets/kb-doc-template.md"
+      ],
       "data_path": "handbook/"
     },
     {
@@ -104,14 +280,33 @@
       "description": "主要 commit & push 入口：品質檢查（Opus 內嵌）→ 修改日誌（Haiku 內嵌）→ README 更新 → commit → push → sekai-workflow 同步 → deploy 評估 → Context 清理 → 經驗回流。10 個步驟完整流程，所有日誌僅存本地。支援 --meta（skill 維護略過 modify_log / 日報）與 --no-subagent（1M context 無法派生 sub-agent 時改由主 session 直跑）兩旗標。",
       "model": "sonnet",
       "trigger": "手動呼叫",
-      "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash(git *)", "Bash(ls *)", "Bash(date *)", "Bash(docker *)"],
-      "files": ["commit-push/SKILL.md", "commit-push/README.md", "commit-push/references/commit-conventions.md", "commit-push/references/gitignore-safety.md"],
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Agent",
+        "Bash(git *)",
+        "Bash(ls *)",
+        "Bash(date *)",
+        "Bash(docker *)"
+      ],
+      "files": [
+        "skills/commit-push/SKILL.md",
+        "skills/commit-push/README.md",
+        "skills/commit-push/references/commit-conventions.md",
+        "skills/commit-push/references/gitignore-safety.md"
+      ],
       "embedded_models": {
         "step_1_quality": "opus",
         "step_5_modify_log": "haiku",
         "main": "sonnet"
       },
-      "merged_from": ["quality-check", "modify-log"]
+      "merged_from": [
+        "quality-check",
+        "modify-log"
+      ]
     }
   ],
   "resources": [

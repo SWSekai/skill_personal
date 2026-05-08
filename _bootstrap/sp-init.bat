@@ -56,38 +56,17 @@ if /I not "!PARENT_DIR!"=="!CHECK_DIR!" (
 )
 
 REM ============================
-REM  Step 1: Create .claude/skills/
+REM  Step 1: Synchronize Agents (Rules & Skills)
 REM ============================
-echo [1/9] Setting up .claude/skills/ ...
+echo [1/9] Synchronizing Agent Rules & Skills...
 
-if exist "%PROJECT_DIR%\.claude\skills" (
-    echo       Already exists - merge mode, will not overwrite existing skills
-    set "MODE=merge"
-) else (
-    mkdir "%PROJECT_DIR%\.claude\skills" 2>nul
-    echo       Created .claude/skills/
-    set "MODE=init"
-)
+node ".sekai-workflow\scripts\sync-agents.js"
 
 REM ============================
-REM  Step 2: Copy skill folders
+REM  Step 2: [Reserved for future unified bootstrap steps]
 REM ============================
-echo [2/9] Copying skill files...
+echo [2/9] Skipping legacy copy steps (handled by sync-agents)...
 
-set "SKILL_COUNT=0"
-for /d %%D in ("%REPO_ROOT%\*") do (
-    call :CopySkill "%%D" "%%~nxD"
-)
-
-REM Copy root README.md to .claude/skills/ (init mode only)
-if "!MODE!"=="init" (
-    if exist "%REPO_ROOT%\README.md" (
-        copy /Y "%REPO_ROOT%\README.md" "%PROJECT_DIR%\.claude\skills\README.md" >nul 2>&1
-        echo       + README.md
-    )
-)
-
-echo       Processed !SKILL_COUNT! skills
 
 REM ============================
 REM  Step 3: Plan source repo rename
