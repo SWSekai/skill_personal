@@ -4,6 +4,10 @@
 
 [English](./README.md) · [繁體中文](./README.zh-TW.md) · **日本語**
 
+> 🚧 **Beta — マルチプラットフォーム改修進行中**（ブランチ [`beta/multi-platform-refactor`](https://github.com/SWSekai/sekai-workflow/tree/beta/multi-platform-refactor)）
+> ポータブル symlink/junction 層（`.agents/`）を追加し、同じ skill を **Codex CLI / Gemini CLI / OpenCode** でも Claude Code と同様に使えるようにします。`AGENTS.md` を CLI 横断の canonical context ファイルに昇格。`main` は beta マージまで Claude 専用で安定。
+> 5 段階ロードマップは [`docs/multi-platform-refactor-plan.md`](./docs/multi-platform-refactor-plan.md)、設計判断は [`docs/decisions/`](./docs/decisions/) を参照。
+
 ---
 
 ## これは何？

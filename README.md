@@ -6,6 +6,10 @@
 
 > ⚠️ **Renamed something?** The single source of truth for global rename history is [`_bootstrap/RENAME_HISTORY.md`](./_bootstrap/RENAME_HISTORY.md). When you spot an old name, run a global `grep` and clean it up per the checklist there. Per-skill `Cross-Skill References` sections in each `SKILL.md` / `README.md` only list that skill's own renames.
 
+> 🚧 **Beta — Multi-Platform Refactor in progress** (branch [`beta/multi-platform-refactor`](https://github.com/SWSekai/sekai-workflow/tree/beta/multi-platform-refactor))
+> Adding portable symlink/junction layer (`.agents/`) so the same skills surface in **Codex CLI / Gemini CLI / OpenCode** alongside Claude Code, with `AGENTS.md` as the cross-CLI canonical context file. `main` remains Claude-only and stable until beta is merged.
+> See [`docs/multi-platform-refactor-plan.md`](./docs/multi-platform-refactor-plan.md) for the 5-stage roadmap and [`docs/decisions/`](./docs/decisions/) for the design rationale.
+
 ---
 
 ## What is this?
