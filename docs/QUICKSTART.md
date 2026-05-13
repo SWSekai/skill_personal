@@ -61,6 +61,8 @@ Sekai_workflow/ (專案內)       ← 通用模板本地副本
 .claude/skills/ (專案內)       ← 專案專屬 Skill，可客製化
 ```
 
+> 🗺️ 想看「產出檔案的整體架構」（skill 寫到哪、文件如何串接、自動觸發鏈）→ [`output-architecture.md`](./output-architecture.md)
+
 - **上游更新**：有人改進通用 Skill → `/skm sync` 自動拉取並合併
 - **下游回流**：你在專案中改進了某個 Skill 且具通用性 → 自動回流至遠端倉庫
 

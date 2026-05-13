@@ -4,6 +4,8 @@
 
 [English](./README.md) · **繁體中文** · [日本語](./README.ja.md)
 
+> 🗺️ **想看整體架構？** [`docs/output-architecture.md`](./docs/output-architecture.md) 提供 skill ⇄ 產出檔對應圖、生命週期、自動觸發鏈（Mermaid + ASCII，AI 與人類雙視角）。
+
 ---
 
 ## 這是什麼？

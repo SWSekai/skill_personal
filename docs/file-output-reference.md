@@ -5,6 +5,8 @@
 > Last updated: 2026-05-08（v2.4 路徑扁平化 — `.hanschen/docs/` 中介層移除）
 >
 > ⚠️ **路徑權威來源已遷移至** `.hanschen/.history/README.md` §1.1（`.hanschen/` ↔ `.local/` 邊界）。本表保留為跨 skill 文件產出的快速索引；遇路徑歧異時以 `.hanschen/.history/README.md` 為準。
+>
+> 🗺️ **整體架構圖**：本表只列「誰寫什麼到哪」；若要看「彼此如何串接 / 生命週期 / 自動觸發鏈」的全景視圖，請讀 [`output-architecture.md`](./output-architecture.md)。
 
 ---
 
@@ -41,7 +43,7 @@
 | **team** | `report --daily` | 手動 / board 結案 / decide 結案 / commit-push Step 11 自動 | `YYMMDD_daily_report.md` | `.hanschen/report/` | 每日 Teams 報告 |
 | **team** | `todo` | 手動 / btw 入 Pending | `TODO.md` | 專案根 | AI 待辦事項清單（含 Pending / In Progress / Completed）|
 | **build** | `do` | 衍生任務時 | 追加至 TODO.md | 專案根 | 從 do 發現的衍生 TODO |
-| **build** | `plan` | 方案設計完成 | `YYMMDD_<feature>.md` | `.local/docs/plan/` | 實作方案文件（機器專屬，含 checkbox 步驟清單）|
+| **build** | `plan` | 方案設計完成 | — | — | 對話內輸出方案 + AskUserQuestion 確認（**2026-05-13 起不再寫檔**）|
 | **skm** | `pack` | 手動 `/skm pack` | 打包結果 + `manifest.txt` | `.local/bag/` | AI 上下文打包（含 memory、guides、project-skills）|
 
 ---
@@ -86,8 +88,6 @@
 └── .history/                   #refactor.jsonl + 邊界規則 README.md
 
 .local/                         ← 機器專屬狀態（不入版控）
-├── docs/
-│   └── plan/                   #build plan（單次實作工作檔）
 ├── context_summary/            ← clean 摘要與 current_topic.md
 ├── bag/                        ← skm pack 打包結果（Skill 退出歸檔專用）
 ├── resumption_prompt.md        ← clean 一次性恢復檔（注入後刪除）
@@ -96,6 +96,8 @@
 專案根/
 └── TODO.md                     ← team todo + build do 衍生任務
 ```
+
+> **2026-05-13 變更**：`/build plan` 改為對話內輸出（AskUserQuestion 收斂方案）+ TODO.md 衍生項，**不再寫 `.local/docs/plan/`**；該目錄已從架構中移除。跨對話 plan 恢復改由 TODO.md Pending 區塊 + context_summary 接手。
 
 ---
 

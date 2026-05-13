@@ -145,6 +145,7 @@ Your edits stay local. If you think a change is generic enough to benefit everyo
 ## Documentation
 
 - [QUICKSTART](./docs/QUICKSTART.md) — a walkthrough with screenshots and common scenarios
+- [Output architecture](./docs/output-architecture.md) — full picture: skill ⇄ artefact map, lifecycles, auto-trigger chains (Mermaid + ASCII, AI & human friendly)
 - [File output reference](./docs/file-output-reference.md) — where each command writes its artefacts
 - [`manifest.json`](./manifest.json) — machine-readable index of every skill, its model tier, and allowed tools
 - Per-skill docs live under each skill folder (`build/README.md`, `team/README.md`, …)
