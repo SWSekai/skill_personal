@@ -11,7 +11,7 @@
 ## 使用方式
 
 ```
-/hello [--no-subagent]
+/hello [--no-subagent] [--skip-divergence-check]
 ```
 
 ## 旗標
@@ -19,6 +19,7 @@
 | 旗標 | 說明 |
 |---|---|
 | `--no-subagent` | **無實際效用**（no-op）— 本 Skill 不 dispatch Agent 子任務，flag 僅為跨 Skill 一致性而接受（對應 CLAUDE.md Rule 26）。在 1M context 模式下傳入此 flag 不會報錯 |
+| `--skip-divergence-check` | 跳過 Step 0 雙 clone rebase 分歧偵測（對應 CLAUDE.md Rule 28）。僅用於已知刻意分歧的特殊情境 |
 
 ## Model
 
@@ -30,6 +31,7 @@
 
 | 步驟 | 說明 |
 |---|---|
+| 0. 分歧偵測（Rule 28，新增 2026-05-13） | `git rev-list --left-right --count` 偵測雙 clone rebase 反模式；3+ 兩側分歧顯示警示、10+ 列為 critical |
 | 1. 拉取專案更新 | `git fetch` + 列出新 commit → **AskUserQuestion 確認後**才套用 |
 | 2. 同步 Skill | 預覽全域 Skill 庫新版本 → **AskUserQuestion 確認後**才執行 `sp-sync.sh` |
 | 3. 工作狀態重建 | 3.1 讀取 context_summary 抽取未完成候選 → 3.2 掃描開放 decision/whiteboard 抽取 `[ ]` 項 → 3.3 與 TODO.md 去重 → 3.4 寫入 TODO.md Pending → 3.5 跨日報告檢查 → 3.6 展示重建摘要 |
@@ -59,5 +61,5 @@ hello/
 
 - **呼叫**：`/skm sync` Flow 1（Step 2 內嵌：遠端拉取 + skill diff）、讀取 `.local/context_summary/` 與 `.hanschen/decision/` `.hanschen/board/`、寫入 `.local/collab/TODO.md`
 - **被呼叫**：無（使用者於對話開始輸入 `/hello`）
-- **共用資源**：`team/TODO.md` schema（重建內容須符合 `/team todo` 格式）、`clean/` 的 context_summary 目錄（讀取上次 session 寫入的摘要）
-- **改名歷史（本 skill 自身）**：2026-04-24 吸收 `/skm sync` Flow 1（遠端同步從 `/skm` 移入 `/hello` Step 2）；全域改名請見 `_bootstrap/RENAME_HISTORY.md`
+- **共用資源**：`team/TODO.md` schema（重建內容須符合 `/team todo` 格式）、`clean/` 的 context_summary 目錄（讀取上次 session 寫入的摘要）、與 `/commit-push` 共用 Rule 28 分歧偵測邏輯（兩者都實作 Step 0）
+- **改名歷史**：見 `_bootstrap/RENAME_HISTORY.md`

@@ -21,6 +21,60 @@ This skill does **not** dispatch any `Agent` sub-tasks — all steps run inline 
 
 ---
 
+## Step 0: Divergence Detection (CLAUDE.md Rule 28)
+
+**Skip with**: `/hello --skip-divergence-check`
+
+Detect "double rebase from independent clones" anti-pattern early. Runs **before** Step 1 (which would `git pull --rebase`) so divergence is surfaced rather than silently re-applied.
+
+### 0.1 Run detection
+
+```bash
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+[ -z "$BRANCH" ] && exit 0   # not a git repo, skip
+git fetch origin --quiet 2>/dev/null
+git rev-list --left-right --count origin/$BRANCH...HEAD 2>/dev/null
+# Returns: <remote_ahead>\t<local_ahead>
+```
+
+If the command fails (no remote, branch never pushed) → silent skip, proceed to Step 1.
+
+### 0.2 Evaluate against thresholds
+
+Let `R` = remote_ahead, `L` = local_ahead.
+
+| Condition | Action |
+|---|---|
+| `R == 0 && L == 0` | silent pass |
+| `R == 0 \|\| L == 0` | normal single-side lead, silent pass |
+| `R >= 1 && L >= 1`, both `< 3` | informational note, do not block |
+| `R >= 3 \|\| L >= 3` | **mandatory warning** — show resolution options |
+| `R >= 10 \|\| L >= 10` | mark as **critical**, recommend manual resolution before proceeding |
+
+### 0.3 Mandatory warning format
+
+```
+⚠ Rule 28 雙 clone rebase 反模式偵測
+   Branch: <branch>
+   分歧: 遠端領先 R 個 commit，本地領先 L 個 commit
+   
+建議處理：
+  (a) `git fetch && git reset --hard origin/<branch>` — 丟棄本地，對齊遠端（若本地皆為重複訊息 commit）
+  (b) `git pull --rebase` — 嘗試 rebase（git 會 auto-skip 已 upstream patches）
+  (c) 開新分支隔離本地工作（`git checkout -b backup-<date>`）
+  (d) 跳過本次警示（`/hello --skip-divergence-check`）
+
+詳見 CLAUDE.md Rule 28。
+```
+
+Use AskUserQuestion (per Rule 15) — never plain Y/N text.
+
+### 0.4 Proceed
+
+After user picks an option (or accepts informational note), continue to Step 1.
+
+---
+
 ## Step 1: Pull Project Updates
 
 ```bash
@@ -246,6 +300,7 @@ docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Service}}" 2>/dev/n
 | → Reads | `.local/context_summary/`, `.hanschen/decision/`, `.hanschen/board/` | Step 3 work-state reconstruction |
 | → Writes | `.local/collab/TODO.md` | Step 3 consolidates open items into TODO Pending block |
 | ← Called by | None (user types `/hello` at conversation start) | — |
+| ↔ Shared | `/commit-push` Step 0 — Rule 28 divergence detection | identical detection logic; both must stay in sync |
 | ↔ Shared | `team/TODO.md` schema | Reconstruction must match `/team todo` format |
 | ↔ Shared | `clean/` context_summary directory | Reads what `/clean` wrote in the previous session |
 

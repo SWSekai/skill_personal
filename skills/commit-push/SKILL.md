@@ -1,9 +1,9 @@
 ---
 name: commit-push
-description: "Commit & Push standalone entry — quality check (Opus) → modify log (Haiku) → README sync → commit → push → restart evaluation → Context cleanup. Built-in complete commit flow, all logs kept local only, not under version control. Supports --meta flag for skill-maintenance commits (skips modify_log + daily report append) and --no-subagent flag for 1M-context / sub-agent-avoidance runs."
+description: "Commit & Push standalone entry — divergence check (Rule 28) → quality check (Opus) → modify log (Haiku) → README sync → commit → push → restart evaluation → Context cleanup. Built-in complete commit flow, all logs kept local only, not under version control. Supports --meta flag for skill-maintenance commits (skips modify_log + daily report append), --no-subagent flag for 1M-context / sub-agent-avoidance runs, and --skip-divergence-check flag for known intentional divergence."
 model: sonnet
 effort: medium
-argument-hint: "[--meta] [--no-subagent] [commit message override]"
+argument-hint: "[--meta] [--no-subagent] [--skip-divergence-check] [commit message override]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(ls *), Bash(date *), Bash(docker *)
 ---
 
@@ -44,6 +44,65 @@ When `$ARGUMENTS` contains `--no-subagent`, **all steps run inline in the main s
 **Trade-off**: default mode optimises for model specialisation (Opus depth on audit, Haiku brevity on log writing). Inline mode trades that for reliability under 1M-gate / visibility; the Sonnet main session is still fully capable of both duties.
 
 **Combinable with `--meta`**: e.g. `/commit-push --meta --no-subagent <msg>` — skill-maintenance commit in 1M mode, skips modify_log + daily report AND avoids sub-agent spawn.
+
+## `--skip-divergence-check` Flag (Rule 28 Override)
+
+Skip Step 0 divergence detection. Use only for **known intentional divergence** (e.g. local test branch evolving independently). Commit message must include `(rule-28 skipped: <reason>)` tag for traceability.
+
+---
+
+## Step 0: Divergence Detection (CLAUDE.md Rule 28)
+
+**Skip with**: `/commit-push --skip-divergence-check`
+
+Detect "double rebase from independent clones" anti-pattern **before** allowing commit/push to proceed. Blocks at high threshold to prevent reinforcing divergent histories.
+
+### 0.1 Run detection
+
+```bash
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+[ -z "$BRANCH" ] && exit 0   # not a git repo, skip
+git fetch origin --quiet 2>/dev/null
+git rev-list --left-right --count origin/$BRANCH...HEAD 2>/dev/null
+# Returns: <remote_ahead>\t<local_ahead>
+```
+
+If command fails (no remote, branch never pushed) → silent skip, proceed to Step 1.
+
+### 0.2 Evaluate against thresholds
+
+Let `R` = remote_ahead, `L` = local_ahead.
+
+| Condition | Action |
+|---|---|
+| `R == 0 && L == 0` | silent pass |
+| `R == 0 \|\| L == 0` | normal single-side lead, silent pass |
+| `R >= 1 && L >= 1`, both `< 3` | informational note in commit summary, do not block |
+| `R >= 3 \|\| L >= 3` | **mandatory warning** — show resolution options |
+| `R >= 10 \|\| L >= 10` | **BLOCK commit** — require manual resolution before retry |
+
+### 0.3 Mandatory warning / blocking format
+
+```
+⚠ Rule 28 雙 clone rebase 反模式偵測
+   Branch: <branch>
+   分歧: 遠端領先 R 個 commit，本地領先 L 個 commit
+   Severity: WARNING (R/L >= 3) | CRITICAL — BLOCKING (R/L >= 10)
+
+處理方案：
+  (a) `git fetch && git reset --hard origin/<branch>` — 若本地皆為重複訊息 commit，丟棄本地對齊遠端
+  (b) `git pull --rebase` — 嘗試 rebase（git 會 auto-skip 已 upstream patches）
+  (c) 開新分支隔離本地工作（`git checkout -b backup-<date>`）
+  (d) 跳過本次警示（commit message 註記 `(rule-28 skipped: <reason>)` + 使用 `--skip-divergence-check`）
+
+詳見 CLAUDE.md Rule 28。
+```
+
+Use AskUserQuestion (per Rule 15). At CRITICAL threshold (≥ 10), no "ignore" option — commit cannot proceed without explicit `--skip-divergence-check`.
+
+### 0.4 Proceed
+
+After resolution (or informational acknowledgment), continue to Step 1.
 
 ---
 
@@ -100,9 +159,15 @@ If this change introduces **new conventions, patterns, or workflow requirements*
 - Directly execute the corresponding SKILL.md Edit; let the Tool Confirmation UI handle approve / deny (aligned with CLAUDE.md Rule 15)
 - **Do not** use text-based prompts like "Do you want to update the Skill definition?"
 
-### 1.6 Skill Integrity Check (if Skill files were changed)
+### 1.6 Rule / Skill Integrity Check (CLAUDE.md Rule 27 enforcement point)
 
-If this change touches any SKILL.md / README.md / new Skill directory, verify item by item:
+Triggered when commit touches any of:
+- `CLAUDE.md` (project)
+- `sekai-workflow/_bootstrap/templates/CLAUDE.md.template`
+- Any `SKILL.md`
+- Any skill `README.md` / new skill directory
+
+#### 1.6.A Skill structural check (legacy items, retained)
 
 1. **Each skill directory** contains both `SKILL.md` and `README.md`
 2. **Three-part sync of Skills README**:
@@ -116,7 +181,24 @@ If this change touches any SKILL.md / README.md / new Skill directory, verify it
 5. **"Available Skills" list in CLAUDE.md** is updated
 6. **Explicit declaration**: Skill changes go through the `sekai-workflow` standalone remote repo (`https://github.com/SWSekai/sekai-workflow.git`), **not** the project git
 
-If any item fails → stop commit and ask the user to complete it.
+#### 1.6.B Rule 27 ripple checklist (mandatory when CLAUDE.md / template / SKILL.md frontmatter is touched)
+
+For each rule / contract change, evaluate and confirm (or declare "not applicable" with reason):
+
+| 改動類型 | 必查項目 | 確認 |
+|---|---|:---:|
+| 路徑遷移 / 指令改名 | append 一行 `.hanschen/.history/refactor.jsonl` | ☐ |
+| 跨 skill 行為改變 | 更新雙方 SKILL.md / README.md `Cross-Skill References` 區塊（Rule 24）| ☐ |
+| 新增 sync 應偵測項 | 更新 `/team sync --audit` 偵測邏輯 | ☐ |
+| 影響 commit 前檢查 | 更新本 Skill Step 1.6 checklist | ☐ |
+| 規則層級擴及全 skill | 同步更新 `_bootstrap/templates/CLAUDE.md.template` | ☐ |
+| 影響 hook 行為 | 更新 `.claude/hooks/*.cjs` + settings.json matcher | ☐ |
+
+Use AskUserQuestion (per Rule 15) to confirm each item. Any unchecked item without "not applicable" declaration → **block commit**.
+
+#### 1.6.C Result
+
+If any item fails → stop commit, list pending items, hand back to user.
 
 ### 1.7 Post-Implementation Data Flow Re-read
 
@@ -474,6 +556,24 @@ No user prompt, no handoff question. This is equivalent to calling `/team report
 - [ ] This commit's hash appears in §6 commit 記錄 table with ✅
 - [ ] Header "最後更新" timestamp advanced
 - [ ] §4 交接事項 content unchanged from previous state
+
+---
+
+## Cross-Skill References
+
+| Direction | Target | Trigger / Purpose |
+|---|---|---|
+| → Calls | `/build deploy --plan` | Step 8 service-restart evaluation |
+| → Calls | `/team report --daily` (inline) | Step 11 daily report auto-append |
+| → Calls | `/clean` flow | Step 9 context cleanup |
+| ← Called by | `/skm new` Step 10 | auto-invokes `--meta` mode for skill-creation commits |
+| ← Called by | `/skm update` Step 7 | mirror commit to sekai-workflow after rule update |
+| ↔ Shared | `/hello` Step 0 — Rule 28 divergence detection | identical detection logic; both must stay in sync |
+| ↔ Shared | `team/references/daily-report.md` | §4.0 audience rule, §7.3 commit-row append spec |
+| ↔ Shared | `team/assets/daily-report-template.md` | Daily report skeleton |
+| ↔ Shared | `references/commit-conventions.md` | 11-prefix conventions used by all commit-creating skills |
+
+**Rename History**: see `_bootstrap/RENAME_HISTORY.md`
 
 ---
 

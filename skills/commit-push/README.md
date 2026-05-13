@@ -21,7 +21,7 @@ commit-push/
 ## 使用方式
 
 ```
-/commit-push [--meta] [--no-subagent] [可選：commit 訊息覆蓋]
+/commit-push [--meta] [--no-subagent] [--skip-divergence-check] [可選：commit 訊息覆蓋]
 ```
 
 ## 旗標
@@ -29,8 +29,9 @@ commit-push/
 | 旗標 | 說明 |
 |---|---|
 | `--meta` | Skill 維護模式：跳過 Step 5（修改日誌）與 Step 11（每日報告），避免污染工作記錄 |
-| `--no-subagent` | 1M context 模式：所有步驟於主 session 內嵌執行，不啟動 Agent 子任務（適用於 1M context 或需要完整稽核軌跡時） |
-| `--meta --no-subagent` | 可同時組合使用 |
+| `--no-subagent` | 1M context 模式：所有步驟於主 session 內嵌執行，不啟動 Agent 子任務 |
+| `--skip-divergence-check` | 跳過 Step 0 雙 clone rebase 分歧偵測（CLAUDE.md Rule 28），commit message 須註記 `(rule-28 skipped: <reason>)` |
+| 組合用法 | 三個 flag 可任意組合，例如 `--meta --no-subagent --skip-divergence-check` |
 
 ## Model 分工（對齊 CLAUDE.md 第 18 條）
 
@@ -46,7 +47,8 @@ commit-push/
 
 | 步驟 | 說明 |
 |------|------|
-| 1. 品質檢查 | 7 小項：死碼/冗餘/硬編碼/錯誤處理/型別/序列化/安全性 + 架構一致性 + Upstream/Downstream 影響 + 風險報告 + Skill 完整性（6 項判斷樹）+ 實作後資料流重讀 |
+| 0. 分歧偵測（Rule 28，新增 2026-05-13） | `git rev-list --left-right --count` 偵測雙 clone rebase 反模式；3+ 分歧顯示警示、10+ 阻擋 commit；可用 `--skip-divergence-check` 跳過 |
+| 1. 品質檢查 | 7 小項：死碼/冗餘/硬編碼/錯誤處理/型別/序列化/安全性 + 架構一致性 + Upstream/Downstream 影響 + 風險報告 + **Step 1.6 規則 / Skill 整合性檢查（含 Rule 27 ripple checklist）** + 實作後資料流重讀 |
 | 2. README 更新 | 掃描變更檔所屬目錄，同步或新建 README.md |
 | 3. 狀態總覽 + staging | `git status` / `diff --stat` / `log origin..HEAD` 三段展示 → `.gitignore` 安全檢查 → `git add <檔名>` |
 | 4. Commit | Conventional Commits 11 個 prefix + HEREDOC + **動態 Co-Author** |
@@ -76,3 +78,12 @@ commit-push/
 - 第 9 條：Memory / Skill / sekai-workflow 三向連動
 - 第 15 條：Y/N 由 tool confirmation UI 處理
 - 第 18 條：Skill Model 三層分層原則
+- **第 27 條**：規則異動後檢核清單回填（Step 1.6 強制執行點）
+- **第 28 條**：雙 clone rebase 反模式預防（Step 0 強制執行點）
+
+## 相關 Skills 與檔案
+
+- **呼叫**：`/build deploy --plan`（Step 8 服務重啟評估）、`/team report --daily`（Step 11 每日報告 append）、`/clean` 流程（Step 9 context 清理）
+- **被呼叫**：`/skm new` Step 10 自動以 `--meta` 呼叫、`/skm update` Step 7 鏡像 commit、`/build all` 串接結尾
+- **共用資源**：與 `/hello` 共用 Rule 28 分歧偵測邏輯（兩者都實作 Step 0）；`team/references/daily-report.md` §4.0 audience rule / §7.3 commit-row append spec；`references/commit-conventions.md` 11 prefix 規範
+- **改名歷史**：見 `_bootstrap/RENAME_HISTORY.md`
