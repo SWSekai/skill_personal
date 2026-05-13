@@ -129,11 +129,14 @@ The project directory may live at any path on any machine. Only project-root-rel
 | `/team todo list` | List all pending items |
 | `/team todo <n>` | Process the specified item number |
 
-### Triggers (CLAUDE.md Rule 17.1.1 / 17.1.7 / 17.1.8)
+### Triggers (CLAUDE.md Rule 9 / Rule 17.1.1 / 17.1.7 / 17.1.8)
 
 **Auto-capture** (silent, append to Pending, one-line tail hint in reply):
 - User says `btw`, `順便`, `臨時想到`, `對了` → capture the mentioned item
 - User signals **future trial**: `以後想試 X` / `未來可以做 X` / `將 X 加入代辦` / `之後可以試 X` → append to TODO (NOT decide); this is cross-project synchronized rule (Rule 17.1.7)
+- **User selects direction via `AskUserQuestion`** (single-select or multi-select) → **mandatory same-reply write** to TODO.md Pending with chosen options + trigger context. Per CLAUDE.md Rule 9. Failure = lost VSCode crash-recovery anchor.
+- **User imperatively lists new work** in free text (`做 X、做 Y`, `接下來 X 和 Y`, `請紀錄 X`) → split by item, write each to Pending with priority tag (`@high` / default / `@low`) and source date
+- **Do NOT** auto-write when: user only **discusses** an option without selecting; user **rejects** previously offered options; user asks **informational** questions about the topic
 
 **TODO location resolution** (checked in order):
 1. Project root `./TODO.md` — canonical per CLAUDE.md Rule 17.1 (matches most existing projects)
@@ -484,7 +487,7 @@ Procedure:
    - **Deviation** → record actual outcome + reason in the upcoming inline summary's 「最終決策（逐項目 §n.m）」 row's 「備註」 column (format: `原選 X → 實作 Y，因 <reason>`)
    - **Partial** (some sub-items skipped) → note in the 「未解決遺留項」 section
 
-Why mandatory: `PROJECT_JOURNAL.md` row built in Step 6.4 extracts its 「採納選項摘要」 from this inline summary, so the summary is the **single source of truth** for journal accuracy. A deviation captured only in commit messages but not here yields a journal row that contradicts the codebase — and journal manual edit is forbidden (anti-pattern §G); only `regen` rebuilds from CLOSED files.
+Why mandatory: `PROJECT_JOURNAL.md` row built in Step 6.4 extracts its 「採納選項摘要」 from this inline summary, so the summary is the **single source of truth** for the closure index. Deviations captured only in commit messages would yield an index row that contradicts the codebase. Progress entries written incrementally via §G Step 1.5 may exist for the same decide — closure summary should additionally list their dates so the closure index can reference them.
 
 #### 6.1 Append Inline Closure Summary (Mandatory)
 
@@ -946,18 +949,23 @@ Full rules, parser specs, edge cases: `references/daily-report.md`. Template: `a
 
 Maintain a single, continuously updated project-level document that accumulates outcomes from all whiteboard and decision table closures. Acts as the project's authoritative knowledge base for past discussions, decisions, and preserved candidates.
 
-**This subcommand is primarily auto-called** by `/team board` Step 3.3 and `/team decide` Step 6.4. Manual invocation is supported for viewing or regenerating.
+**This subcommand is primarily auto-called** by `/team board` Step 3.3 and `/team decide` Step 6.4. Manual invocation supports viewing, regenerating, or appending **incremental progress entries** (CLAUDE.md Rule 17.4.1).
 
-### Triggers (CLAUDE.md Rule 17.1)
+### Triggers (CLAUDE.md Rule 17.1 / 17.4 / 17.4.1)
 
-- **Auto**: `/team board` closure Step 3.3 + `/team decide` closure Step 6.4 → append one row to the appropriate journal table
-- **Manual**: `/team journal` (show path) / `/team journal view` (print full) / `/team journal regen` (rebuild from CLOSED_* files)
+- **Auto — closure index**: `/team board` closure Step 3.3 + `/team decide` closure Step 6.4 → append one-row index to the appropriate journal table (links to `CLOSED_*.md`)
+- **Incremental progress entry (Rule 17.4.1)**: when a decide's TODO sub-item is checked into Completed → **same reply** append a narrative entry to the appropriate domain section (e.g., `## OCR Pipeline` / `## Project Setup`). Followed by `/commit-push` to seal the stage.
+- **Manual**: `/team journal` (show path) / `/team journal view` (print full) / `/team journal regen` (rebuild closure-index tables only — progress entries preserved as-is)
 
-### Anti-patterns (Rule 17.1.5 / 17.1.9)
+### Anti-patterns
 
-- ❌ Manual editing of `PROJECT_JOURNAL.md` (violates auto-index principle) — use CLOSED_ source file edits instead, then `/team journal regen`
-- ❌ Using journal as TODO replacement (journal is read-only historical index)
+- ❌ Writing a progress entry **before** the corresponding TODO sub-item is checked into Completed
+- ❌ Writing a progress entry for "planning" or "intent to do" (must be 已完成)
+- ❌ Skipping `/commit-push` between TODO sub-item completion and the next one (breaks commit↔entry 1:1)
+- ❌ Duplicating a closure-index row when a CLOSED_ entry is already present (use `regen` to rebuild indexes)
+- ❌ Using journal as TODO replacement (journal is for historical record + progress narrative)
 - ❌ Using journal for daily work accumulation (that's `/team report --daily`)
+- ❌ Citing CLAUDE.md rules inside entry body — entries are content-focused (背景／方法／結果); rules live in SKILL.md and CLAUDE.md
 
 ### Document Location
 
@@ -1005,6 +1013,38 @@ If `.hanschen/journal/PROJECT_JOURNAL.md` does not exist, create the directory a
 | 來源主題 | 選項說明 | 未採納原因 | 重啟時機 |
 |---------|---------|----------|---------|
 ```
+
+### Step 1.5: Append Incremental Progress Entry (Rule 17.4.1)
+
+Triggered when a TODO sub-item belonging to an active decide is moved to Completed. Same reply must include the entry.
+
+1. Pick the correct domain section header (`## OCR Pipeline`, `## Skill 規則`, `## Project Setup` — or whichever exists). If none fit, add a new domain section.
+2. Insert entry **at the top of that section** (newest first):
+   ```markdown
+   ### YYYY-MM-DD — <subject>
+
+   **背景**：承接 decide §X 的什麼子項、為什麼需要這次 session。
+
+   **方法／結果**：本次 session 做了什麼、量化收益（指標前後對比表）。
+
+   **變更清單**：
+   | 檔案 | 變更 |
+   |---|---|
+   | ... | ... |
+
+   **🔖 保留候選**（若有）
+
+   **遺留項**：尚未處理但已知的後續工作。
+
+   **來源**：指向 decide 檔（`.hanschen/decision/<active>.md` §n）。
+   ```
+3. Update `> 最後更新` line (just the date — no rule citation).
+4. **Same reply trigger** `/commit-push`（或 `--meta` 視變更性質）.
+
+Content rules:
+- Entry body is **content-only**; no `CLAUDE.md Rule X` citations inside the narrative
+- Quantitative results only when measured (don't write predicted/expected numbers)
+- "來源" line is the only allowed rule-adjacent link, and it points at the decide doc, not at CLAUDE.md
 
 ### Step 2: Append from Board Closure
 
