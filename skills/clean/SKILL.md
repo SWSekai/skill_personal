@@ -1,10 +1,18 @@
 ---
 name: clean
-description: "Context cleanup entry point: saves full summary + generates one-shot resumption_prompt.md → /clear resets context → UserPromptSubmit hook auto-injects resumption on next session start (deletes file after injection). Stop hook auto-reminds when stale summaries detected."
+description: "Context cleanup entry point: saves full summary + generates one-shot resumption_prompt.md → /clear resets context → UserPromptSubmit hook auto-injects resumption on next session start (deletes file after injection). Stop hook auto-reminds when stale summaries detected. Accepts --no-subagent flag as a no-op (cross-skill consistency, CLAUDE.md Rule 26)."
 model: sonnet
 effort: low
-argument-hint: "[check|force]"
+argument-hint: "[check|force] [--no-subagent]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(rm *), Bash(mkdir *), Bash(git status*), Bash(git log*), Bash(date *)
+---
+
+## `--no-subagent` Flag (No-op, Accepted for Consistency)
+
+This skill does **not** dispatch any `Agent` sub-tasks — all steps run inline in the main session. The `--no-subagent` flag is accepted purely for cross-skill uniformity (CLAUDE.md Rule 26): users can pass it under 1M-context / no-extra-usage mode without triggering an "unknown flag" error.
+
+**Behaviour**: no-op. Combinable with `check` / `force` (e.g. `/clean force --no-subagent`).
+
 ---
 
 ## Context Cleanup Entry Point (inherited from context-guard)

@@ -11,8 +11,14 @@
 ## 使用方式
 
 ```
-/hello
+/hello [--no-subagent]
 ```
+
+## 旗標
+
+| 旗標 | 說明 |
+|---|---|
+| `--no-subagent` | **無實際效用**（no-op）— 本 Skill 不 dispatch Agent 子任務，flag 僅為跨 Skill 一致性而接受（對應 CLAUDE.md Rule 26）。在 1M context 模式下傳入此 flag 不會報錯 |
 
 ## Model
 

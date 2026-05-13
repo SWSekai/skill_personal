@@ -1,9 +1,9 @@
 ---
 name: hello
-description: "Conversation initialization entry point — pull updates → sync Skills → reconstruct work state (scan decision/whiteboard/context-summary → consolidate unfinished items into TODO) → status overview."
+description: "Conversation initialization entry point — pull updates → sync Skills → reconstruct work state (scan decision/whiteboard/context-summary → consolidate unfinished items into TODO) → status overview. Accepts --no-subagent flag as a no-op (cross-skill consistency, CLAUDE.md Rule 26)."
 model: sonnet
 effort: low
-argument-hint: ""
+argument-hint: "[--no-subagent]"
 allowed-tools: Read, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(docker *)
 ---
 
@@ -12,6 +12,12 @@ allowed-tools: Read, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(doc
 Call at the start of every new conversation to complete in one stop: pull updates → sync Skills → restore context → status overview.
 
 **Replaces the legacy "auto-sync on conversation start" mechanism in CLAUDE.md Rule 12** — now triggered explicitly by the user for better control.
+
+## `--no-subagent` Flag (No-op, Accepted for Consistency)
+
+This skill does **not** dispatch any `Agent` sub-tasks — all steps run inline in the main session. The `--no-subagent` flag is accepted purely for cross-skill uniformity (CLAUDE.md Rule 26): users can pass it under 1M-context / no-extra-usage mode without triggering an "unknown flag" error.
+
+**Behaviour**: no-op. The flow runs identically with or without the flag.
 
 ---
 

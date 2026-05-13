@@ -21,8 +21,16 @@ commit-push/
 ## 使用方式
 
 ```
-/commit-push [可選：commit 訊息覆蓋]
+/commit-push [--meta] [--no-subagent] [可選：commit 訊息覆蓋]
 ```
+
+## 旗標
+
+| 旗標 | 說明 |
+|---|---|
+| `--meta` | Skill 維護模式：跳過 Step 5（修改日誌）與 Step 11（每日報告），避免污染工作記錄 |
+| `--no-subagent` | 1M context 模式：所有步驟於主 session 內嵌執行，不啟動 Agent 子任務（適用於 1M context 或需要完整稽核軌跡時） |
+| `--meta --no-subagent` | 可同時組合使用 |
 
 ## Model 分工（對齊 CLAUDE.md 第 18 條）
 

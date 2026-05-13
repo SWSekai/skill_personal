@@ -12,10 +12,17 @@
 ## 使用方式
 
 ```
-/clean           # 完整流程：摘要 → 清理舊摘要 → /clear
-/clean check     # 僅檢查狀態，不產生摘要、不清理
-/clean force     # 跳過 commit 確認，直接執行完整流程
+/clean                               # 完整流程：摘要 → 清理舊摘要 → /clear
+/clean check                         # 僅檢查狀態，不產生摘要、不清理
+/clean force                         # 跳過 commit 確認，直接執行完整流程
+/clean [check|force] --no-subagent   # 任意子模式皆可附加（no-op 一致性 flag）
 ```
+
+## 旗標
+
+| 旗標 | 說明 |
+|---|---|
+| `--no-subagent` | **無實際效用**（no-op）— 本 Skill 不 dispatch Agent 子任務，flag 僅為跨 Skill 一致性而接受（對應 CLAUDE.md Rule 26）。在 1M context 模式下傳入此 flag 不會報錯 |
 
 ## Model
 

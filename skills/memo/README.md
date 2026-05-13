@@ -4,6 +4,12 @@
 
 跨專案可攜帶的 Claude Code Memory。
 
+## 旗標
+
+| 旗標 | 說明 |
+|---|---|
+| `--no-subagent` | **無實際效用**（no-op）— 本 Skill 不 dispatch Agent 子任務，flag 僅為跨 Skill 一致性而接受（對應 CLAUDE.md Rule 26）。在 1M context 模式下傳入此 flag 不會報錯 |
+
 ## 設計
 
 - 只收錄 `feedback` 和 `user` type 的 memory（跨專案通用的偏好與習慣）

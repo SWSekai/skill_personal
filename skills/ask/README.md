@@ -11,7 +11,7 @@
 ## 使用方式
 
 ```
-/ask <欄位名或功能描述>
+/ask <欄位名或功能描述> [--no-subagent]
 ```
 
 範例：`/ask user_id`、`/ask "登入後的 session token"`
@@ -19,6 +19,12 @@
 ## 最常見用法
 
 `/ask user_id` — 追蹤 user_id 欄位從前端表單到資料庫，找出哪一層可能遺失或預設值不一致。
+
+## 旗標
+
+| 旗標 | 說明 |
+|---|---|
+| `--no-subagent` | **目前為無實際效用**（no-op）— 本 Skill 現階段不 dispatch Agent 子任務（trace 流程於主 session 內嵌完成）。flag 為跨 Skill 一致性而接受（對應 CLAUDE.md Rule 26），未來若加入深度 trace 子代理時將生效 |
 
 ## Model
 

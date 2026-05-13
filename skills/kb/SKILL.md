@@ -1,15 +1,21 @@
 ---
 name: kb
-description: "Manage sekai-workflow/handbook/ — engineering handbook of general technical notes (Docker, K8s, ETL, algorithms, backend patterns); auto-extract from decision/board closures; retrieve relevant content when answering technical questions."
+description: "Manage sekai-workflow/handbook/ — engineering handbook of general technical notes (Docker, K8s, ETL, algorithms, backend patterns); auto-extract from decision/board closures; retrieve relevant content when answering technical questions. Accepts --no-subagent flag as a no-op (cross-skill consistency, CLAUDE.md Rule 26)."
 model: sonnet
 effort: medium
-argument-hint: "<add|search|extract> [topic|query|source-path]"
+argument-hint: "<add|search|extract> [topic|query|source-path] [--no-subagent]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(mkdir *), Bash(ls *), Bash(date *)
 ---
 
 # /kb — Knowledge Base Manager
 
 Maintains `sekai-workflow/handbook/` as a cross-project engineering handbook. Engineers and the model retrieve notes, templates, and best-practice examples without re-deriving them from scratch.
+
+## `--no-subagent` Flag (No-op, Accepted for Consistency)
+
+This skill does **not** dispatch any `Agent` sub-tasks — all subcommands (add / search / extract) run inline in the main session. The `--no-subagent` flag is accepted purely for cross-skill uniformity (CLAUDE.md Rule 26): users can pass it under 1M-context / no-extra-usage mode without triggering an "unknown flag" error.
+
+**Behaviour**: no-op. Subcommands run identically with or without the flag.
 
 ## Subcommand Routing
 

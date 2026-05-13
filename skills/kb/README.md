@@ -13,14 +13,20 @@
 ## 使用方式
 
 ```
-/kb <add|search|extract> [topic|query|source-path]
-/kb <query>              # 無子命令時視為 search
+/kb <add|search|extract> [topic|query|source-path] [--no-subagent]
+/kb <query>                                # 無子命令時視為 search
 ```
 
 ## 最常見用法
 
 - `/kb search docker multi-stage` — 查通用技術筆記
 - `/kb add k8s-rolling-update` — 把這次學到的通用知識存進跨專案 handbook
+
+## 旗標
+
+| 旗標 | 說明 |
+|---|---|
+| `--no-subagent` | **無實際效用**（no-op）— 本 Skill 不 dispatch Agent 子任務，flag 僅為跨 Skill 一致性而接受（對應 CLAUDE.md Rule 26）。在 1M context 模式下傳入此 flag 不會報錯 |
 
 ## Model
 

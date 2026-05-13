@@ -1,9 +1,18 @@
 ---
 name: memo
-description: "Memory cross-project portability: feedback/user type memory is carried with Sekai_workflow git and automatically restored during new project initialization."
+description: "Memory cross-project portability: feedback/user type memory is carried with Sekai_workflow git and automatically restored during new project initialization. Accepts --no-subagent flag as a no-op (cross-skill consistency, CLAUDE.md Rule 26)."
 model: sonnet
 effort: low
+argument-hint: "[--no-subagent]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(cp *), Bash(git *)
+---
+
+## `--no-subagent` Flag (No-op, Accepted for Consistency)
+
+This skill does **not** dispatch any `Agent` sub-tasks — all steps run inline in the main session. The `--no-subagent` flag is accepted purely for cross-skill uniformity (CLAUDE.md Rule 26): users can pass it under 1M-context / no-extra-usage mode without triggering an "unknown flag" error.
+
+**Behaviour**: no-op. The flow runs identically with or without the flag.
+
 ---
 
 ## Memory Cross-Project Portability

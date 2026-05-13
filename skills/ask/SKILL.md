@@ -1,9 +1,9 @@
 ---
 name: ask
-description: "End-to-end data flow tracing for the current project. Layer-by-layer walkthrough (UI → API → service → storage) with data-loss risk annotations."
+description: "End-to-end data flow tracing for the current project. Layer-by-layer walkthrough (UI → API → service → storage) with data-loss risk annotations. Accepts --no-subagent flag as a no-op (cross-skill consistency, CLAUDE.md Rule 26)."
 model: opus
 effort: medium
-argument-hint: "<field-or-feature>"
+argument-hint: "<field-or-feature> [--no-subagent]"
 allowed-tools: Read, Glob, Grep, Agent, Bash(ls *), Bash(find *), Bash(git log*), Bash(git diff*)
 ---
 
@@ -11,10 +11,16 @@ allowed-tools: Read, Glob, Grep, Agent, Bash(ls *), Bash(find *), Bash(git log*)
 
 > **2026-05-06 scope reduction**: the legacy `info` subcommand and its `ask_info_router.cjs` UserPromptSubmit hook were removed. System-info queries now go through plain conversation with Claude (no skill ceremony). Project-specific knowledge writes go to `/team note` (project-local) or `/kb add` (cross-project). Only `trace` remains because it carries structured methodology that plain Q&A does not replicate.
 
+## `--no-subagent` Flag (No-op, Accepted for Consistency)
+
+This skill currently does **not** dispatch `Agent` sub-tasks during the trace flow — all layer walks run inline in the main `opus` session. (The `Agent` entry in `allowed-tools` is reserved for future deep-trace sub-agents but not yet exercised.) The `--no-subagent` flag is accepted purely for cross-skill uniformity (CLAUDE.md Rule 26): users can pass it under 1M-context / no-extra-usage mode without triggering an "unknown flag" error.
+
+**Behaviour**: no-op today. If a future revision adds Agent dispatch, this flag will force inline execution.
+
 ## Usage
 
 ```
-/ask <field-or-feature>
+/ask <field-or-feature> [--no-subagent]
 ```
 
 The argument is the field name or feature description to trace end-to-end.

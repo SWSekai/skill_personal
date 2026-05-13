@@ -6,6 +6,7 @@
 'use strict';
 
 const { execSync } = require('child_process');
+const fs = require('fs');
 
 const GREEN   = '\x1b[32m';
 const YELLOW  = '\x1b[33m';
@@ -39,15 +40,36 @@ process.stdin.on('end', () => {
   const cwdShort = cwdRaw.replace(/\/+$/, '').split('/').pop() || cwdRaw;
   const cwdSeg = ` ${cwdShort}`;
 
-  // 2. Git branch (omit segment entirely if not in a repo)
+  // 2. Git branch — try cwd, then fall back to immediate subdirectories that
+  //    are git repos (e.g. project root not a repo, but contains sekai-workflow/).
+  //    Subdirectory matches are prefixed with "<name>:" to make the source obvious.
   let branchSeg = '';
-  try {
-    const branch = execSync(
-      `git -C "${cwdRaw}" --no-optional-locks branch --show-current 2>/dev/null`,
-      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
-    ).trim();
-    if (branch) branchSeg = ` ${branch}`;
-  } catch (_) {}
+  function tryBranch(dir) {
+    try {
+      const b = execSync(
+        `git -C "${dir}" --no-optional-locks branch --show-current`,
+        { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+      ).trim();
+      return b || null;
+    } catch (_) { return null; }
+  }
+  let branch = tryBranch(cwdRaw);
+  let branchPrefix = '';
+  if (!branch) {
+    try {
+      const subs = fs.readdirSync(cwdRaw, { withFileTypes: true })
+        .filter(d => d.isDirectory() && !d.name.startsWith('.') && d.name !== 'node_modules')
+        .map(d => d.name)
+        .sort();
+      for (const name of subs) {
+        const sub = `${cwdRaw}/${name}`;
+        if (!fs.existsSync(`${sub}/.git`)) continue;
+        const b = tryBranch(sub);
+        if (b) { branch = b; branchPrefix = `${name}:`; break; }
+      }
+    } catch (_) {}
+  }
+  if (branch) branchSeg = ` ${branchPrefix}${branch}`;
 
   // 3. Context usage (% + 10-cell bar, color-coded)
   let ctxSeg = '';
