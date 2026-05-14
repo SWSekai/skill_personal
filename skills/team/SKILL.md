@@ -1,7 +1,6 @@
 ---
 name: team
 description: "One-stop entry for interactive collaboration: AI TODO handling, live whiteboard, Markdown interactive decision tables, tech notes, handoff documents, work reports, and project journal maintenance. Subcommand routing: todo / board / decide / note / handoff / report / journal (renamed from living on 2026-04-24) / follow-up / sync. Supports --no-subagent flag for 1M-context / sub-agent-avoidance runs."
-model: sonnet
 effort: medium
 argument-hint: "<todo|board|decide|note|handoff|report|journal|follow-up|sync> [--no-subagent] [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Agent, AskUserQuestion, Bash(git *), Bash(ls *), Bash(date *), Bash(mkdir *), Bash(mv *)

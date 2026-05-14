@@ -1,7 +1,6 @@
 ---
 name: dispatch
 description: "Task router that selects the right model tier (per CLAUDE.md Rule 18) and dispatches via the Agent tool so the model swap is real and verifiable. Logs every dispatch to .local/model_dispatch.log."
-model: haiku
 effort: low
 argument-hint: "<task description> [--model opus|sonnet|haiku] [--agent <subagent_type>]"
 allowed-tools: Agent, Read, Bash(date *), Bash(mkdir *), Bash(cat *)

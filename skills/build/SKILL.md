@@ -1,7 +1,6 @@
 ---
 name: build
 description: "One-stop entry for the full development flow: requirement analysis → solution design → implementation → testing → quality check → review → deploy. Commit & push is handled by the standalone `/commit-push`. Subcommand routing: all / plan / do / test / check / review / deploy. Supports --no-subagent flag for 1M-context / sub-agent-avoidance runs."
-model: sonnet
 effort: medium
 argument-hint: "<all|plan|do|test|check|review|deploy> [--no-subagent] [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(docker *), Bash(ls *), Bash(date *), Bash(sleep *), Bash(mkdir *), Bash(npm *), Bash(npx *), Bash(pytest *), Bash(python *)

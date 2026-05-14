@@ -1,7 +1,6 @@
 ---
 name: ask
 description: "End-to-end data flow tracing for the current project. Layer-by-layer walkthrough (UI → API → service → storage) with data-loss risk annotations. Accepts --no-subagent flag as a no-op (cross-skill consistency, CLAUDE.md Rule 26)."
-model: opus
 effort: medium
 argument-hint: "<field-or-feature> [--no-subagent]"
 allowed-tools: Read, Glob, Grep, Agent, Bash(ls *), Bash(find *), Bash(git log*), Bash(git diff*)

@@ -1,7 +1,6 @@
 ---
 name: clean
 description: "Context cleanup entry point: saves full summary + generates one-shot resumption_prompt.md → /clear resets context → UserPromptSubmit hook auto-injects resumption on next session start (deletes file after injection). Stop hook auto-reminds when stale summaries detected. Accepts --no-subagent flag as a no-op (cross-skill consistency, CLAUDE.md Rule 26)."
-model: sonnet
 effort: low
 argument-hint: "[check|force] [--no-subagent]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(rm *), Bash(mkdir *), Bash(git status*), Bash(git log*), Bash(date *)

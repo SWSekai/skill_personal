@@ -1,7 +1,6 @@
 ---
 name: skm
 description: "Skill Management — one-stop entry for Skill environment management: create new Skill, remote sync, project packaging, user-confirmed skill improvements. Subcommand routing: new / sync / pack / update / refactor. Supports --no-subagent flag for 1M-context / sub-agent-avoidance runs. Renamed from /skill on 2026-04-24 to avoid confusion with Claude Code's built-in /skills dialog."
-model: sonnet
 effort: medium
 argument-hint: "<new|sync|pack|update|refactor> [--no-subagent] [args...]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(ls *), Bash(mkdir *), Bash(date *), Bash(cp *), Bash(bash *), Bash(cat *)
@@ -91,7 +90,6 @@ Check `.claude/skills/<name>/` and `Sekai_workflow/<name>/`:
 ---
 name: <name>
 description: "<description>"
-model: <model>
 effort: <effort>
 argument-hint: "<argument_hint>"
 allowed-tools: <allowed_tools>
@@ -99,7 +97,7 @@ allowed-tools: <allowed_tools>
 ```
 
 Format rules:
-- frontmatter order: name → description → model → effort → argument-hint → allowed-tools
+- frontmatter order: name → description → effort → argument-hint → allowed-tools
 - Steps use `### Step N:`
 - Separate each step with `---`
 - End with `Arguments: $ARGUMENTS`
@@ -159,7 +157,7 @@ Project-specific Skill: lives only in `.claude/skills/`, not synced; inform the 
 |---|:---:|
 | `.claude/skills/<name>/SKILL.md` | |
 | `.claude/skills/<name>/README.md` | |
-| frontmatter contains `model` + `effort` | |
+| frontmatter contains `effort` | |
 | Subdirectory files exist (if planned) | |
 | `.claude/skills/README.md` updated | |
 | `CLAUDE.md` updated | |
@@ -175,7 +173,6 @@ Project-specific Skill: lives only in `.claude/skills/`, not synced; inform the 
 
 Name: <name>
 Command: /<command>
-Model: <model> (effort: <effort>)
 Type: general / project-specific
 Location: .claude/skills/<name>/
 Structure: SKILL.md + README.md [+ references/ + assets/ + scripts/]

@@ -1,7 +1,6 @@
 ---
 name: hello
 description: "Conversation initialization entry point — pull updates → sync Skills → reconstruct work state (scan decision/whiteboard/context-summary → consolidate unfinished items into TODO) → status overview. Accepts --no-subagent flag as a no-op (cross-skill consistency, CLAUDE.md Rule 26)."
-model: sonnet
 effort: low
 argument-hint: "[--no-subagent]"
 allowed-tools: Read, Glob, Grep, Bash(git *), Bash(ls *), Bash(date *), Bash(docker *)

@@ -4,7 +4,7 @@ Migrated from CLAUDE.md Rule 19.2-19.5 (2026-04-24) per CLOSED_260424_claudemd_s
 
 ## 1. SKILL.md External Contract — What MUST Be Present
 
-- frontmatter (name, description, model, argument-hint, allowed-tools)
+- frontmatter (name, description, argument-hint, allowed-tools)
 - Subcommand routing (overview table)
 - Common rules (cross-subcommand shared rules — time sampling, filename conventions, closure markers)
 - Per-subcommand: Usage + Steps (Step 1-N outline; detail references `references/<detail>.md`)

@@ -41,7 +41,7 @@ commit-push/
 | Step 2–4、6–10 主流程 | **Sonnet** | 檔案讀寫、git 操作（execution 屬性） |
 | Step 5 修改日誌 | **Haiku** | 結構化模板填寫（文字產出屬性） |
 
-跨 model 透過 Agent 工具呼叫子任務，Skill 本體 `model: sonnet`。
+跨 model 透過 Agent 工具呼叫子任務；Skill 本體 frontmatter 不指定 `model:`（繼承當前 session 模型，避免 1M context 切模型 gateway 卡關）。
 
 ## 執行流程
 

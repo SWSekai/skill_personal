@@ -1,7 +1,6 @@
 ---
 name: commit-push
 description: "Commit & Push standalone entry — divergence check (Rule 28) → quality check (Opus) → modify log (Haiku) → README sync → commit → push → restart evaluation → Context cleanup. Built-in complete commit flow, all logs kept local only, not under version control. Supports --meta flag for skill-maintenance commits (skips modify_log + daily report append), --no-subagent flag for 1M-context / sub-agent-avoidance runs, and --skip-divergence-check flag for known intentional divergence."
-model: sonnet
 effort: medium
 argument-hint: "[--meta] [--no-subagent] [--skip-divergence-check] [commit message override]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(git *), Bash(ls *), Bash(date *), Bash(docker *)
