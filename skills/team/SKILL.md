@@ -316,8 +316,8 @@ Whiteboard's key-outcomes / decisions-made / unresolved items map to the unified
 
 After writing the closure summary, immediately update the project living document (`.hanschen/journal/PROJECT_JOURNAL.md`):
 - If the file does not exist, initialize it first (see Section G Step 1)
-- Append a new row to the "討論成果" table: date, topic, 1–2 sentence outcome summary, link to renamed file
-- If the whiteboard's decision log contains entries → also append to the "決策紀錄" table
+- Identify matching domain H2 + topic H3 (no date in title); append narrative event with `|YYMMDD <短描>` suffix — full flow in Section G Step 2
+- If the whiteboard's decision log contains entries → fold them into the same event narrative under **最終決策** subsection
 
 #### 3.4 Self-Check
 
@@ -541,8 +541,9 @@ For each decision block:
 
 After renaming, immediately update `.hanschen/journal/PROJECT_JOURNAL.md`:
 - If the file does not exist, initialize it first (see Section G Step 1)
-- Append new row to "決策紀錄" table: date, topic, adopted options summary (1 line), link to `CLOSED_YYMMDD_<topic>_decision.md` (the **only** source file now — no separate summary file exists)
-- If the inline summary contains "🔖 保留候選" → append each to living doc's "🔖 保留候選" table
+- Identify matching domain H2 + topic H3 (no date in title); append narrative event with `|YYMMDD <短描>` suffix — full flow in Section G Step 3
+- The link in 「來源」 line points **only** to `CLOSED_YYMMDD_<topic>_decision.md` (the inline summary inside is the authoritative record)
+- If the inline summary contains "🔖 保留候選" → include each in the event narrative's **🔖 保留候選** subsection
 - Update "最後更新" timestamp
 
 #### 6.5 Self-Check (Mandatory)
@@ -983,35 +984,80 @@ One file per project; entries are append-only (never overwrite existing rows).
 
 ### Step 1: Initialize (First-Time Only)
 
-If `.hanschen/journal/PROJECT_JOURNAL.md` does not exist, create the directory and initialize the file:
+If `.hanschen/journal/PROJECT_JOURNAL.md` does not exist, create the directory and initialize the file. **Topic-grouped structure (2026-05-14 format)** — entries grouped by domain H2, then by topic H3 (no date in H3 title); each event's narrative ends with `|YYMMDD <短描>` suffix line.
 
 ```markdown
-# 專案活文件（Project Journal）
+# <project-name> 專案活文件（Project Journal）
 
-> 建立：YYYY-MM-DD
-> 最後更新：YYYY-MM-DD HH:MM
-> 專案：<project-name>（from directory name or CLAUDE.md）
-
----
-
-## 決策紀錄
-
-| 日期 | 主題 | 最終決策摘要 | 來源文件 |
-|------|------|------------|---------|
+> 建立：YYYY-MM-DD　最後更新：YYYY-MM-DD　專案：<project-name>
+>
+> **本檔是專案權威概覽**：收錄各領域演進、規則異動、Setup 變更的歷史軌跡。
+>
+> 每筆事件 narrative 末尾以 `|YYMMDD <短描>` 標記時間戳；指向原 decision 檔或 `CLOSED_*.md` 反向連結保留在 narrative 內的「來源」行。
 
 ---
 
-## 討論成果
+## 目錄
 
-| 日期 | 主題 | 關鍵成果 | 來源文件 |
-|------|------|---------|---------|
+- [<Domain 1>](#domain-1) — <one-line scope>
+- [Skill 規則](#skill-規則) — 專案規範、協作流程、文件管理規則
+- [Project Setup](#project-setup) — 環境、工具鏈、交付形式
 
 ---
 
-## 🔖 保留候選（未採納但可重啟）
+## <Domain 1>（例：OCR Pipeline / Backend / Data Pipeline）
 
-| 來源主題 | 選項說明 | 未採納原因 | 重啟時機 |
-|---------|---------|----------|---------|
+### <Topic A>
+
+（若主題下只有一個事件，narrative 直接 inline）
+
+**背景**：...
+
+**方法／結果**：...
+
+**變更清單**：表格
+
+**🔖 保留候選**（若有）
+
+**遺留項**：...
+
+**來源**：...
+
+|YYMMDD <短描>
+
+---
+
+### <Topic B>（多事件 topic）
+
+#### <Event 1 短標題>
+
+narrative ...
+
+|YYMMDD <短描 1>
+
+---
+
+#### <Event 2 短標題>
+
+narrative ...
+
+|YYMMDD <短描 2>
+
+---
+
+## Skill 規則
+
+### <規則 topic>
+
+narrative ...
+
+|YYMMDD <短描>
+
+---
+
+## Project Setup
+
+（Bootstrap / 環境 / 工具鏈相關事件）
 ```
 
 ### Step 1.5: Append Incremental Progress Entry (Rule 17.4.1)
@@ -1019,9 +1065,14 @@ If `.hanschen/journal/PROJECT_JOURNAL.md` does not exist, create the directory a
 Triggered when a TODO sub-item belonging to an active decide is moved to Completed. Same reply must include the entry.
 
 1. Pick the correct domain section header (`## OCR Pipeline`, `## Skill 規則`, `## Project Setup` — or whichever exists). If none fit, add a new domain section.
-2. Insert entry **at the top of that section** (newest first):
+2. Identify the matching topic H3 (no date in title) under that domain. If no matching topic exists, create a new H3 with a topic title (no date).
+3. Append event narrative under that H3:
+   - If the H3 only has a single existing event → convert that event to H4 (`#### <existing event 短標題>`) and add the new H4 below
+   - If the H3 already has H4 sub-events → append a new H4 event at the bottom (chronological order, oldest first)
+   - If the H3 is new (no events yet) → write narrative inline (no H4 yet)
+4. Event narrative template:
    ```markdown
-   ### YYYY-MM-DD — <subject>
+   #### <event 短標題>（多事件 topic 才寫 H4）
 
    **背景**：承接 decide §X 的什麼子項、為什麼需要這次 session。
 
@@ -1037,46 +1088,67 @@ Triggered when a TODO sub-item belonging to an active decide is moved to Complet
    **遺留項**：尚未處理但已知的後續工作。
 
    **來源**：指向 decide 檔（`.hanschen/decision/<active>.md` §n）。
+
+   |YYMMDD <短描>
    ```
-3. Update `> 最後更新` line (just the date — no rule citation).
-4. **Same reply trigger** `/commit-push`（或 `--meta` 視變更性質）.
+5. `|YYMMDD <短描>` format (mandatory):
+   - `YYMMDD` = 6-digit short date (e.g., `260514`)
+   - `<短描>` = 10-30 character noun phrase summarizing the event's primary outcome (no verbs like 「完成」, focus on the artifact / change / discovery)
+   - Examples: `|260507 v1 初版 (F1=0.471 val PDF)`, `|260513 v2 GT擴增重訓 (056 R 76→70.6%)`, `|260514 v1/v2 模型打包交付`
+6. Update `> 最後更新` line (just the date — no rule citation).
+7. **Same reply trigger** `/commit-push`（或 `--meta` 視變更性質）.
 
 Content rules:
 - Entry body is **content-only**; no `CLAUDE.md Rule X` citations inside the narrative
 - Quantitative results only when measured (don't write predicted/expected numbers)
 - "來源" line is the only allowed rule-adjacent link, and it points at the decide doc, not at CLAUDE.md
+- `|YYMMDD` suffix is **mandatory** — it's the timestamp anchor (replaces the old date-in-H3-heading convention)
 
 ### Step 2: Append from Board Closure
 
 Called internally after `/team board` Step 3.2. Input: the renamed whiteboard file path.
 
 1. Read the closure summary section from `CLOSED_YYMMDD_topic.md`
-2. Append one row to the "討論成果" table:
-   - Date (from file or closure summary)
-   - Topic (from filename or whiteboard title)
-   - Key outcomes (1–2 sentences condensed from "Key Outcomes" bullet points)
-   - Link: `[CLOSED_YYMMDD_topic.md](.hanschen/board/CLOSED_YYMMDD_topic.md)`
-3. If the whiteboard's "決策紀錄" table has entries → also append each to "決策紀錄" table
-4. Update "最後更新" timestamp
+2. Identify the matching domain H2 (`## OCR Pipeline` / `## Skill 規則` / `## Project Setup` / 其他既有) and topic H3 (no date in title) where this whiteboard belongs:
+   - Existing topic H3 matches → append a new event under it (follow Step 1.5 multi-event rules)
+   - No matching topic → create new topic H3 with descriptive title (no date)
+3. Append event narrative containing:
+   - **背景** (1-2 sentences)
+   - **方法／結果** (key outcomes from whiteboard closure summary, condensed)
+   - **變更清單** (if any code/file changes)
+   - **🔖 保留候選** (if whiteboard had any)
+   - **遺留項** (if any)
+   - **來源** line: `[CLOSED_YYMMDD_topic.md](../board/CLOSED_YYMMDD_topic.md)`
+4. **Mandatory** trailing timestamp line: `|YYMMDD <短描>`
+5. Update "最後更新" timestamp
 
 ### Step 3: Append from Decide Closure
 
 Called internally after `/team decide` Step 6.4. Input: the renamed decision file path (no separate summary file exists — summary is inline at file end).
 
 1. Read the **inline closure summary block** at the bottom of `CLOSED_YYMMDD_<topic>_decision.md`
-2. Append rows to the "決策紀錄" table — one row per major decision block:
-   - Date, topic, adopted option summary (1 line), link **only** to `CLOSED_YYMMDD_<topic>_decision.md` (the inline summary inside is the authoritative record)
-3. If the inline summary contains "🔖 保留候選" section → append each candidate to living doc's "🔖 保留候選" table
-4. Update "最後更新" timestamp
+2. Identify the matching domain H2 and topic H3 (same logic as Step 2.2):
+   - Existing topic H3 matches → append new event under it
+   - No matching topic → create new topic H3
+3. Append event narrative containing:
+   - **背景** (1-2 sentences from decision background)
+   - **最終決策** table (per §n.m item, adopted option + 意義)
+   - **變更清單** (file-level changes)
+   - **🔖 保留候選** (if decision had any unadopted options)
+   - **遺留項** (if any)
+   - **來源** line: `[CLOSED_YYMMDD_<topic>_decision.md](../decision/CLOSED_YYMMDD_<topic>_decision.md)`
+4. **Mandatory** trailing timestamp line: `|YYMMDD <短描>`
+5. Update "最後更新" timestamp
 
 ### Step 4: Regen Flow
 
 For `/team journal regen`:
-1. Clear the rows from all three tables (keep headers and template structure)
+1. Preserve all `## <domain>` headers and `### <topic>` H3 structure (these are manually curated)
 2. Scan all `CLOSED_*` files in `.hanschen/board/` and `.hanschen/decision/`
 3. For each CLOSED file, parse the **inline closure summary block** at its end
-4. Rebuild the three tables chronologically by date
-5. Report: "Rebuilt from N whiteboard sessions, M decisions"
+4. Match each closure to existing topic H3 by subject keyword (auto-classify when possible; ambiguous → list to user)
+5. Rebuild event narratives under their topic H3 (chronological order within each H3, oldest first); ensure each event ends with `|YYMMDD <短描>` line
+6. Report: "Rebuilt N events under M topics across K domains"
 
 Note: `.local/docs/summary/` directory no longer exists (removed 2026-04-22). Do not scan it.
 
