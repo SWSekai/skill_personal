@@ -59,7 +59,6 @@ Use AskUserQuestion or parse `$ARGUMENTS` to obtain:
 | name | ✓ | kebab-case (e.g. `trace-flow`) |
 | command | ✓ | Slash command (e.g. `/trace-flow`) |
 | description | ✓ | One-line description |
-| model | ✓ | `opus` / `sonnet` / `haiku` |
 | effort | ✓ | `low` / `medium` / `high` |
 | argument-hint | - | Autocomplete hint |
 | trigger | ✓ | Manual / automatic / conditional trigger |
@@ -116,7 +115,7 @@ Format rules:
 
 ### Step 4: Generate README.md
 
-Includes feature description, usage, Model info (model + effort + rationale), trigger conditions, execution flow, directory structure, and parameter explanations.
+Includes feature description, usage, Effort info (effort + rationale), trigger conditions, execution flow, directory structure, and parameter explanations.
 
 **Language rule (mandatory)**: README.md is **all Traditional Chinese (Taiwan usage)**; exceptions: code, file paths, commands, identifier names, API names remain as-is. Violations of the CLAUDE.md language-division rule must be corrected.
 
