@@ -29,6 +29,7 @@
 |---|---|---|---|
 | cicd-gitea-actions-yaml | _general | Gitea/GitHub Actions YAML 結構、Docker Build、K8s 部署、kubeconfig 注入、常見坑 | 2026-05-06 |
 | sql_common_syntax | backend | SQL 常見語法完整指南：SELECT/WHERE/JOIN/聚合/子查詢/DDL + 跨 RDBMS 差異與常見陷阱 | 2026-05-08 |
+| windows-to-linux-server-migration | _general | Windows → Linux Server 遷移：排程任務容器化、時區管理、cron 採坑、MinIO 清理、CRLF/LF、企業 proxy | 2026-05-15 |
 
 ## 規則
 
