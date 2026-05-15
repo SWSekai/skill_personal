@@ -1414,4 +1414,20 @@ Skip all git ops; emit a structured architecture audit to `.hanschen/.history/au
 
 ---
 
+## Cross-Skill References
+
+| Direction | Target | Trigger / Purpose |
+|---|---|---|
+| → Calls | `/commit-push` | decide/board closure → journal progress entry → `/commit-push` (CLAUDE.md Rule 17.4.1) |
+| → Reads/Writes | `.hanschen/{decision,board,journal,handoff,report,modify_log}/`, `.local/collab/TODO.md` | all interactive-collaboration artifacts |
+| → Writes | `.hanschen/.history/refactor.jsonl` (apply side), `sekai-workflow/handbook/` (via `/kb`) | `/team sync` migration; `/team note` → `/kb add` redirect |
+| ← Called by | `/hello` Step 3 | reads TODO / open decision / open board for work-state reconstruction |
+| ← Called by | `/commit-push` Step 11 | daily report append |
+| ↔ Shared | `/skm refactor` | `.hanschen/.history/refactor.jsonl` consumer↔producer: `/skm refactor` writes intent, `/team sync` Step 0 reads/applies |
+| ↔ Shared | `/hello` | `TODO.md` schema + `.local/context_summary/` directory |
+
+**Rename History (this skill only)**: `team-office` → `team` (skill name, 2026-04-24); `/team living` → `/team journal` and `/ask report` → `/team report` (subcommands). Global rename history: see `_bootstrap/RENAME_HISTORY.md`.
+
+---
+
 Arguments: $ARGUMENTS (the first token is the subcommand, the rest are arguments for that subcommand)

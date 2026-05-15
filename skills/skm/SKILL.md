@@ -46,6 +46,23 @@ When `$ARGUMENTS` contains `--no-subagent`, **all Agent dispatches across every 
 
 ---
 
+## Common Rule: Cross-Skill Reference Integrity
+
+Every skill's `SKILL.md` (and `README.md` where structural) **must** carry a `## Cross-Skill References` section listing what it Calls / Reads / Writes / is Called-by / Shares with other skills. This section is the **maintained contract** that makes renames and path migrations safe — it is not optional documentation.
+
+**Enforcement across `/skm` subcommands**:
+
+| Subcommand | Obligation |
+|---|---|
+| `/skm new` (Step 4) | New skill's SKILL.md must include a `## Cross-Skill References` section |
+| `/skm update` (Step 3) | When a change alters what a skill calls/reads/writes, update the section on **both** this skill and any skill it newly references or stops referencing |
+| `/skm refactor` (Step 5) | A path/command rename must **sweep every skill's** `Cross-Skill References` section — not rely on grep-at-refactor-time alone |
+| `/skm sync` (Flow 1b item 6) | Scans for un-propagated renames: `RENAME_HISTORY.md` open rows whose old name still appears in skill files |
+
+**Why this rule exists**: the 2026-04-24 `Sekai_workflow → .sekai-workflow` rename was recorded in `RENAME_HISTORY.md` but its global-grep verification step was never run — the old name rotted in 49 files for 3 weeks (discovered 2026-05-15). Maintained cross-references plus Flow 1b detection close that gap.
+
+---
+
 ## A. `/skm new` — Create New Skill
 
 Interactively create a brand-new Claude Code Skill following existing structural conventions and completing all registrations.
@@ -257,6 +274,7 @@ After Flow 1 completes, **scan `.local/` for drift against the newly-synced Skil
 3. **Orphan directories** — directories under `.local/` with no SKILL.md reference (grep `.local/<name>` across all `.claude/skills/**/*.md`). Classify as: likely-obsolete / project-specific / needs-user-judgment.
 4. **Filename convention drift** — files in `decisions/` without `_decision.md` suffix, in `whiteboards/` without `_board.md` suffix, etc. Report count, do not rename (existing files per `team/references/naming.md` remain valid).
 5. **Path-expectation mismatches** — e.g. Skill expects `.local/collab/TODO.md` but project keeps `./TODO.md`. Check config-flexible paths (see `team/SKILL.md` §A location resolution).
+6. **Un-propagated rename drift** — for each open row in `_bootstrap/RENAME_HISTORY.md` (rows **not** marked ✅), grep `.claude/skills/**` + `.sekai-workflow/**` for the old name/path. Any hit means a recorded rename whose global-grep verification step was skipped. Report as category E; these **must** be fixed before the `RENAME_HISTORY.md` row can be marked ✅ (per Common Rule: Cross-Skill Reference Integrity).
 
 **Output format** (present to user, require confirmation for destructive ops):
 
@@ -271,9 +289,11 @@ After Flow 1 completes, **scan `.local/` for drift against the newly-synced Skil
      - docs/changelog/ (experiment data, likely retain)
   D. Path mismatches:
      - ./TODO.md at root (Skill now accepts both root + .local/collab/)
+  E. Un-propagated renames (RENAME_HISTORY open rows with stale hits):
+     - <old-name> still in N file(s) — row dated <date> not yet ✅
 ```
 
-Safe merges (pure rename of legacy-plural → active-singular with no semantic conflict) may be auto-executed. All other categories require user confirmation before action.
+Safe merges (pure rename of legacy-plural → active-singular with no semantic conflict) may be auto-executed. All other categories require user confirmation before action. Category E is reported, not auto-fixed — the user decides whether to complete the rename now or defer.
 
 ### Flow 2: Rule Evaluation and Three-Way Linkage (Mandatory)
 
@@ -548,6 +568,7 @@ Ambiguous → AskUserQuestion listing 2–3 candidate skills, first option marke
    - frontmatter `description` / `argument-hint` update needed?
    - Subcommand Routing table change needed?
    - New section numbering collision?
+   - `Cross-Skill References` section update needed — on **this** skill and any skill it newly references or stops referencing (per Common Rule: Cross-Skill Reference Integrity)?
 4. Present the full diff to the user
 
 AskUserQuestion:
@@ -671,6 +692,8 @@ If the refactor changes paths or commands referenced in skills:
 1. Batch-update all `.claude/skills/**/*.md` files
 2. Mirror to `.sekai-workflow/**/*.md`
 3. Update `CLAUDE.md` if cross-project rule
+4. **Sweep every skill's `## Cross-Skill References` section** for the old name/path — do not rely on a one-off grep (per Common Rule: Cross-Skill Reference Integrity)
+5. After the global grep confirms the old name is gone, mark the `_bootstrap/RENAME_HISTORY.md` row ✅
 
 ### Step 6: Commit (with `--meta` flag)
 
@@ -692,6 +715,8 @@ Print:
 - [ ] `.hanschen/.history/refactor.jsonl` contains new entry
 - [ ] Affected `.claude/skills/` files updated
 - [ ] `.sekai-workflow/` mirror updated (if general refactor)
+- [ ] Every skill's `## Cross-Skill References` section swept for the old name
+- [ ] Global grep confirms old name gone → `RENAME_HISTORY.md` row marked ✅
 - [ ] `CLAUDE.md` updated (if cross-project rule)
 - [ ] Commit made with `--meta` (or queued for user)
 
@@ -701,6 +726,21 @@ Print:
 - **Two-phase migration** — initiator (this subcommand) records intent; receivers (`/team sync`) apply per-project
 - **Decision-traceable** — each refactor record links to a CLOSED_*.md decision when available
 - **No runtime fallback** — `.hanschen/` and `.local/` are strictly separated (per §03.A); migration consistency is enforced through this history mechanism, not skill-layer if/else
+
+---
+
+## Cross-Skill References
+
+| Direction | Target | Trigger / Purpose |
+|---|---|---|
+| → Calls | `/commit-push --meta` | `/skm new` Step 10, `/skm update` Step 7, `/skm refactor` Step 6 — meta-level commit |
+| → Edits | every skill's `SKILL.md` / `README.md` | `/skm new` (registration), `/skm update` (improvement), `/skm refactor` (rename sweep) |
+| → Writes | `.sekai-workflow/`, `CLAUDE.md`, `manifest.json`, `file_manifest.json`, `.hanschen/.history/refactor.jsonl` | skill registration / refactor records |
+| ← Called by | `/hello` Step 2 | `/hello` absorbed `/skm sync` Flow 1 (remote pull + skill diff) on 2026-04-24 |
+| ↔ Shared | `/team sync` | `.hanschen/.history/refactor.jsonl` producer↔consumer: `/skm refactor` writes intent, `/team sync` Step 0 applies per-machine |
+| ↔ Shared | `_bootstrap/RENAME_HISTORY.md` | global rename governance; Flow 1b item 6 reads open (non-✅) rows |
+
+**Rename History (this skill only)**: `/setup` → `/skill` (2026-04-17) → `/skm` (2026-04-24, avoids clash with built-in `/skills`). Global rename history: see `_bootstrap/RENAME_HISTORY.md`.
 
 ---
 
