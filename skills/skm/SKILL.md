@@ -67,6 +67,19 @@ Every skill's `SKILL.md` (and `README.md` where structural) **must** carry a `##
 
 Interactively create a brand-new Claude Code Skill following existing structural conventions and completing all registrations.
 
+### Step 0: Pre-modification Check (Rule 21, mandatory)
+
+Before any write to `.sekai-workflow/` or `.claude/skills/`:
+
+1. **Remote check** — `cd .sekai-workflow && git fetch origin --quiet && git rev-list --left-right --count origin/main...HEAD`
+   - Both sides > 0 (divergence) → halt and surface Rule 28 handling options (rebase / reset / new branch); do NOT proceed until resolved
+   - Remote ahead only → `git pull --rebase origin main` then continue
+   - Local ahead only or `0 0` → proceed
+2. **Risk assessment** — list affected paths (this skill's new folder + manifest + CLAUDE.md available-skills + `Sekai_workflow/` mirror)
+3. **User confirmation** — only when risk assessment surfaces irreversible operations (e.g. overwriting an existing skill); pure additive new-skill creation may skip this gate (Rule 21.3 + Rule 15)
+
+Skipping this step risks stale-tree edits → push conflicts → manual recovery. See `.claude/skills/build/references/pre-modification.md` for full protocol.
+
 ### Step 1: Collect Skill Definition
 
 Use AskUserQuestion or parse `$ARGUMENTS` to obtain:
@@ -540,6 +553,19 @@ Manual invocation only:
 | `/skm update` | Claude asks what to capture (free-form or recent-candidate list) |
 | `/skm update <one-line hint>` | Use the hint directly as the improvement description |
 
+### Step 0: Pre-modification Check (Rule 21, mandatory)
+
+Before drafting / writing the improvement diff:
+
+1. **Remote check** — `cd .sekai-workflow && git fetch origin --quiet && git rev-list --left-right --count origin/main...HEAD`
+   - Both sides > 0 (divergence) → halt; surface Rule 28 options (rebase / reset / new branch)
+   - Remote ahead only → `git pull --rebase origin main` BEFORE Step 3 (otherwise the draft diff is on a stale tree)
+   - Local ahead only or `0 0` → proceed
+2. **Risk assessment** — list affected files (target skill's SKILL.md + README.md + optionally CLAUDE.md / template)
+3. **User confirmation** — included in Step 3 diff preview (existing flow), no extra gate needed
+
+Skipping this step is the most common cause of `/skm update` push failures. See `.claude/skills/build/references/pre-modification.md`.
+
 ### Step 1: Clarify the Improvement
 
 If `$ARGUMENTS` contains a hint → use it as the starting description.
@@ -651,6 +677,19 @@ This subcommand is the entry for the "initiator" half.
 | `/skm refactor migrate <from> <to>` | Path migration: scan `<from>`, propose move to `<to>` |
 | `/skm refactor rename-skill <old> <new>` | Skill rename: update `skill_aliases` in manifest, scan stale folders |
 | `/skm refactor redirect <skill> <from> <to>` | Workflow redirect: e.g., `/team note` writes go to `/kb add` instead |
+
+### Step 0: Pre-modification Check (Rule 21, mandatory; refactor scope = high impact)
+
+Refactors typically touch many files across `.sekai-workflow/` + `.claude/skills/` + project source. Before Step 1 type selection:
+
+1. **Remote check** — `cd .sekai-workflow && git fetch origin --quiet && git rev-list --left-right --count origin/main...HEAD`
+   - Both sides > 0 (divergence) → **halt**; surface Rule 28 options (rebase / reset / new branch); refactor must NOT proceed on a divergent tree
+   - Remote ahead only → `git pull --rebase origin main` BEFORE Step 2 (Impact Analysis would be wrong on stale tree)
+   - Local ahead only or `0 0` → proceed
+2. **Risk assessment** — declare scope: which skill(s) touched, whether CLAUDE.md / template / manifest / hooks affected, irreversible ops involved (rename / removal)
+3. **User confirmation** — **mandatory** for refactor (all refactor types are irreversible by definition); use AskUserQuestion with "low-risk accept default / high-risk needs step-by-step / cancel" options per Rule 21.3
+
+This gate is the strictest of all `/skm` flows because refactor failures are hardest to recover. See `.claude/skills/build/references/pre-modification.md`.
 
 ### Step 1: Refactor Type Selection
 
