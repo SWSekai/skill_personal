@@ -558,6 +558,34 @@ git rev-list --left-right --count origin/$BRANCH...HEAD 2>/dev/null
 
 `/hello --skip-divergence-check`、`/commit-push --skip-divergence-check` — commit message 註記 `(rule-28 skipped: <reason>)`。
 
+### 29. 任務完成後必須清理 TODO（2026-05-15 新增）
+
+任何明確產出物（`/kb add`、`/build` 完成、bug fix commit、指南撰寫、設計檔案結案等）執行完畢後，**必須立即更新** `.local/collab/TODO.md`：
+
+1. 將對應的 `[ ]` 項目從 `## Pending` / `## In Progress` 移至 `## Completed`
+2. 改為 `[x]`，標註完成日期、產出物路徑或 commit hash
+3. 若 TODO 原無此項（任務臨時新增）→ 直接在 `## Completed` 新增一行記錄
+
+**強制性**：這是收尾動作，**不需 Y/N 確認**（依 Rule 15 直接執行）。違反此規則 = 工作沒閉環，等同流程缺陷。
+
+**禁止**：把清理留到下次對話、等使用者提醒、僅口頭聲明完成卻不改檔。
+
+**觸發點**：
+- skill 子流程末步（如 `/kb add` Step 5 commit 完成、`/team decide` Step 6 結案重命名完成）
+- 自主任務的最後一個產出物落地（檔案 commit / push / 文件建立 / decision 結案）
+- 使用者口語確認「OK / 完成 / 收掉」
+
+**範例**：
+```diff
+ ## Pending
+-- [ ] Windows→Linux Server 通用轉移指南撰寫 *(來源: /kb)*
+
+ ## Completed
++- [x] Windows→Linux Server 通用轉移指南撰寫 *(2026-05-15，handbook/_general/windows-to-linux-server-migration.md，<commit-hash>)*
+```
+
+**關聯**：對應 `team` skill 的 TODO 子指令；`/kb add` Step 5、`/team decide` Step 6、`/build` 結案應於各自流程中觸發此規則。
+
 ## 可用 Skills
 
 合併版（17 → 6），透過子命令路由至原 Skill 對應職能。
