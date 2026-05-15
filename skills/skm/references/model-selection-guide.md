@@ -27,4 +27,4 @@
 - `low`：結構化輸出，適合 haiku 或簡單 sonnet 任務
 - `max`：僅用於極端複雜場景（罕見）
 
-完整規則參見 `Sekai_workflow/references/model-routing.md`。
+完整規則參見 `.sekai-workflow/references/model-routing.md`。

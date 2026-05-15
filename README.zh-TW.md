@@ -68,7 +68,7 @@ C:\path\to\sekai-workflow\_bootstrap\sp-init.bat
 Bootstrap 會自動：
 
 1. 建立 `.claude/skills/` 並複製所有 Skill 到你的專案
-2. 建立本地 `Sekai_workflow/`（首次執行後自動更名為 `.sekai-workflow/`），追蹤上游倉庫更新
+2. 建立本地 `.sekai-workflow/`（首次執行後自動更名為 `.sekai-workflow/`），追蹤上游倉庫更新
 3. 產生針對 Claude Code 調校的 `CLAUDE.md` 規則檔
 4. 安裝 `pre-commit` hook，防止 Skill 檔案誤入你的專案版控
 5. 自動更新 `.gitignore` 排除所有 AI 相關檔案

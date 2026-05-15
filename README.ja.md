@@ -66,7 +66,7 @@ C:\path\to\sekai-workflow\_bootstrap\sp-init.bat
 Bootstrap が自動で行うこと：
 
 1. `.claude/skills/` を作成し、全 Skill をコピー
-2. ローカル `Sekai_workflow/` を作成（初回実行後 `.sekai-workflow/` にリネーム）— 上流リポの更新を追跡
+2. ローカル `.sekai-workflow/` を作成（初回実行後 `.sekai-workflow/` にリネーム）— 上流リポの更新を追跡
 3. Claude Code 用にチューニングされた `CLAUDE.md` を生成
 4. `pre-commit` フックを入れて、Skill ファイルが誤ってコミットされないようにガード
 5. `.gitignore` に AI 関連の全ファイルを除外設定

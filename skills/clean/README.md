@@ -103,7 +103,7 @@ clean/
 ## 需要安裝的 Hook
 
 `UserPromptSubmit` hook：`inject_context_on_resume.cjs`
-- 來源：`Sekai_workflow/hooks/inject_context_on_resume.cjs`（需透過 sp-init 或手動安裝）
+- 來源：`.sekai-workflow/hooks/inject_context_on_resume.cjs`（需透過 sp-init 或手動安裝）
 - 綁定：`.claude/settings.local.json` 的 `UserPromptSubmit` 項目
 - 行為：第一則訊息時注入 resumption_prompt.md 內容並刪除，後續訊息不觸發
 

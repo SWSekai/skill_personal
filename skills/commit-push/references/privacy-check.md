@@ -50,7 +50,7 @@ done < <(git diff --cached --name-only)
 
 | 檢查層 | 觸發 | 範圍 | 用途 |
 |---|---|---|---|
-| pre-commit hook（`_bootstrap/hooks/pre-commit`）| 專案 git commit | 專案根倉庫 | 阻擋 `.claude/ Sekai_workflow/ CLAUDE.md` 等入版控 |
+| pre-commit hook（`_bootstrap/hooks/pre-commit`）| 專案 git commit | 專案根倉庫 | 阻擋 `.claude/ .sekai-workflow/ CLAUDE.md` 等入版控 |
 | Privacy check（本文件）| `/commit-push` Step 7.1 | `sekai-workflow/` 待 push 檔案 | 阻擋敏感字串推送至公開倉庫 |
 
 兩者互補，互不取代。

@@ -127,7 +127,7 @@ If `.claude/hooks/inject_context_on_resume.cjs` does not exist, output:
 To enable seamless context injection after /clear, add the hook:
   .claude/hooks/inject_context_on_resume.cjs
   Bound as: UserPromptSubmit (matcher: ".*")
-See: Sekai_workflow/hooks/inject_context_on_resume.cjs
+See: .sekai-workflow/hooks/inject_context_on_resume.cjs
 ```
 
 If the hook exists → proceed silently.

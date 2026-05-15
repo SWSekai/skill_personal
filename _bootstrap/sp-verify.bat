@@ -35,7 +35,7 @@ if not exist "!GI!" (
     set /a FAIL+=1
 ) else (
     set "GI_OK=1"
-    for %%E in (".claude/" "Sekai_workflow/" "!USER_WORKDIR!") do (
+    for %%E in (".claude/" ".sekai-workflow/" "!USER_WORKDIR!") do (
         findstr /B /C:%%E "!GI!" >nul 2>&1
         if errorlevel 1 (
             echo       FAIL: %%~E not in .gitignore
@@ -44,7 +44,7 @@ if not exist "!GI!" (
         )
     )
     if "!GI_OK!"=="1" (
-        echo       PASS: .claude/ Sekai_workflow/ !USER_WORKDIR! all present
+        echo       PASS: .claude/ .sekai-workflow/ !USER_WORKDIR! all present
         set /a PASS+=1
     )
 )
@@ -75,13 +75,13 @@ if not exist "%PROJECT_DIR%\.claude\skills" (
     set /a PASS+=1
 )
 
-REM --- Check 4: Sekai_workflow/ exists ---
-echo [Check 4] Sekai_workflow/ directory...
-if not exist "%PROJECT_DIR%\Sekai_workflow" (
-    echo       FAIL: Sekai_workflow/ not found
+REM --- Check 4: .sekai-workflow/ exists ---
+echo [Check 4] .sekai-workflow/ directory...
+if not exist "%PROJECT_DIR%\.sekai-workflow" (
+    echo       FAIL: .sekai-workflow/ not found
     set /a FAIL+=1
 ) else (
-    echo       PASS: Sekai_workflow/ exists
+    echo       PASS: .sekai-workflow/ exists
     set /a PASS+=1
 )
 
@@ -136,7 +136,7 @@ echo.
 
 if !FAIL! GTR 0 (
     echo   Run sp-init.bat to fix issues:
-    echo     Sekai_workflow\_bootstrap\sp-init.bat "%PROJECT_DIR%"
+    echo     .sekai-workflow\_bootstrap\sp-init.bat "%PROJECT_DIR%"
     echo.
     exit /b 1
 )

@@ -26,7 +26,7 @@
 |---|---|---|---|---|---|
 | 2026-04-17 | `/setup` | `/skill` | Skill 管理 subcommand | 全 skill 系統 README/SKILL、CLAUDE.md | 2026-07-16 |
 | 2026-04-22 | `.local/docs/summary/` 目錄機制 | 內嵌結案摘要 append 至 CLOSED_ 原檔末尾 | team decide / board 結案流程 | `team/SKILL.md`、`team/references/naming.md`、所有 CLOSED 決策檔 | 2026-07-21 |
-| 2026-04-24 | `Sekai_workflow/`（駝峰底線）| `sekai-workflow/`（小寫連字號，源 repo）；`.sekai-workflow/`（init 後專案內隱藏目錄）| 全域路徑 | bootstrap 腳本、所有路徑引用、hooks | 2026-07-23 |
+| 2026-04-24 | `Sekai_workflow/`（駝峰底線）| `sekai-workflow/`（小寫連字號，源 repo）；`.sekai-workflow/`（init 後專案內隱藏目錄）| 全域路徑 | ✅ 2026-05-15 全域 grep 確認舊名消失（49 檔修正：bootstrap 腳本、skill .md、hooks、templates、`.claude/skills/` 鏡像）；本檔保留歷史紀錄 | 2026-07-23 |
 | 2026-04-24 | `/skill` | `/skm` | Skill 管理 subcommand（避免與內建 `/skills` 衝突）| 全 skill 系統 README/SKILL、CLAUDE.md、`_bootstrap/templates/` | 2026-07-23 |
 | 2026-04-24 | `/team living` | `/team journal` | team subcommand（專案 journal）| `team/SKILL.md`、`team/references/`、CLAUDE.md Available Skills | 2026-07-23 |
 | 2026-04-24 | `team-office` (skill 名) | `team` | 互動協作 skill | 全 skill 系統 README/SKILL、CLAUDE.md | 2026-07-23 |

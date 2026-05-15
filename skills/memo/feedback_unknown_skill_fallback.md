@@ -14,7 +14,7 @@ type: feedback
 
 **Why（根因）**：
 
-Claude Code harness 在 session 啟動時將 skill 列表凍結進 system prompt。當使用者於 session 中**編輯 Sekai_workflow 回流區域**（如 `.sekai-workflow/<skill>/SKILL.md` 等遠端上傳前的 skill 檔案）→ harness 將 cwd 或 skill 掃描路徑指向該回流目錄而非 `.claude/skills/` → skill 列表掃不到 project-level skill。
+Claude Code harness 在 session 啟動時將 skill 列表凍結進 system prompt。當使用者於 session 中**編輯 .sekai-workflow 回流區域**（如 `.sekai-workflow/<skill>/SKILL.md` 等遠端上傳前的 skill 檔案）→ harness 將 cwd 或 skill 掃描路徑指向該回流目錄而非 `.claude/skills/` → skill 列表掃不到 project-level skill。
 
 關鍵特徵：
 - `.claude/skills/` 是 runtime 副本（被 harness 掃描以注入 skill 列表）

@@ -265,7 +265,7 @@ set "HOOK_SCRIPTS_SRC=%REPO_ROOT%\hooks"
 set "HOOK_SCRIPTS_DST=%PROJECT_DIR%\.claude\hooks"
 
 if not exist "!HOOK_SCRIPTS_SRC!" (
-    echo            WARN: hooks/ directory not found in Sekai_workflow - skipped
+    echo            WARN: hooks/ directory not found in .sekai-workflow - skipped
 ) else (
     if not exist "!HOOK_SCRIPTS_DST!" mkdir "!HOOK_SCRIPTS_DST!" 2>nul
     set "HOOK_COPIED=0"
@@ -315,7 +315,7 @@ echo [8/9] Restoring portable memory...
 set "MEM_PORTABLE=%REPO_ROOT%\memo"
 
 if not exist "!MEM_PORTABLE!" (
-    echo       WARN: memo/ not found in Sekai_workflow - skipped
+    echo       WARN: memo/ not found in .sekai-workflow - skipped
     goto :DoneMemory
 )
 

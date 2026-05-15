@@ -6,7 +6,7 @@ Run this checklist after creating a new skill via `/skm new` or manually. Migrat
 
 - [ ] Skill folder contains both `SKILL.md` and `README.md`
 - [ ] `.claude/skills/README.md` updated with new skill entry
-- [ ] `Sekai_workflow/` mirror folder synced (cross-project portability per Rule 4)
+- [ ] `.sekai-workflow/` mirror folder synced (cross-project portability per Rule 4)
 - [ ] `CLAUDE.md` 可用 Skills list updated
 - [ ] **Subdirectory structure per Rule 19**: at minimum includes `references/`; `assets/` holds only templates and sample data (no executables); `agents/` and `scripts/` are optional (see Rule 19 trade-offs)
 - [ ] **SKILL.md holds only external contract**: subcommand routing, usage, step outline. Detail rules, parser logic, data structures all live in `references/`
@@ -26,7 +26,7 @@ ls .claude/skills/<new>/       # SKILL.md + README.md present
 ls .claude/skills/<new>/references/   # at least one .md
 grep "<new>" .claude/skills/README.md
 grep "<new>" CLAUDE.md         # Available Skills list
-ls Sekai_workflow/<new>/        # mirror exists
+ls .sekai-workflow/<new>/        # mirror exists
 ```
 
 Any missing item is a Rule 10 violation — must be completed before closing the `/skm new` flow.

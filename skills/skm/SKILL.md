@@ -76,7 +76,7 @@ If `$ARGUMENTS` contains enough information, parse directly; only ask follow-up 
 
 ### Step 2: Name Conflict Check
 
-Check `.claude/skills/<name>/` and `Sekai_workflow/<name>/`:
+Check `.claude/skills/<name>/` and `.sekai-workflow/<name>/`:
 - Exists with content → warn, ask whether to "overwrite" or "update"
 - Exists but empty → treat as new
 - Does not exist → proceed
@@ -124,7 +124,7 @@ Includes feature description, usage, Effort info (effort + rationale), trigger c
 Add the new Skill in three locations:
 1. **Skills Overview table**: insert a new row in alphabetical order
 2. **Detailed description section**: insert description block in alphabetical order
-3. **Directory Structure tree**: add the new folder under the `Sekai_workflow/` structure
+3. **Directory Structure tree**: add the new folder under the `.sekai-workflow/` structure
 
 ### Step 6: Update CLAUDE.md
 
@@ -133,16 +133,16 @@ Insert into the `## 可用 Skills` section in alphabetical order:
 - `/command` — description
 ```
 
-### Step 7: Sync to `Sekai_workflow/` (general Skills only)
+### Step 7: Sync to `.sekai-workflow/` (general Skills only)
 
 General Skill:
-1. Copy the entire skill directory to `Sekai_workflow/<name>/`
-2. Update `Sekai_workflow/manifest.json` (including `model` field and all file paths)
-3. Update `Sekai_workflow/README.md` (table + description + tree)
+1. Copy the entire skill directory to `.sekai-workflow/<name>/`
+2. Update `.sekai-workflow/manifest.json` (including `model` field and all file paths)
+3. Update `.sekai-workflow/README.md` (table + description + tree)
 4. commit + push:
 
 ```bash
-cd Sekai_workflow
+cd .sekai-workflow
 git add <name>/ manifest.json README.md
 git commit -m "feat: add <name> skill"
 git push
@@ -160,9 +160,9 @@ Project-specific Skill: lives only in `.claude/skills/`, not synced; inform the 
 | Subdirectory files exist (if planned) | |
 | `.claude/skills/README.md` updated | |
 | `CLAUDE.md` updated | |
-| `Sekai_workflow/<name>/` synced (if general) | |
-| `Sekai_workflow/manifest.json` updated (if general) | |
-| `Sekai_workflow/README.md` updated (if general) | |
+| `.sekai-workflow/<name>/` synced (if general) | |
+| `.sekai-workflow/manifest.json` updated (if general) | |
+| `.sekai-workflow/README.md` updated (if general) | |
 | Step 10 commit prompt executed (AskUserQuestion or direct `/commit-push --meta`) | |
 
 ### Step 9: Output Summary
@@ -179,7 +179,7 @@ Structure: SKILL.md + README.md [+ references/ + assets/ + scripts/]
 Updated:
 - .claude/skills/README.md
 - CLAUDE.md
-- Sekai_workflow/ (if general)
+- .sekai-workflow/ (if general)
 ```
 
 ### Step 10: Commit Prompt (Mandatory, per CLAUDE.md Rule 20)
@@ -217,15 +217,15 @@ Skill creation is a **meta-level maintenance** activity; its commit must not pol
 ### Trigger Timing
 
 1. **When new rules are added to CLAUDE.md or Memory** (automatic): evaluate whether they should be added to a Skill
-2. **When `Sekai_workflow/` is modified** (automatic): sync to remote
+2. **When `.sekai-workflow/` is modified** (automatic): sync to remote
 3. **Manual invocation**: force the full sync flow (including remote sync + rule evaluation)
 
-### Flow 1: `Sekai_workflow/` Remote Sync
+### Flow 1: `.sekai-workflow/` Remote Sync
 
 Directly run the automation script:
 
 ```bash
-bash Sekai_workflow/_bootstrap/sp-sync.sh
+bash .sekai-workflow/_bootstrap/sp-sync.sh
 ```
 
 The script performs:
@@ -234,9 +234,9 @@ The script performs:
 3. Compare local and remote commits
 4. If updated → `git pull --rebase origin main`
 5. **Step 1c Post-pull drift check** — Re-read pulled manifest; same schema gate. Also compare on-disk `sp-sync.sh` `SCRIPT_VERSION` against the currently running value — if different, warn and abort (exit 3) so the user reruns with the newer script.
-6. **Skills sync** — Compare each skill's SKILL.md / README.md between `Sekai_workflow/` and `.claude/skills/`; copy new or differing skills
-7. **Manifest reconciliation** — Read `Sekai_workflow/file_manifest.json`; for every entry in `skill_aliases` (old→new rename map), detect stale folders at `.claude/skills/<old>/` and `Sekai_workflow/<old>/`, then interactively prompt the user to remove them. Non-interactive runs skip removal.
-8. **Hooks sync** — Compare each `*.cjs` / `*.sh` between `Sekai_workflow/hooks/` and `.claude/hooks/`; copy new or differing hook scripts
+6. **Skills sync** — Compare each skill's SKILL.md / README.md between `.sekai-workflow/` and `.claude/skills/`; copy new or differing skills
+7. **Manifest reconciliation** — Read `.sekai-workflow/file_manifest.json`; for every entry in `skill_aliases` (old→new rename map), detect stale folders at `.claude/skills/<old>/` and `.sekai-workflow/<old>/`, then interactively prompt the user to remove them. Non-interactive runs skip removal.
+8. **Hooks sync** — Compare each `*.cjs` / `*.sh` between `.sekai-workflow/hooks/` and `.claude/hooks/`; copy new or differing hook scripts
 9. **Statusline sync** — Sync `statusline.cjs` + patch `~/.claude/settings.json` `statusLine.command`
 10. Output `Version — Script / Schema` plus Added / Updated / No change summaries for skills, manifest-stale, hooks, and statusline
 
@@ -244,7 +244,7 @@ The script performs:
 - Pull conflict → abort; resolve manually then rerun
 - New skill → the script only copies files; you must manually update available Skills in `CLAUDE.md`
 - **New hook → the script copies the file but `.claude/settings.local.json` binding is not auto-modified** (per-project risk). Reference `_bootstrap/templates/hooks.json` for the expected matcher/command shape; manually add the `PreToolUse` / `PostToolUse` / `Stop` entry.
-- Push local changes → the script does not auto-push; you must `cd Sekai_workflow && git push origin main`
+- Push local changes → the script does not auto-push; you must `cd .sekai-workflow && git push origin main`
 
 ### Flow 1b: `.local/` Structure Drift Scan (Mandatory Post-Sync)
 
@@ -279,12 +279,12 @@ Safe merges (pure rename of legacy-plural → active-singular with no semantic c
 
 > **When writing to Memory, evaluation and execution must be completed in the same reply. Do not end the reply after just writing Memory.**
 >
-> Memory mostly represents user habits and behavior preferences, which are cross-project general. Rules stored only in Memory take effect only in the current project and cannot be carried to new projects with `Sekai_workflow`.
+> Memory mostly represents user habits and behavior preferences, which are cross-project general. Rules stored only in Memory take effect only in the current project and cannot be carried to new projects with `.sekai-workflow`.
 
 **After writing Memory, immediately decide**:
 
 1. **Is it a reusable behavioral constraint or process rule?** → sync-update `CLAUDE.md`
-2. **Is it cross-project general?** → reflow back to `Sekai_workflow/` template and push to remote
+2. **Is it cross-project general?** → reflow back to `.sekai-workflow/` template and push to remote
 3. **Does it only apply to the current project?** → Memory only, no reflow
 
 Full decision tree and 5 evaluation questions:
@@ -293,7 +293,7 @@ See `${CLAUDE_SKILL_DIR}/references/evaluation-decision-tree.md` (if it exists; 
 
 ### Flow 3: `file_manifest.json` Maintenance (Mandatory for Renames/Retirements)
 
-`Sekai_workflow/file_manifest.json` is the single source of truth for **which folders should exist where** and **which old folders must be cleaned up** after a rename/retirement. `sp-sync.sh` Step 2b reads this file to detect stale folders and interactively remove them.
+`.sekai-workflow/file_manifest.json` is the single source of truth for **which folders should exist where** and **which old folders must be cleaned up** after a rename/retirement. `sp-sync.sh` Step 2b reads this file to detect stale folders and interactively remove them.
 
 #### Structure
 
@@ -380,7 +380,7 @@ For each `(oldName, newName)` in `skill_aliases`:
 |---|---|
 | `CLAUDE.md` | Not under version control (local) |
 | `.claude/skills/` | Not under version control (local) |
-| `Sekai_workflow/` | `sekai-workflow` remote repository |
+| `.sekai-workflow/` | `sekai-workflow` remote repository |
 | `.local/` | Not under version control |
 
 **Do not use `git add -f`**: files in `.gitignore` must never be added to project version control by any means.

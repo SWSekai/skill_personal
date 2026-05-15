@@ -1,12 +1,12 @@
 #!/bin/bash
 # ============================================================
 # sp-pack.sh — 專案打包：收集 AI 上下文 → 清除 skill 環境
-# 用法：bash Sekai_workflow/_bootstrap/sp-pack.sh
+# 用法：bash .sekai-workflow/_bootstrap/sp-pack.sh
 #
 # 流程：
 #   1. 收集 AI 上下文到 .local/ai-context/
 #   2. 比對找出專案專屬 skill，保存到 project-skills/
-#   3. 刪除 .claude/skills/、Sekai_workflow/、CLAUDE.md
+#   3. 刪除 .claude/skills/、.sekai-workflow/、CLAUDE.md
 #   4. 產生 manifest.txt
 # ============================================================
 
@@ -56,7 +56,7 @@ echo ""
 echo "[WARN] 此操作將："
 echo "       1. 收集 AI 上下文到 .local/ai-context/"
 echo "       2. 刪除 .claude/skills/ 目錄"
-echo "       3. 刪除 Sekai_workflow/ 目錄"
+echo "       3. 刪除 .sekai-workflow/ 目錄"
 echo "       4. 刪除 CLAUDE.md"
 echo ""
 read -p "確認執行？(y/N) " confirm
@@ -140,7 +140,7 @@ else
     echo "  [SKIP] handbook/ 不存在"
 fi
 
-# --- Step 4b: 回寫 portable memory 到 Sekai_workflow ---
+# --- Step 4b: 回寫 portable memory 到 .sekai-workflow ---
 echo "[Step 3b] 回寫 portable memory..."
 MEM_PORTABLE="$SP_DIR/memo"
 if [ -n "$MEMORY_DIR" ] && [ -d "$MEMORY_DIR" ] && [ -d "$MEM_PORTABLE" ]; then
@@ -164,8 +164,8 @@ if [ -n "$MEMORY_DIR" ] && [ -d "$MEMORY_DIR" ] && [ -d "$MEM_PORTABLE" ]; then
     if [ "$WRITEBACK_COUNT" -eq 0 ]; then
         echo "  [INFO] portable memory 已是最新"
     else
-        echo "  [OK] 回寫 $WRITEBACK_COUNT 個 memory 到 Sekai_workflow/memo/"
-        # Auto commit & push within Sekai_workflow
+        echo "  [OK] 回寫 $WRITEBACK_COUNT 個 memory 到 .sekai-workflow/memo/"
+        # Auto commit & push within .sekai-workflow
         # 必須 push：Step 9 會刪除整個 $SP_DIR（含 .git），未 push 的 commit 將永久遺失
         cd "$SP_DIR"
         git add memo/ 2>/dev/null
@@ -174,7 +174,7 @@ if [ -n "$MEMORY_DIR" ] && [ -d "$MEMORY_DIR" ] && [ -d "$MEM_PORTABLE" ]; then
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>" 2>/dev/null; then
             CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
             if git push origin "$CURRENT_BRANCH" 2>/dev/null; then
-                echo "  [OK] 已 commit 並 push 到 Sekai_workflow 遠端 ($CURRENT_BRANCH)"
+                echo "  [OK] 已 commit 並 push 到 .sekai-workflow 遠端 ($CURRENT_BRANCH)"
             else
                 echo "  [WARN] commit 成功但 push 失敗（網路/權限問題），請手動 push 以避免 Step 9 刪除後遺失"
                 echo "  [WARN] 若繼續 Step 9，memo 更新將永久遺失！"
@@ -214,7 +214,7 @@ if [ -d "$SKILLS_DIR" ] && [ -d "$SP_DIR" ]; then
         [ ! -d "$skill_dir" ] && continue
         skill_name=$(basename "$skill_dir")
 
-        # 如果 Sekai_workflow/ 沒有同名目錄 → 專案專屬
+        # 如果 .sekai-workflow/ 沒有同名目錄 → 專案專屬
         if [ ! -d "$SP_DIR/$skill_name" ]; then
             cp -r "$skill_dir" "$AI_CONTEXT/project-skills/$skill_name"
             echo "  [SAVE] $skill_name (專案專屬)"
@@ -307,8 +307,8 @@ fi)
 ----------------------------------------------------------------
  還原指引
 ----------------------------------------------------------------
-1. 執行 Sekai_workflow/_bootstrap/sp-init.bat 重建 skill 環境
-2. 執行 bash Sekai_workflow/_bootstrap/sp-sync.sh 同步最新 skill
+1. 執行 .sekai-workflow/_bootstrap/sp-init.bat 重建 skill 環境
+2. 執行 bash .sekai-workflow/_bootstrap/sp-sync.sh 同步最新 skill
 3. 將 project-skills/ 內容複製回 .claude/skills/
 4. 將 CLAUDE.md 複製回專案根目錄
 5. Memory 檔案複製回 ~/.claude/projects/.../memory/
@@ -326,11 +326,11 @@ if [ -d "$SKILLS_DIR" ]; then
     echo "  [DEL] .claude/skills/"
 fi
 
-# 刪除 Sekai_workflow/（先確認不在其中工作）
+# 刪除 .sekai-workflow/（先確認不在其中工作）
 cd "$PROJECT_DIR"
 if [ -d "$SP_DIR" ]; then
     rm -rf "$SP_DIR"
-    echo "  [DEL] Sekai_workflow/"
+    echo "  [DEL] .sekai-workflow/"
 fi
 
 # 刪除 CLAUDE.md
@@ -350,7 +350,7 @@ echo "  專案專屬 skill   : $PROJECT_SKILL_COUNT 個"
 echo ""
 echo "  已清除："
 echo "    - .claude/skills/"
-echo "    - Sekai_workflow/"
+echo "    - .sekai-workflow/"
 echo "    - CLAUDE.md"
 echo ""
 echo "  還原方式請參閱: .local/ai-context/manifest.txt"

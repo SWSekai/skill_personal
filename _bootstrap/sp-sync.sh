@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
-# sp-sync.sh — Sekai_workflow 遠端同步 + 專案 Skills 更新
-# 用法：在專案根目錄執行 bash Sekai_workflow/_bootstrap/sp-sync.sh
+# sp-sync.sh — .sekai-workflow 遠端同步 + 專案 Skills 更新
+# 用法：在專案根目錄執行 bash .sekai-workflow/_bootstrap/sp-sync.sh
 # ============================================================
 
 set -euo pipefail
@@ -24,10 +24,10 @@ MANIFEST_FILE="$SP_DIR/file_manifest.json"
 
 echo ""
 echo "========================================"
-echo " Sekai_workflow Sync Tool"
+echo " .sekai-workflow Sync Tool"
 echo "========================================"
 echo ""
-echo "[INFO] Sekai_workflow : $SP_DIR"
+echo "[INFO] .sekai-workflow : $SP_DIR"
 echo "[INFO] Project skills : $SKILLS_DIR"
 echo "[INFO] Project hooks  : $HOOKS_DIR"
 echo "[INFO] User .claude   : $USER_CLAUDE_DIR"
@@ -57,7 +57,7 @@ else
     if [ "$LOCAL_SCHEMA" -gt "$SCRIPT_SCHEMA_COMPAT" ] 2>/dev/null; then
         echo "  [ABORT] manifest.schema_version ($LOCAL_SCHEMA) > SCRIPT_SCHEMA_COMPAT ($SCRIPT_SCHEMA_COMPAT)"
         echo "          This sp-sync.sh ($SCRIPT_VERSION) is too old to parse the current manifest."
-        echo "          Update sp-sync.sh from the latest Sekai_workflow and rerun."
+        echo "          Update sp-sync.sh from the latest .sekai-workflow and rerun."
         exit 2
     fi
     echo "  [OK] Local manifest schema_version=$LOCAL_SCHEMA (within compat)."
@@ -358,7 +358,7 @@ fi
 
 if [ "$AHEAD" != "0" ]; then
     echo "[INFO] Local has $AHEAD unpushed commit(s)."
-    echo "       Run: cd Sekai_workflow && git push origin main"
+    echo "       Run: cd .sekai-workflow && git push origin main"
 fi
 
 echo "[DONE]"

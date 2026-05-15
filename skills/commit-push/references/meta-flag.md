@@ -29,7 +29,7 @@ When `$ARGUMENTS` contains `--meta`:
 - `/skm update` / `/skm sync` related SKILL.md / reference modifications
 - CLAUDE.md / manifest.json rule-level modifications (pure meta-layer)
 - `.claude/hooks/` adjustments
-- `Sekai_workflow/` structural modifications (changes to this repo itself)
+- `.sekai-workflow/` structural modifications (changes to this repo itself)
 
 **NOT applicable** (use normal `/commit-push`):
 - Project feature development

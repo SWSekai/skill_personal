@@ -1,6 +1,6 @@
 ---
 name: memo
-description: "Memory cross-project portability: feedback/user type memory is carried with Sekai_workflow git and automatically restored during new project initialization. Accepts --no-subagent flag as a no-op (cross-skill consistency, CLAUDE.md Rule 26)."
+description: "Memory cross-project portability: feedback/user type memory is carried with .sekai-workflow git and automatically restored during new project initialization. Accepts --no-subagent flag as a no-op (cross-skill consistency, CLAUDE.md Rule 26)."
 effort: low
 argument-hint: "[--no-subagent]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls *), Bash(cp *), Bash(git *)
@@ -16,7 +16,7 @@ This skill does **not** dispatch any `Agent` sub-tasks — all steps run inline 
 
 ## Memory Cross-Project Portability
 
-Manages `feedback` and `user` type memory files so they can be carried with Sekai_workflow to new projects.
+Manages `feedback` and `user` type memory files so they can be carried with .sekai-workflow to new projects.
 
 ---
 
@@ -31,17 +31,17 @@ Decision basis: read the frontmatter `type` field of each `.md` file.
 
 ---
 
-### Step 2: Sync to Sekai_workflow
+### Step 2: Sync to .sekai-workflow
 
-Copy the filtered memory files to `Sekai_workflow/memo/`:
+Copy the filtered memory files to `.sekai-workflow/memo/`:
 
 ```bash
-cp ~/.claude/projects/{project}/memory/feedback_*.md Sekai_workflow/memo/
-cp ~/.claude/projects/{project}/memory/user_*.md Sekai_workflow/memo/
+cp ~/.claude/projects/{project}/memory/feedback_*.md .sekai-workflow/memo/
+cp ~/.claude/projects/{project}/memory/user_*.md .sekai-workflow/memo/
 ```
 
 - **Do not overwrite existing files with the same name** (preserve existing version)
-- Update the file list in `Sekai_workflow/memo/README.md`
+- Update the file list in `.sekai-workflow/memo/README.md`
 
 ---
 
@@ -49,7 +49,7 @@ cp ~/.claude/projects/{project}/memory/user_*.md Sekai_workflow/memo/
 
 Executed automatically during new project initialization:
 
-1. Copy `Sekai_workflow/memo/*.md` to the current account's `~/.claude/projects/{project}/memory/`
+1. Copy `.sekai-workflow/memo/*.md` to the current account's `~/.claude/projects/{project}/memory/`
 2. Do not overwrite existing files with the same name
 3. Automatically generate or merge the `MEMORY.md` index
 
@@ -60,8 +60,8 @@ Executed automatically during new project initialization:
 During project packaging:
 
 1. Scan the memory directory to find newly added feedback/user memory
-2. Copy them to `Sekai_workflow/memo/`
-3. commit + push Sekai_workflow
+2. Copy them to `.sekai-workflow/memo/`
+3. commit + push .sekai-workflow
 
 ---
 

@@ -67,7 +67,7 @@ C:\path\to\sekai-workflow\_bootstrap\sp-init.bat
 The bootstrap:
 
 1. Creates `.claude/skills/` and copies all skills into your project
-2. Creates a local `Sekai_workflow/` (auto-renamed to `.sekai-workflow/` after first run) that tracks this upstream repo for updates
+2. Creates a local `.sekai-workflow/` (auto-renamed to `.sekai-workflow/` after first run) that tracks this upstream repo for updates
 3. Generates a `CLAUDE.md` ruleset tuned for Claude Code
 4. Installs a `pre-commit` hook that blocks Skill files from being committed to your project by mistake
 5. Ensures `.gitignore` excludes everything AI-related

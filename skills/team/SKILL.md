@@ -662,7 +662,7 @@ Before leaving (off-duty, vacation, project handover, environment switch), produ
 | Aspect | `/skm pack` | `/team handoff` |
 |---|---|---|
 | Purpose | Skill exit archival | Handoff / environment transition |
-| Environment | **Clear** .claude/skills/ + Sekai_workflow/ + CLAUDE.md | **Preserve**, environment untouched |
+| Environment | **Clear** .claude/skills/ + .sekai-workflow/ + CLAUDE.md | **Preserve**, environment untouched |
 | Output target | Machine (restore manifest) | Human (handoff doc) + AI (context bundle) |
 | Output location | `.local/ai-context/` | `.hanschen/handoff/` or `docs/handoff/` (`--share`) |
 | Use timing | Project end, long-term archival | Weekend off-duty, vacation, colleague takeover, switching dev machines |

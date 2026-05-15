@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Claude Code statusLine — Sekai_workflow template
+// Claude Code statusLine — .sekai-workflow template
 // Segments:  cwd │  branch │  XX% [bar] │ Session XX% │ Weekly XX% │  model
 // No external dependencies (Node built-ins only). Requires a Nerd Font in the terminal.
 

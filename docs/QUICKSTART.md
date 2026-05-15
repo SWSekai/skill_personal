@@ -21,12 +21,12 @@ git clone https://github.com/SWSekai/sekai-workflow.git
 
 # 2. 進入你的專案目錄，執行一鍵建置
 cd /path/to/your-project
-/path/to/sekai-workflow/Sekai_workflow/_bootstrap/sp-init.bat
+/path/to/sekai-workflow/.sekai-workflow/_bootstrap/sp-init.bat
 ```
 
 完成後你的專案會多出：
 - `.claude/skills/` — 專案專屬 Skill（已客製化）
-- `Sekai_workflow/` — 通用模板同步用（指向本倉庫）
+- `.sekai-workflow/` — 通用模板同步用（指向本倉庫）
 - `CLAUDE.md` — AI 行為規範
 - `.git/hooks/pre-commit` — 防止 Skill 檔案誤入版控
 
@@ -56,7 +56,7 @@ cd /path/to/your-project
 ```
 sekai-workflow (遠端倉庫)      ← 通用模板，跨專案共享
        ↓ clone / sync
-Sekai_workflow/ (專案內)       ← 通用模板本地副本
+.sekai-workflow/ (專案內)       ← 通用模板本地副本
        ↓ customize
 .claude/skills/ (專案內)       ← 專案專屬 Skill，可客製化
 ```
@@ -72,7 +72,7 @@ Sekai_workflow/ (專案內)       ← 通用模板本地副本
 |------|--------|:------------:|
 | 你的程式碼 | 專案 git | ✓ |
 | `.claude/skills/` | 本地，不版控 | ✗ |
-| `Sekai_workflow/` | sekai-workflow 遠端倉庫 | ✗ |
+| `.sekai-workflow/` | sekai-workflow 遠端倉庫 | ✗ |
 | `CLAUDE.md` | 本地，不版控 | ✗ |
 | 修改日誌 / 摘要 | 本地工作紀錄 | ✗ |
 
@@ -132,7 +132,7 @@ Sekai_workflow/ (專案內)       ← 通用模板本地副本
 
 ```bash
 # 檢查所有保護層是否就位
-Sekai_workflow/_bootstrap/sp-verify.bat /path/to/your-project
+.sekai-workflow/_bootstrap/sp-verify.bat /path/to/your-project
 ```
 
 驗證項目：`.gitignore` 規則、hook 安裝、目錄結構、遠端連線。

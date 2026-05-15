@@ -112,7 +112,7 @@ Read `sekai_workflow.flowback.pull` from `.claude/settings.local.json`:
 Before running the sync script, preview what's available:
 
 ```bash
-cd Sekai_workflow && git fetch origin
+cd .sekai-workflow && git fetch origin
 git log HEAD..origin/main --oneline 2>/dev/null | head -10
 ```
 
@@ -121,13 +121,13 @@ git log HEAD..origin/main --oneline 2>/dev/null | head -10
   2. Call AskUserQuestion: **"全域 Skill 庫有 N 個新版本可套用，是否立即同步？"**
      - `套用（執行 sp-sync.sh）` ← (Recommended)
      - `跳過（保留目前版本）`
-  3. If apply → `bash Sekai_workflow/_bootstrap/sp-sync.sh`
+  3. If apply → `bash .sekai-workflow/_bootstrap/sp-sync.sh`
   4. If skip → note "Skill library: N commits pending" in Step 4 status overview
 - If already up to date → proceed to Step 2.3
 
 **sp-sync.sh behavior** (when executed):
-1. `git pull --rebase origin main` in Sekai_workflow/
-2. Compare each skill's SKILL.md / README.md between `Sekai_workflow/` and `.claude/skills/`
+1. `git pull --rebase origin main` in .sekai-workflow/
+2. Compare each skill's SKILL.md / README.md between `.sekai-workflow/` and `.claude/skills/`
 3. Automatically copy new or differing skills to `.claude/skills/`
 4. Output Added / Updated / No change summary
 
