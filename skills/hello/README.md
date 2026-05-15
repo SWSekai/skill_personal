@@ -59,7 +59,7 @@ hello/
 
 ## 相關 Skills 與檔案
 
-- **呼叫**：`/skm sync` Flow 1（Step 2 內嵌：遠端拉取 + skill diff）、讀取 `.local/context_summary/` 與 `.hanschen/decision/` `.hanschen/board/`、寫入 `.local/collab/TODO.md`
+- **呼叫**：`/skm sync` Flow 1（Step 2 內嵌：遠端拉取 + skill diff）、讀取 `.local/context_summary/` 與 `.hanschen/decision/` `.hanschen/board/`、寫入 `./TODO.md`（project root，唯一真相來源）
 - **被呼叫**：無（使用者於對話開始輸入 `/hello`）
 - **共用資源**：`team/TODO.md` schema（重建內容須符合 `/team todo` 格式）、`clean/` 的 context_summary 目錄（讀取上次 session 寫入的摘要）、與 `/commit-push` 共用 Rule 28 分歧偵測邏輯（兩者都實作 Step 0）
 - **改名歷史**：見 `_bootstrap/RENAME_HISTORY.md`

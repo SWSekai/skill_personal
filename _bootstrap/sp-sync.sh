@@ -329,6 +329,63 @@ else
     fi
 fi
 
+# --- Step 4.5: Path Migration Scan (dry-run, 2026-05-15) ---
+# Reads .hanschen/.history/refactor.jsonl and warns when legacy paths still exist
+# in the project. Minimal version of TODO [plan-sync-§5] — dry-run only, no auto-mv.
+# See: .hanschen/decision/CLOSED_260515_todo_root_cause_and_claudemd_slim_decision.md
+echo ""
+echo "[Step 4.5] Path Migration Scan (dry-run)..."
+echo ""
+
+REFACTOR_JSONL="$PROJECT_DIR/.hanschen/.history/refactor.jsonl"
+PATH_MIGRATION_HITS=0
+
+if [ ! -f "$REFACTOR_JSONL" ]; then
+    echo "  [SKIP] No refactor.jsonl at $REFACTOR_JSONL"
+elif ! command -v node >/dev/null 2>&1; then
+    echo "  [SKIP] node not in PATH; cannot parse refactor.jsonl"
+else
+    PATH_MIGRATION_HITS=$(
+        REFACTOR_JSONL="$REFACTOR_JSONL" \
+        PROJECT_DIR="$PROJECT_DIR" \
+        node -e '
+            const fs = require("fs");
+            const path = require("path");
+            const projectDir = process.env.PROJECT_DIR;
+            const lines = fs.readFileSync(process.env.REFACTOR_JSONL, "utf8")
+                .split(/\r?\n/).filter(Boolean);
+            let hits = 0;
+            const warnings = [];
+            for (const line of lines) {
+                let e;
+                try { e = JSON.parse(line); } catch { continue; }
+                if (e.type !== "path_migration") continue;
+                if (!e.from || e.from.startsWith("(")) continue;
+                const fromPath = path.join(projectDir, e.from.replace(/^\.\//, ""));
+                try {
+                    if (fs.existsSync(fromPath)) {
+                        hits += 1;
+                        warnings.push("  [WARN] Legacy path detected: " + e.from + " (migration date: " + e.date + ")");
+                        warnings.push("         Suggest: mv \"" + e.from + "\" \"" + e.to + "\"");
+                        if (e.note) warnings.push("         Note: " + e.note);
+                        warnings.push("         Decision: " + (e.decision || "n/a"));
+                    }
+                } catch {}
+            }
+            if (warnings.length > 0) console.error(warnings.join("\n"));
+            process.stdout.write(String(hits));
+        '
+    )
+    if [ "$PATH_MIGRATION_HITS" = "0" ]; then
+        TOTAL=$(grep -c '"type":"path_migration"' "$REFACTOR_JSONL" 2>/dev/null || echo 0)
+        echo "  [OK] No legacy paths detected ($TOTAL path_migration entries scanned)"
+    else
+        echo ""
+        echo "  [INFO] $PATH_MIGRATION_HITS legacy path(s) detected. Review warnings above and migrate manually."
+        echo "         (Full auto-mv is reserved for future TODO [plan-sync-§5] implementation.)"
+    fi
+fi
+
 # --- Step 5: Summary ---
 echo ""
 echo "========================================"
@@ -339,6 +396,7 @@ echo "  Skills     — Added: $ADDED / Updated: $UPDATED / No change: $UNCHANGED
 echo "  Manifest   — Stale removed: $STALE_COUNT"
 echo "  Hooks      — Added: $HOOK_ADDED / Updated: $HOOK_UPDATED / No change: $HOOK_UNCHANGED"
 echo "  Statusline — File: $STATUSLINE_FILE_STATUS / Settings: $SETTINGS_PATCH_STATUS"
+echo "  Path migr. — Legacy paths detected: $PATH_MIGRATION_HITS (dry-run)"
 echo "========================================"
 echo ""
 

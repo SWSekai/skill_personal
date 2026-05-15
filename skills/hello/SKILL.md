@@ -179,8 +179,8 @@ Add labeled items to the candidate list. Do **not** output yet.
 
 ### 3.3 Deduplicate Against TODO.md
 
-Read `.local/collab/TODO.md`:
-- If file does not exist → create it with basic scaffold (`## Pending\n\n## In Progress\n\n## Completed`) per CLAUDE.md Rule 17.1.8
+Read `./TODO.md` (project root — single source of truth per CLAUDE.md Rule 17.1, unified 2026-05-15):
+- If file does not exist → create it at project root with basic scaffold (`## Pending\n\n## In Progress\n\n## Completed`) per CLAUDE.md Rule 17.1.8
 - For each candidate: fuzzy-match against existing **Pending** and **In Progress** entries
 - Mark as **SKIP** if already present; mark as **ADD** if new
 
@@ -297,7 +297,7 @@ docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Service}}" 2>/dev/n
 |---|---|---|
 | → Calls | `/skm sync` (inline Flow 1) | Step 2 absorbed the original sync flow (remote pull + skill diff) |
 | → Reads | `.local/context_summary/`, `.hanschen/decision/`, `.hanschen/board/` | Step 3 work-state reconstruction |
-| → Writes | `.local/collab/TODO.md` | Step 3 consolidates open items into TODO Pending block |
+| → Writes | `./TODO.md` (project root) | Step 3 consolidates open items into TODO Pending block |
 | ← Called by | None (user types `/hello` at conversation start) | — |
 | ↔ Shared | `/commit-push` Step 0 — Rule 28 divergence detection | identical detection logic; both must stay in sync |
 | ↔ Shared | `team/TODO.md` schema | Reconstruction must match `/team todo` format |

@@ -58,7 +58,7 @@ For each `.hanschen/decision/CLOSED_YYMMDD_*_decision.md` within scope:
 
 ### 3.3 TODO State Changes (§2.1.c)
 
-Scan TODO.md (resolve: `./TODO.md` project root → `.local/collab/TODO.md` legacy):
+Scan `./TODO.md` (project root — single source of truth per CLAUDE.md Rule 17.1):
 
 - **Completed today**: parse `## Completed` section, filter entries with `done YYYY-MM-DD HH:MM` matching scope → fill daily report's **「本日完成」**
 - **In Progress**: parse `## In Progress` section → fill daily report's **「進行中」**

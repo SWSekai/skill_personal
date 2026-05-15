@@ -244,6 +244,7 @@ After all steps are checked off:
 2. List the implementation summary (which files were modified, what was added)
 3. If inside `/build all` → automatically proceed to `/build test`
 4. If called standalone → suggest "Implementation complete; `/build test` is recommended for verification"
+5. **Close out source TODO** (Cross-Skill End-Step Contract) — if this `/build do` was triggered by a TODO entry in `./TODO.md`, apply `/team todo` Step 5 close-out (`[ ]` → `[x]` + commit hash + affected files; move to `## Completed`). See `team/SKILL.md` §A "Cross-Skill End-Step Contract for TODO Closure" for canonical semantics.
 
 ---
 
@@ -587,6 +588,8 @@ Output:
 | Service | Action | Status | Duration |
 |---|---|---|---|
 ```
+
+**Close out source TODO** (Cross-Skill End-Step Contract) — if this deploy was triggered by a TODO entry in `./TODO.md`, apply `/team todo` Step 5 close-out (`[ ]` → `[x]` + commit hash + affected files; move to `## Completed`). See `team/SKILL.md` §A "Cross-Skill End-Step Contract for TODO Closure".
 
 ### Non-containerized projects
 

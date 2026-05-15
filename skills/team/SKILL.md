@@ -137,12 +137,11 @@ The project directory may live at any path on any machine. Only project-root-rel
 - **User imperatively lists new work** in free text (`做 X、做 Y`, `接下來 X 和 Y`, `請紀錄 X`) → split by item, write each to Pending with priority tag (`@high` / default / `@low`) and source date
 - **Do NOT** auto-write when: user only **discusses** an option without selecting; user **rejects** previously offered options; user asks **informational** questions about the topic
 
-**TODO location resolution** (checked in order):
-1. Project root `./TODO.md` — canonical per CLAUDE.md Rule 17.1 (matches most existing projects)
-2. `.local/collab/TODO.md` — legacy path for projects that opted into `.local/collab/` layout
-3. Path specified by `CLAUDE.md` or project-level override
+**TODO location** (single source of truth — 2026-05-15 unified):
+- **Project root `./TODO.md`** — the only canonical location per CLAUDE.md Rule 17.1. Project-level `CLAUDE.md` override allowed only for non-standard layouts (must be explicit).
+- Legacy `.local/collab/TODO.md` paths from older projects → migrate via `.hanschen/.history/refactor.jsonl` entry `{"from":".local/collab/TODO.md","to":"./TODO.md"}` (see `_bootstrap/sp-sync.sh` Path Migration Scan).
 
-**Auto-create file**: if no TODO.md exists at either location on first TODO signal → Claude creates it at **project root** (`./TODO.md`) with skeleton (`## Pending / ## In Progress / ## Completed`) automatically (Rule 17.1.8).
+**Auto-create file**: if `./TODO.md` does not exist on first TODO signal → Claude creates it at **project root** with skeleton (`## Pending / ## In Progress / ## Completed`) automatically (Rule 17.1.8). Never fall back to other paths.
 
 **Manual**: `/team todo add <desc>` explicit; `/team todo list`; `/team todo <n>`.
 
@@ -152,10 +151,17 @@ The project directory may live at any path on any machine. Only project-root-rel
 - ❌ Item requires multi-line design discussion (>200 chars or contains branching `?`) → propose upgrade to decide
 - ❌ Already decided + in progress item described vaguely → ask follow-up first (Step 3)
 - ❌ "Future trial" items being stuffed into decision tables as `[ ]` options → move to TODO, mark original as `~~~~（移往 TODO）`
+- ❌ **Meta updates do NOT belong in project TODO** (2026-05-15 added) — skill / rule / template / hook / Memory / `.sekai-workflow/` 同步等 self-maintenance items must NOT pollute the project's working TODO. Correct channels:
+  - Skill behavior changes → `/skm update` or `/skm refactor`
+  - Rule changes → `CLAUDE.md` edit + `_bootstrap/templates/CLAUDE.md.template` mirror (Rule 27)
+  - `.sekai-workflow/` library sync → `/skm sync` Flow 1
+  - Hook changes → `.claude/hooks/` direct edit
+  - User-habit / preference rules → Memory file write
+  - Cross-project rule reflow → see Rule 9 three-way linkage
 
 ### Step 1: Read and Parse
 
-Read TODO.md (resolve path per the location resolution order above — project root first, then `.local/collab/`), parse all items in the "Pending" section, extract description, priority tag, and indented notes.
+Read `./TODO.md` (project root — single source of truth). Parse all items in the "Pending" section, extract description, priority tag, and indented notes.
 If the action is `add` / `list`, execute the corresponding branch and exit.
 
 ### Step 2: Sort and Select
@@ -194,6 +200,32 @@ Selected `all` → continue to the next item; otherwise ask whether to continue.
 ### Step 6: Wrap-up
 
 Present a processing summary (completed / deferred / derived). If there are uncommitted changes, remind the user they can invoke `/build commit`.
+
+---
+
+### Cross-Skill End-Step Contract for TODO Closure (single owner, 2026-05-15 added)
+
+> **Owner**: this skill (`/team todo`) is the sole place defining the `[ ]` → `[x]` close-out semantics. All other skills that touch a TODO item at end-of-flow MUST cross-reference back to Step 5 above instead of redefining the rule. Avoids drift (one rule, one place).
+
+**Close-out semantics (canonical, defined here)**:
+1. Locate the in-progress entry in `## In Progress` (or matching `## Pending` if item was never moved)
+2. Move to `## Completed` with format: `- [x] description — done YYYY-MM-DD HH:MM`
+3. Append `- commit: hash message` on indented sub-line if a commit was produced
+4. Append `- affected: file1, file2` on indented sub-line listing modified files
+5. Per Rule 15 (Y/N → Tool Confirmation UI), this transition is non-interactive: it happens automatically at the end of the consuming skill's flow
+
+**Consuming skills MUST trigger this close-out at their final step**:
+
+| Skill | Step where close-out fires | Cross-reference line in that step |
+|---|---|---|
+| `/kb add` | Step 5 (Commit) | "依 `/team todo` Step 5 規則更新 `./TODO.md`（[ ]→[x]，加 commit hash + affected files）" |
+| `/build do` | Step 3 (Implementation complete) | same as above |
+| `/build deploy` | Step 10 (Final verification) | same as above |
+| `/team decide` | Step 6 (Inline Closure Summary) | same as above; in addition, derived 實作項 auto-append to TODO Pending per Rule 17.1.4 |
+| `/team board` | Step 3 (Closure and Archival) | same as above |
+| `/commit-push` | Step 11 (Daily Report Append) | reads close-out state to populate the daily report |
+
+**Why cross-reference, not redefine**: CLAUDE.md Rule 24 ("Cross-Skill References") principle — single owner per rule. If `/kb add` were to redefine close-out, a future close-out tweak (e.g., adding tag for blocked items) would have to be applied in 6+ files; missing one creates rule drift.
 
 ---
 
@@ -324,7 +356,8 @@ After writing the closure summary, immediately update the project living documen
 - [ ] "最後更新" date in the document updated
 - [ ] Closure summary section appended
 - [ ] Living document (`.hanschen/journal/PROJECT_JOURNAL.md`) updated
-- [ ] **Leftover items from closure summary appended to `TODO.md` Pending** with `(from CLOSED_*_board.md)` tag (2026-04-24 expanded per Rule 17.1.4: whiteboard unresolved items auto-append to prevent forgetting after CLOSED archival)
+- [ ] **Leftover items from closure summary appended to `./TODO.md` Pending** with `(from CLOSED_*_board.md)` tag (2026-04-24 expanded per Rule 17.1.4: whiteboard unresolved items auto-append to prevent forgetting after CLOSED archival)
+- [ ] **Source TODO item closed out** if this board was opened from `@needs-decide` TODO entry — apply §A Cross-Skill End-Step Contract: `[ ]` → `[x]` with commit hash + affected files, move to `## Completed`
 - [ ] Daily report updated (Step 3.5)
 - [ ] Contains reusable experience → evaluate writing it into a guide (same as `/build commit` Step 9)
 - Any not done → complete immediately; must not end the reply
@@ -554,7 +587,8 @@ After Step 6 completes, confirm:
 - [ ] `.hanschen/decision/YYMMDD_<topic>_decision.md` has been renamed to `CLOSED_YYMMDD_<topic>_decision.md`
 - [ ] `.hanschen/journal/PROJECT_JOURNAL.md` has been updated with this decision's entries (link → `CLOSED_*_decision.md`)
 - [ ] **No** `.local/docs/summary/` file has been created (directory was removed 2026-04-22; writing there is a violation)
-- [ ] **Leftover items from closure summary appended to `TODO.md` Pending** with `(from CLOSED_*_decision.md)` tag (2026-04-24 expanded per Rule 17.1.4: previously only 實作項 appended; now 遺留項 also auto-append to prevent forgetting after CLOSED archival)
+- [ ] **Leftover items from closure summary appended to `./TODO.md` Pending** with `(from CLOSED_*_decision.md)` tag (2026-04-24 expanded per Rule 17.1.4: previously only 實作項 appended; now 遺留項 also auto-append to prevent forgetting after CLOSED archival)
+- [ ] **Source TODO item closed out** if this decision was opened from `@needs-decide` TODO entry — apply §A Cross-Skill End-Step Contract: `[ ]` → `[x]` with commit hash + affected files, move to `## Completed`
 - [ ] Daily report updated (Step 6.6)
 - Any not done → complete immediately; **must not end the reply**
 
@@ -682,7 +716,7 @@ Read the following information sources in parallel:
 |---|---|---|
 | Project overview | `CLAUDE.md` / root `README.md` | Human §A / AI bundle |
 | Recent work | `.hanschen/modify_log/*.md` (most recent 10~20) | Human §B |
-| Pending items | `./TODO.md` (project root) or `.local/collab/TODO.md` | Human §C |
+| Pending items | `./TODO.md` (project root) | Human §C |
 | Plans in progress | `.local/docs/plan/*.md` (unfinished steps) | Human §C |
 | Risk records | "Potential risks" sections in `.hanschen/modify_log/` | Human §D |
 | Environment architecture | `docker-compose.yml` / `.env` / config | Human §E / AI bundle |
@@ -778,7 +812,7 @@ YYMMDD_ai-context/
 ├── decision-history/          ← Copy of .local/docs/summary/*.md
 ├── guides/                    ← Copy of .hanschen/guides/*.md
 ├── recent-modify-logs/        ← Most recent 10 from .hanschen/modify_log/
-├── todo-snapshot.md           ← Copy of ./TODO.md (or .local/collab/TODO.md if that's where project keeps it)
+├── todo-snapshot.md           ← Copy of ./TODO.md (project root)
 └── context-snapshot.md        ← Latest summary from .local/context_summary/
 ```
 
@@ -1419,7 +1453,7 @@ Skip all git ops; emit a structured architecture audit to `.hanschen/.history/au
 | Direction | Target | Trigger / Purpose |
 |---|---|---|
 | → Calls | `/commit-push` | decide/board closure → journal progress entry → `/commit-push` (CLAUDE.md Rule 17.4.1) |
-| → Reads/Writes | `.hanschen/{decision,board,journal,handoff,report,modify_log}/`, `.local/collab/TODO.md` | all interactive-collaboration artifacts |
+| → Reads/Writes | `.hanschen/{decision,board,journal,handoff,report,modify_log}/`, `./TODO.md` | all interactive-collaboration artifacts |
 | → Writes | `.hanschen/.history/refactor.jsonl` (apply side), `sekai-workflow/handbook/` (via `/kb`) | `/team sync` migration; `/team note` → `/kb add` redirect |
 | ← Called by | `/hello` Step 3 | reads TODO / open decision / open board for work-state reconstruction |
 | ← Called by | `/commit-push` Step 11 | daily report append |

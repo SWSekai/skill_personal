@@ -273,7 +273,7 @@ After Flow 1 completes, **scan `.local/` for drift against the newly-synced Skil
 2. **Renamed subcommand artifacts** — e.g. if `/team living` renamed to `/team journal`, check whether `.hanschen/journal/` needs redirect / alias.
 3. **Orphan directories** — directories under `.local/` with no SKILL.md reference (grep `.local/<name>` across all `.claude/skills/**/*.md`). Classify as: likely-obsolete / project-specific / needs-user-judgment.
 4. **Filename convention drift** — files in `decisions/` without `_decision.md` suffix, in `whiteboards/` without `_board.md` suffix, etc. Report count, do not rename (existing files per `team/references/naming.md` remain valid).
-5. **Path-expectation mismatches** — e.g. Skill expects `.local/collab/TODO.md` but project keeps `./TODO.md`. Check config-flexible paths (see `team/SKILL.md` §A location resolution).
+5. **Path-expectation mismatches** — e.g. Skill expects legacy `.local/collab/TODO.md` but the canonical path is `./TODO.md` (unified 2026-05-15). Per `.hanschen/.history/refactor.jsonl`, legacy paths should be reported here so users can migrate via `sp-sync.sh` Path Migration Scan.
 6. **Un-propagated rename drift** — for each open row in `_bootstrap/RENAME_HISTORY.md` (rows **not** marked ✅), grep `.claude/skills/**` + `.sekai-workflow/**` for the old name/path. Any hit means a recorded rename whose global-grep verification step was skipped. Report as category E; these **must** be fixed before the `RENAME_HISTORY.md` row can be marked ✅ (per Common Rule: Cross-Skill Reference Integrity).
 
 **Output format** (present to user, require confirmation for destructive ops):

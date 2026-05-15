@@ -72,6 +72,12 @@ git commit -m "docs(kb): add/update <topic>"
 git push
 ```
 
+### Step 6: Close out source TODO (Cross-Skill End-Step Contract)
+
+If this `/kb add` was triggered by a TODO entry in `./TODO.md` — apply `/team todo` Step 5 close-out:
+- `[ ]` → `[x]`, append `- commit: <hash> <message>` + `- affected: <files>`, move from Pending/In Progress to `## Completed`
+- See `team/SKILL.md` §A "Cross-Skill End-Step Contract for TODO Closure" for canonical semantics (single owner, do not redefine here)
+
 ---
 
 ## B. `/kb search` — Search Knowledge Documents
