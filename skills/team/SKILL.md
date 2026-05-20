@@ -80,8 +80,9 @@ All sequential / cross-machine documents live under `.hanschen/` at the project 
 **Local-only paths (under `.local/`, never cross-machine)**:
 - `.local/context_summary/` — Claude context summaries (machine state)
 - `.local/training/` — large model artifacts (per-machine, e.g. GPU host)
-- `.local/docs/plan/` — implementation plans (machine state)
 - `.local/bag/` — `/skm pack` output
+
+**Plan output convention (2026-05-15)**: "Implementation plan / execution steps" (AI internal cookbook after decisions are ticked) — **DO NOT write to any file**. No `.local/docs/plan/`, no `.local/plan/`, no `docs/superpowers/plans/`. Inline conversation only. Decisions still go through `/team decide` → `.hanschen/decision/`. Crash recovery uses TODO + decision file + context_summary + transcript. Detail / case: memory `feedback_planning_via_markdown.md`. CLAUDE.md Rule 17 exception clause.
 
 **Cross-project knowledge (under `sekai-workflow/handbook/`, via /kb)**:
 - General technical notes (Docker, K8s, algorithms, backend patterns) → `/kb add` writes to `sekai-workflow/handbook/`, **not** `.hanschen/`
