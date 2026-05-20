@@ -52,18 +52,13 @@ echo "[INFO] Git hash  : $GIT_HASH"
 echo "[INFO] 時間      : $TIMESTAMP"
 echo ""
 
-# --- 安全確認 ---
+# --- 安全提示（確認權已移交 /skm pack Phase 3 AskUserQuestion；本腳本不再 read -p） ---
 echo "[WARN] 此操作將："
 echo "       1. 收集 AI 上下文到 .local/ai-context/"
 echo "       2. 刪除 .claude/skills/ 目錄"
 echo "       3. 刪除 .sekai-workflow/ 目錄"
 echo "       4. 刪除 CLAUDE.md"
 echo ""
-read -p "確認執行？(y/N) " confirm
-if [[ ! "$confirm" =~ ^[yY]$ ]]; then
-    echo "[ABORT] 使用者取消"
-    exit 0
-fi
 
 echo ""
 
@@ -142,7 +137,7 @@ fi
 
 # --- Step 4b: 回寫 portable memory 到 .sekai-workflow ---
 echo "[Step 3b] 回寫 portable memory..."
-MEM_PORTABLE="$SP_DIR/memo"
+MEM_PORTABLE="$SP_DIR/skills/memo"
 if [ -n "$MEMORY_DIR" ] && [ -d "$MEMORY_DIR" ] && [ -d "$MEM_PORTABLE" ]; then
     WRITEBACK_COUNT=0
     for mem_file in "$MEMORY_DIR"/feedback_*.md "$MEMORY_DIR"/user_*.md; do
@@ -168,7 +163,7 @@ if [ -n "$MEMORY_DIR" ] && [ -d "$MEMORY_DIR" ] && [ -d "$MEM_PORTABLE" ]; then
         # Auto commit & push within .sekai-workflow
         # 必須 push：Step 9 會刪除整個 $SP_DIR（含 .git），未 push 的 commit 將永久遺失
         cd "$SP_DIR"
-        git add memo/ 2>/dev/null
+        git add skills/memo/ 2>/dev/null
         if git commit -m "sync: 回寫 portable memory from $(basename "$PROJECT_DIR")
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>" 2>/dev/null; then
@@ -197,8 +192,8 @@ if [ -d "$SKILLS_DIR" ]; then
     for skill_dir in "$SKILLS_DIR"/*/; do
         [ ! -d "$skill_dir" ] && continue
         skill_name=$(basename "$skill_dir")
-        mkdir -p "$AI_CONTEXT/skills/$skill_name"
-        cp "$skill_dir"/*.md "$AI_CONTEXT/skills/$skill_name/" 2>/dev/null || true
+        # cp -r 含子目錄（references/ assets/ scripts/ agents/），不只頂層 *.md
+        cp -r "$skill_dir" "$AI_CONTEXT/skills/$skill_name"
     done
     skill_count=$(find "$AI_CONTEXT/skills" -mindepth 1 -maxdepth 1 -type d | wc -l)
     echo "  [OK] skills/ ($skill_count 個 skill)"
@@ -214,8 +209,8 @@ if [ -d "$SKILLS_DIR" ] && [ -d "$SP_DIR" ]; then
         [ ! -d "$skill_dir" ] && continue
         skill_name=$(basename "$skill_dir")
 
-        # 如果 .sekai-workflow/ 沒有同名目錄 → 專案專屬
-        if [ ! -d "$SP_DIR/$skill_name" ]; then
+        # 如果 .sekai-workflow/skills/ 沒有同名目錄 → 專案專屬
+        if [ ! -d "$SP_DIR/skills/$skill_name" ]; then
             cp -r "$skill_dir" "$AI_CONTEXT/project-skills/$skill_name"
             echo "  [SAVE] $skill_name (專案專屬)"
             PROJECT_SKILL_COUNT=$((PROJECT_SKILL_COUNT + 1))

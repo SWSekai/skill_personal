@@ -106,7 +106,7 @@ If `$ARGUMENTS` contains enough information, parse directly; only ask follow-up 
 
 ### Step 2: Name Conflict Check
 
-Check `.claude/skills/<name>/` and `.sekai-workflow/<name>/`:
+Check `.claude/skills/<name>/` and `.sekai-workflow/skills/<name>/`:
 - Exists with content → warn, ask whether to "overwrite" or "update"
 - Exists but empty → treat as new
 - Does not exist → proceed
@@ -166,14 +166,14 @@ Insert into the `## 可用 Skills` section in alphabetical order:
 ### Step 7: Sync to `.sekai-workflow/` (general Skills only)
 
 General Skill:
-1. Copy the entire skill directory to `.sekai-workflow/<name>/`
+1. Copy the entire skill directory to `.sekai-workflow/skills/<name>/`
 2. Update `.sekai-workflow/manifest.json` (including `model` field and all file paths)
-3. Update `.sekai-workflow/README.md` (table + description + tree)
+3. Update `.sekai-workflow/README.md` (table + description + tree). If the repo carries localized READMEs (`README.ja.md`, `README.zh-TW.md`), update them too — or state in the summary that they are maintained by a separate flow
 4. commit + push:
 
 ```bash
 cd .sekai-workflow
-git add <name>/ manifest.json README.md
+git add skills/<name>/ manifest.json README.md
 git commit -m "feat: add <name> skill"
 git push
 ```
@@ -190,7 +190,7 @@ Project-specific Skill: lives only in `.claude/skills/`, not synced; inform the 
 | Subdirectory files exist (if planned) | |
 | `.claude/skills/README.md` updated | |
 | `CLAUDE.md` updated | |
-| `.sekai-workflow/<name>/` synced (if general) | |
+| `.sekai-workflow/skills/<name>/` synced (if general) | |
 | `.sekai-workflow/manifest.json` updated (if general) | |
 | `.sekai-workflow/README.md` updated (if general) | |
 | Step 10 commit prompt executed (AskUserQuestion or direct `/commit-push --meta`) | |
@@ -265,7 +265,7 @@ The script performs:
 4. If updated → `git pull --rebase origin main`
 5. **Step 1c Post-pull drift check** — Re-read pulled manifest; same schema gate. Also compare on-disk `sp-sync.sh` `SCRIPT_VERSION` against the currently running value — if different, warn and abort (exit 3) so the user reruns with the newer script.
 6. **Skills sync** — Compare each skill's SKILL.md / README.md between `.sekai-workflow/` and `.claude/skills/`; copy new or differing skills
-7. **Manifest reconciliation** — Read `.sekai-workflow/file_manifest.json`; for every entry in `skill_aliases` (old→new rename map), detect stale folders at `.claude/skills/<old>/` and `.sekai-workflow/<old>/`, then interactively prompt the user to remove them. Non-interactive runs skip removal.
+7. **Manifest reconciliation** — Read `.sekai-workflow/file_manifest.json`; for every entry in `skill_aliases` (old→new rename map), detect stale folders at `.claude/skills/<old>/` and `.sekai-workflow/skills/<old>/`, then interactively prompt the user to remove them. Non-interactive runs skip removal.
 8. **Hooks sync** — Compare each `*.cjs` / `*.sh` between `.sekai-workflow/hooks/` and `.claude/hooks/`; copy new or differing hook scripts
 9. **Statusline sync** — Sync `statusline.cjs` + patch `~/.claude/settings.json` `statusLine.command`
 10. Output `Version — Script / Schema` plus Added / Updated / No change summaries for skills, manifest-stale, hooks, and statusline
@@ -368,7 +368,7 @@ See `${CLAUDE_SKILL_DIR}/references/evaluation-decision-tree.md` (if it exists; 
 
 For each `(oldName, newName)` in `skill_aliases`:
 - If `.claude/skills/<oldName>/` exists → flag as STALE (local)
-- If `.sekai-workflow/<oldName>/` exists → flag as STALE (sekai)
+- If `.sekai-workflow/skills/<oldName>/` exists → flag as STALE (sekai)
 - List all flagged paths → ask user `y/N` → `rm -rf` on `y`
 - Non-interactive run (no tty) → skip removal, keep for manual cleanup
 
@@ -420,7 +420,7 @@ For each `(oldName, newName)` in `skill_aliases`:
 
 ### Non-Skill Directory Changes (CLAUDE.md Rule 23)
 
-When adding, renaming, or deleting **non-skill top-level directories** under `sekai-workflow/` (those without a `SKILL.md`, e.g. `handbook/`, `docs/`, `hooks/`, `references/`), you **must** also verify and update the bootstrap scripts:
+When adding, renaming, or deleting **non-skill top-level directories** under `.sekai-workflow/` (those without a `SKILL.md`, e.g. `handbook/`, `docs/`, `hooks/`, `references/`), you **must** also verify and update the bootstrap scripts:
 
 | Script | Checkpoint | Failure mode if missed |
 |---|---|---|
@@ -437,9 +437,11 @@ When adding, renaming, or deleting **non-skill top-level directories** under `se
 
 ## C. `/skm pack` — Project Packaging (Closure Flow)
 
-Pack all AI-maintenance-related files, archive cross-project knowledge assets, and restore a clean project directory. Serves as the **project closure flow**.
+Pack all AI-maintenance-related files into `.local/ai-context/`, write portable memory back to `.sekai-workflow/skills/memo/`, then delete the skill environment. Serves as the **project closure flow**.
 
-The pack flow runs **all phases in one invocation**: audit → collect → changeset review → execute. **No writes occur before the user confirms the changeset in Phase 3.**
+> **This section describes the actual behavior of `.sekai-workflow/_bootstrap/sp-pack.sh`** — the script is the source of truth; keep this section in sync with it.
+
+The flow runs in four phases: audit → plan → changeset review → execute. **Phases 1-2 are read-only; no files are written and nothing is deleted until the user approves in Phase 3.**
 
 ### Trigger
 
@@ -447,7 +449,7 @@ Manual invocation: `/skm pack`
 
 ---
 
-### Phase 1: Pre-Pack Audit
+### Phase 1: Pre-Pack Audit (read-only)
 
 #### Step 1: Memory Audit
 
@@ -457,84 +459,90 @@ Scan all memory files in `~/.claude/projects/<path>/memory/`:
 
 #### Step 2: Skill Sync Verification
 
-For each skill in `.claude/skills/`: diff against `sekai-workflow/<skill>/`:
-- **Synced** / **Diverged** (needs push) / **Local-only** (project-specific)
-- If any general skill is diverged → invoke `/skm sync` before proceeding
-- Confirm remote is current: `cd sekai-workflow && git fetch origin && git status`
+For each skill in `.claude/skills/`: diff against `.sekai-workflow/skills/<skill>/`:
+- **Synced** / **Diverged** / **Local-only** (project-specific)
+- **If any general skill is diverged → run `/skm sync` inline now**, before continuing the audit. Do not merely warn — the divergence must be reconciled (and `.sekai-workflow` brought current with its remote) so the pack snapshot reflects the true state.
+- Confirm remote is current: `cd .sekai-workflow && git fetch origin && git status`
 
 #### Step 3: CLAUDE.md Comparison
 
-Compare local `CLAUDE.md` against `sekai-workflow/_bootstrap/CLAUDE.md.template`:
+Compare local `CLAUDE.md` against `.sekai-workflow/_bootstrap/templates/CLAUDE.md.template`:
 - Identify local additions → propose reflow if cross-project general
 - Queue approved changes for Phase 3 confirmation
 
 ---
 
-### Phase 2: Collect & Package
+### Phase 2: Collection Plan (planning only — no writes)
 
-#### Step 4: Export Session Commands
-- Diff `.claude/skills/` vs `sekai-workflow/` → project-specific entries
-- List `CLAUDE.md` entries not in `sekai-workflow/manifest.json`
-- Output: `.local/bag/session-commands.md`
+Determine **what** `sp-pack.sh` will collect and delete; produce the plan for Phase 3 review. No files are written in this phase.
 
-#### Step 5: Archive Knowledge Documents
-- Scan `.local/docs/`, `docs/`, project root for guides / ADRs
-- Output: `.local/bag/docs/`
+`sp-pack.sh` collects into `.local/ai-context/`:
 
-#### Step 6: Auto-Generate `.skill` Files
-- For each project-specific skill: generate `.local/bag/project-skills/<name>.skill` from frontmatter
+| Source | Destination under `.local/ai-context/` |
+|---|---|
+| `CLAUDE.md` | `CLAUDE.md` |
+| `.local/` subdirs (`docs`, `modify_log`, `context_summary`, `report`, `collab`, `samples`) | `<subdir>/` |
+| Project memory (`~/.claude/projects/<path>/memory/`) | `memory/` |
+| All skills in `.claude/skills/` (full directory copy, incl. subdirs) | `skills/<name>/` |
+| Project-specific skills (no `.sekai-workflow/skills/<name>/` counterpart) | `project-skills/<name>/` |
+| Guide docs (`*guide*`, `*指南*` under `.local/docs`, `docs`, project root) | `guides/` |
+| `.claude/settings.local.json` | `settings.local.json` |
+| — generated — | `manifest.txt` (pack info + file listing + restore guide) |
 
-#### Step 7: Document Consolidation into `bag/`
-- Merge same-topic docs into single files; annotate conflicts; delete originals
-- Also snapshot: `.local/bag/memory/`, `.local/bag/CLAUDE.md`, `.local/bag/skills/`
+Before deleting anything, `sp-pack.sh` also:
+- **handbook protection** — commits + pushes any uncommitted `.sekai-workflow/handbook/` changes (aborts pack if push fails)
+- **portable memory writeback** — copies `feedback_*.md` / `user_*.md` from project memory into `.sekai-workflow/skills/memo/`, then commits + pushes (aborts pack if push fails)
+
+Then it deletes: `.claude/skills/`, `.sekai-workflow/`, `CLAUDE.md`.
+
+> `sp-pack.sh` does **not** produce `.local/bag/`, `session-commands.md`, a `closure-report.md`, or per-skill `.skill` files, and does **not** merge same-topic docs. Produce those manually or enhance the script first if needed.
 
 ---
 
 ### Phase 3: Changeset Review
 
-#### Step 8: Changeset Preview & User Confirmation
+#### Step 4: Changeset Preview & User Confirmation
 
-Present full planned changeset before any writes:
+Present the full planned changeset before Phase 4:
 ```
 📦 Pack Changeset Review
 [Memory]      Keep / Merge / Remove counts
 [Skill Sync]  Synced / Diverged / Local-only
 [CLAUDE.md]   Template additions / local-only rules
-[bag/ tree]   Full file list
-[Cleanup]     Files to delete after confirmation
+[Collect]     .local/ai-context/ tree (planned)
+[Delete]      .claude/skills/, .sekai-workflow/, CLAUDE.md
 ⚠️  Sensitive files: <list or "none">
 ```
-Use AskUserQuestion — Phase 4 executes only after approval.
+Use AskUserQuestion. This is the **sole confirmation gate** — `sp-pack.sh` no longer prompts on its own. Phase 4 executes only after approval.
 
 ---
 
 ### Phase 4: Execute
 
-#### Step 9: Clean Up
+#### Step 5: Clean Up
 After user approval:
 1. Apply memory changes (Step 1 plan)
-2. Update `sekai-workflow/_bootstrap/CLAUDE.md.template` if approved (Step 3)
-3. Run `bash sekai-workflow/_bootstrap/sp-pack.sh` — collects, generates manifest.txt, deletes `.claude/skills/`, `sekai-workflow/`, `CLAUDE.md`, temp files
-4. `bag/` is **not deleted** — remains for user review and transfer
-
-#### Step 10: Output Closure Report
-Generate `.local/bag/closure-report.md` covering all phases.
+2. Update `.sekai-workflow/_bootstrap/templates/CLAUDE.md.template` if approved (Step 3)
+3. Run `bash .sekai-workflow/_bootstrap/sp-pack.sh` — collects into `.local/ai-context/`, writes portable memory back to `.sekai-workflow/skills/memo/`, generates `manifest.txt`, then deletes `.claude/skills/`, `.sekai-workflow/`, `CLAUDE.md`
+4. `.local/ai-context/` is **not deleted** — it remains for review and transfer
 
 ---
 
 ### Notes
 
-- All output is under `.local/bag/` (gitignored)
-- `bag/` is the primary transfer artifact for new projects
+- All output is under `.local/ai-context/` (gitignored)
+- `.local/ai-context/` is the primary transfer artifact for new projects
 - **Environment info / progress notes → `/team handoff`**; pack handles Skill exit archival only
 
 ### Restore Flow
 
-1. `sekai-workflow/_bootstrap/sp-init.bat` — rebuild environment
-2. `bash sekai-workflow/_bootstrap/sp-sync.sh` — sync latest skills
-3. Copy `.local/bag/project-skills/` back to `.claude/skills/`
-4. Copy `.local/bag/CLAUDE.md` back to the project root
-5. Copy `.local/bag/memory/` back to `~/.claude/projects/.../memory/`
+1. `.sekai-workflow/_bootstrap/sp-init.bat` — rebuild environment
+2. `bash .sekai-workflow/_bootstrap/sp-sync.sh` — sync latest skills
+3. Copy `.local/ai-context/project-skills/` back to `.claude/skills/`
+4. Copy `.local/ai-context/CLAUDE.md` back to the project root
+5. Copy `.local/ai-context/memory/` back to `~/.claude/projects/.../memory/`
+
+(`manifest.txt` inside the pack restates this restore guide.)
 
 ---
 
@@ -606,11 +614,11 @@ AskUserQuestion:
 
 Edit SKILL.md + README.md as drafted. Do **not** also update `.sekai-workflow/` yet — reserve that for Step 5 so the diff is reviewable isolated.
 
-### Step 5: Mirror to `.sekai-workflow/<skill>/` (general skills only)
+### Step 5: Mirror to `.sekai-workflow/skills/<skill>/` (general skills only)
 
-1. Apply the same diff to `.sekai-workflow/<skill>/SKILL.md` (+ README.md)
-2. `diff -q .claude/skills/<skill>/SKILL.md .sekai-workflow/<skill>/SKILL.md` → expect no output
-3. Project-specific skill (only in `.claude/skills/`, not in `.sekai-workflow/`) → skip, note it in summary
+1. Apply the same diff to `.sekai-workflow/skills/<skill>/SKILL.md` (+ README.md)
+2. `diff -q .claude/skills/<skill>/SKILL.md .sekai-workflow/skills/<skill>/SKILL.md` → expect no output
+3. Project-specific skill (only in `.claude/skills/`, not in `.sekai-workflow/skills/`) → skip, note it in summary
 
 ### Step 6: Evaluate CLAUDE.md Impact
 
@@ -625,7 +633,7 @@ Otherwise leave CLAUDE.md unchanged and state "CLAUDE.md: no change needed" in t
 
 ```bash
 cd .sekai-workflow
-git add <skill>/
+git add skills/<skill>/
 # README.md / manifest.json if touched
 git commit -m "feat(skill): <skill> — <one-line improvement summary>"
 git push
@@ -642,7 +650,7 @@ Skill: <skill>
 Change: <one-line summary>
 Files modified:
   - .claude/skills/<skill>/SKILL.md (+ README.md if applicable)
-  - .sekai-workflow/<skill>/SKILL.md (+ README.md if applicable)
+  - .sekai-workflow/skills/<skill>/SKILL.md (+ README.md if applicable)
 CLAUDE.md: updated / no change
 .sekai-workflow commit: <hash>
 ```
