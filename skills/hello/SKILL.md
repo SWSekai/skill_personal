@@ -151,6 +151,14 @@ Skill sync:
   No change: ask, context-guard, setup, memory-portable
 ```
 
+### 2.4 Post-Sync Re-Anchor (Mandatory)
+
+If Step 2's sync **updated `hello/` itself** (this skill appears in the sync summary's Added/Updated list), the slash-command body delivered at conversation start is now a **stale snapshot**. Before proceeding to Step 3, **re-read `.claude/skills/hello/SKILL.md` from disk** and follow the on-disk version — paths, step logic, and conventions may have changed.
+
+**Why**: the harness loads a skill's body at invocation time; a sync that runs *within* the same invocation cannot retroactively update the already-loaded body. Trusting the stale body re-introduces just-fixed bugs (e.g. a renamed canonical path such as `.local/collab/TODO.md` → `./TODO.md`).
+
+This re-anchor applies to **any** path or convention referenced later in this skill — not only `TODO.md`.
+
 ---
 
 ## Step 3: Work State Reconstruction
